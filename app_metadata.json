@@ -1,0 +1,367 @@
+{
+  "appgroup_id": "6914a805b7293995c67ab4d6",
+  "appgroup_name": "Fitness & Ern\u00e4hrungs-Tracker",
+  "apps": {
+    "uebungen": {
+      "app_id": "6914a7e259d98c952771c809",
+      "name": "\u00dcbungen",
+      "controls": {
+        "name": {
+          "identifier": "name",
+          "label": "\u00dcbungsname",
+          "type": "string",
+          "subtype": "text",
+          "fulltype": "string/text",
+          "description": "A string value not longer than 4000 characters (or `null`)."
+        },
+        "muskelgruppe": {
+          "identifier": "muskelgruppe",
+          "label": "Muskelgruppe",
+          "type": "lookup",
+          "subtype": "select",
+          "fulltype": "lookup/select",
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+        },
+        "equipment": {
+          "identifier": "equipment",
+          "label": "Equipment",
+          "type": "lookup",
+          "subtype": "select",
+          "fulltype": "lookup/select",
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+        },
+        "schwierigkeitsgrad": {
+          "identifier": "schwierigkeitsgrad",
+          "label": "Schwierigkeitsgrad",
+          "type": "lookup",
+          "subtype": "select",
+          "fulltype": "lookup/select",
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+        }
+      }
+    },
+    "workouts": {
+      "app_id": "6914a7e7b773d677cf3838c1",
+      "name": "Workouts",
+      "controls": {
+        "datum": {
+          "identifier": "datum",
+          "label": "Datum",
+          "type": "date",
+          "subtype": "date",
+          "fulltype": "date/date",
+          "description": "A calendar date consisting of year, month and day. (Or `null`/`None`)\n\nThe field value will be a string in the format `<YYYY>-<MM>-<DD>` or `null`.\n\nFor example: `1642-12-25`."
+        },
+        "typ": {
+          "identifier": "typ",
+          "label": "Trainingstyp",
+          "type": "lookup",
+          "subtype": "select",
+          "fulltype": "lookup/select",
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+        },
+        "dauer_minuten": {
+          "identifier": "dauer_minuten",
+          "label": "Dauer (Minuten)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "stimmung": {
+          "identifier": "stimmung",
+          "label": "Stimmung",
+          "type": "lookup",
+          "subtype": "select",
+          "fulltype": "lookup/select",
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+        },
+        "rest_day": {
+          "identifier": "rest_day",
+          "label": "Ruhetag",
+          "type": "bool",
+          "subtype": null,
+          "fulltype": "bool",
+          "description": "A boolean value, i.e. `true` or `false` (or `null`)."
+        }
+      }
+    },
+    "ziele": {
+      "app_id": "6914a7ead630b6a1488ff831",
+      "name": "Ziele",
+      "controls": {
+        "taeglich_kalorien": {
+          "identifier": "taeglich_kalorien",
+          "label": "T\u00e4gliche Kalorien (kcal)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "taeglich_protein": {
+          "identifier": "taeglich_protein",
+          "label": "T\u00e4gliches Protein (g)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "trainingstage_pro_woche": {
+          "identifier": "trainingstage_pro_woche",
+          "label": "Trainingstage pro Woche",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "schlaf_ziel_stunden": {
+          "identifier": "schlaf_ziel_stunden",
+          "label": "Schlafziel (Stunden)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "status": {
+          "identifier": "status",
+          "label": "Status",
+          "type": "lookup",
+          "subtype": "select",
+          "fulltype": "lookup/select",
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+        },
+        "notizen": {
+          "identifier": "notizen",
+          "label": "Notizen",
+          "type": "string",
+          "subtype": "textarea",
+          "fulltype": "string/textarea",
+          "description": "A string value that can contain multiple lines of text (or `null`)."
+        }
+      }
+    },
+    "ernaehrung": {
+      "app_id": "6914a7e8078cdd936a7fe8bf",
+      "name": "Ern\u00e4hrung",
+      "controls": {
+        "datum": {
+          "identifier": "datum",
+          "label": "Datum",
+          "type": "date",
+          "subtype": "date",
+          "fulltype": "date/date",
+          "description": "A calendar date consisting of year, month and day. (Or `null`/`None`)\n\nThe field value will be a string in the format `<YYYY>-<MM>-<DD>` or `null`.\n\nFor example: `1642-12-25`."
+        },
+        "mahlzeit_typ": {
+          "identifier": "mahlzeit_typ",
+          "label": "Mahlzeitentyp",
+          "type": "lookup",
+          "subtype": "select",
+          "fulltype": "lookup/select",
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+        },
+        "beschreibung": {
+          "identifier": "beschreibung",
+          "label": "Beschreibung",
+          "type": "string",
+          "subtype": "textarea",
+          "fulltype": "string/textarea",
+          "description": "A string value that can contain multiple lines of text (or `null`)."
+        },
+        "kalorien": {
+          "identifier": "kalorien",
+          "label": "Kalorien (kcal)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "protein": {
+          "identifier": "protein",
+          "label": "Protein (g)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "carbs": {
+          "identifier": "carbs",
+          "label": "Kohlenhydrate (g)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "fett": {
+          "identifier": "fett",
+          "label": "Fett (g)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        }
+      }
+    },
+    "koerperdaten": {
+      "app_id": "6914a7e9764e7bbbd63bbd93",
+      "name": "K\u00f6rperdaten",
+      "controls": {
+        "datum": {
+          "identifier": "datum",
+          "label": "Datum",
+          "type": "date",
+          "subtype": "date",
+          "fulltype": "date/date",
+          "description": "A calendar date consisting of year, month and day. (Or `null`/`None`)\n\nThe field value will be a string in the format `<YYYY>-<MM>-<DD>` or `null`.\n\nFor example: `1642-12-25`."
+        },
+        "gewicht_kg": {
+          "identifier": "gewicht_kg",
+          "label": "Gewicht (kg)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "kfa_geschaetzt": {
+          "identifier": "kfa_geschaetzt",
+          "label": "K\u00f6rperfettanteil gesch\u00e4tzt (%)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "brustumfang": {
+          "identifier": "brustumfang",
+          "label": "Brustumfang (cm)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "taillenumfang": {
+          "identifier": "taillenumfang",
+          "label": "Taillenumfang (cm)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "hueftumfang": {
+          "identifier": "hueftumfang",
+          "label": "H\u00fcftumfang (cm)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "armumfang": {
+          "identifier": "armumfang",
+          "label": "Armumfang (cm)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "beinumfang": {
+          "identifier": "beinumfang",
+          "label": "Beinumfang (cm)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "notizen": {
+          "identifier": "notizen",
+          "label": "Notizen",
+          "type": "string",
+          "subtype": "textarea",
+          "fulltype": "string/textarea",
+          "description": "A string value that can contain multiple lines of text (or `null`)."
+        }
+      }
+    },
+    "workout_logs": {
+      "app_id": "6914a7e8154ee0268140a731",
+      "name": "Workout-Logs",
+      "controls": {
+        "workout": {
+          "identifier": "workout",
+          "label": "Workout",
+          "type": "applookup",
+          "subtype": "select",
+          "fulltype": "applookup/select",
+          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`."
+        },
+        "uebung": {
+          "identifier": "uebung",
+          "label": "\u00dcbung",
+          "type": "applookup",
+          "subtype": "select",
+          "fulltype": "applookup/select",
+          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`."
+        },
+        "satz_nummer": {
+          "identifier": "satz_nummer",
+          "label": "Satznummer",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "gewicht": {
+          "identifier": "gewicht",
+          "label": "Gewicht (kg)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "wiederholungen": {
+          "identifier": "wiederholungen",
+          "label": "Wiederholungen",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "rpe": {
+          "identifier": "rpe",
+          "label": "RPE / Gef\u00fchl",
+          "type": "lookup",
+          "subtype": "select",
+          "fulltype": "lookup/select",
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+        }
+      }
+    }
+  },
+  "metadata": {
+    "apps_list": [
+      "\u00dcbungen",
+      "Workouts",
+      "Ziele",
+      "Ern\u00e4hrung",
+      "K\u00f6rperdaten",
+      "Workout-Logs"
+    ]
+  }
+}
