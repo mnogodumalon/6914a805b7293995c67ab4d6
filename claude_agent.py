@@ -89,7 +89,7 @@ async def main():
                         print("[DEPLOY] ⚠️ Keine Apps gefunden")
                         return {"content": [{"type": "text", "text": "✅ Deployment erfolgreich!"}]}
                     
-                    dashboard_url = f"https://my.living-apps.de/github/{appgroup_id}"
+                    dashboard_url = f"https://my.living-apps.de/github/{appgroup_id}/"
                     
                     # 2. Füge inaktive Dashboard-Links hinzu
                     print("[DEPLOY] Füge inaktive Dashboard-Links hinzu...")
@@ -122,7 +122,7 @@ async def main():
                     
                     # 3. Warte bis Dashboard verfügbar ist
                     print(f"[DEPLOY] ⏳ Warte auf Dashboard: {dashboard_url}")
-                    max_attempts = 60  # Max 60 Sekunden warten
+                    max_attempts = 180  # Max 180 Sekunden warten
                     for attempt in range(max_attempts):
                         try:
                             check_resp = httpx.get(dashboard_url, timeout=5)
