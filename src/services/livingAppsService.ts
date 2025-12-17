@@ -30,6 +30,19 @@ async function callApi(method: string, endpoint: string, data?: any) {
 }
 
 export class LivingAppsService {
+  // --- APP METADATA ---
+  static async getAppMetadata(appId: string): Promise<any> {
+    return callApi('GET', `/apps/${appId}`);
+  }
+
+  static async getWorkoutLookupData(): Promise<{ typ: Record<string, string>; stimmung: Record<string, string> }> {
+    const metadata = await this.getAppMetadata(APP_IDS.WORKOUTS);
+    return {
+      typ: metadata.controls?.typ?.lookup_data || {},
+      stimmung: metadata.controls?.stimmung?.lookup_data || {}
+    };
+  }
+
   // --- UEBUNGEN ---
   static async getUebungen(): Promise<Uebungen[]> {
     const data = await callApi('GET', `/apps/${APP_IDS.UEBUNGEN}/records`);

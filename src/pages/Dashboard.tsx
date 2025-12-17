@@ -24,6 +24,11 @@ interface DashboardData {
   uebungen: Uebungen[];
 }
 
+interface WorkoutLookups {
+  typ: Record<string, string>;
+  stimmung: Record<string, string>;
+}
+
 interface NewWorkoutForm {
   datum: string;
   typ: string;
@@ -34,6 +39,7 @@ interface NewWorkoutForm {
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [lookups, setLookups] = useState<WorkoutLookups | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -56,16 +62,18 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
 
-      const [workouts, ernaehrung, koerperdaten, ziele, workoutLogs, uebungen] = await Promise.all([
+      const [workouts, ernaehrung, koerperdaten, ziele, workoutLogs, uebungen, workoutLookups] = await Promise.all([
         LivingAppsService.getWorkouts(),
         LivingAppsService.getErnaehrung(),
         LivingAppsService.getKoerperdaten(),
         LivingAppsService.getZiele(),
         LivingAppsService.getWorkoutLogs(),
-        LivingAppsService.getUebungen()
+        LivingAppsService.getUebungen(),
+        LivingAppsService.getWorkoutLookupData()
       ]);
 
       setData({ workouts, ernaehrung, koerperdaten, ziele, workoutLogs, uebungen });
+      setLookups(workoutLookups);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Laden der Daten');
       console.error('Dashboard load error:', err);
@@ -296,11 +304,9 @@ export default function Dashboard() {
                     <SelectValue placeholder="Wähle einen Typ..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="kraft">Kraft</SelectItem>
-                    <SelectItem value="cardio">Cardio</SelectItem>
-                    <SelectItem value="hiit">HIIT</SelectItem>
-                    <SelectItem value="yoga">Yoga</SelectItem>
-                    <SelectItem value="stretching">Stretching</SelectItem>
+                    {lookups && Object.entries(lookups.typ).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -322,11 +328,9 @@ export default function Dashboard() {
                     <SelectValue placeholder="Wie war das Training?" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="excellent">Excellent 🔥</SelectItem>
-                    <SelectItem value="good">Gut 👍</SelectItem>
-                    <SelectItem value="okay">Okay ✅</SelectItem>
-                    <SelectItem value="tired">Müde 😴</SelectItem>
-                    <SelectItem value="struggling">Schwer 😓</SelectItem>
+                    {lookups && Object.entries(lookups.stimmung).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
