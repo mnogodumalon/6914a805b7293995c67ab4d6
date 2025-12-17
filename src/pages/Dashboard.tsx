@@ -23,7 +23,7 @@ import {
   CheckCircle2,
   Loader2
 } from 'lucide-react';
-import { LivingAppsService } from '@/services/livingAppsService';
+import { LivingAppsService, extractRecordId } from '@/services/livingAppsService';
 import type { Workouts, Ernaehrung, Ziele, Koerperdaten, WorkoutLogs, Uebungen } from '@/types/app';
 import { format, subDays, startOfWeek, isWithinInterval, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -247,9 +247,9 @@ export default function Dashboard() {
     const uebungUrl = log.fields.uebung;
     if (!uebungUrl) return acc;
 
-    // URL parsen um ID zu extrahieren
-    const urlParts = uebungUrl.split('/');
-    const uebungId = urlParts[urlParts.length - 1];
+    // URL parsen um ID zu extrahieren (verwende extractRecordId Helper)
+    const uebungId = extractRecordId(uebungUrl);
+    if (!uebungId) return acc;
 
     acc[uebungId] = (acc[uebungId] || 0) + 1;
     return acc;
