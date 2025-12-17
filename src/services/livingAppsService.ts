@@ -37,14 +37,14 @@ export class LivingAppsService {
 
   static async getWorkoutLookupData(): Promise<{ typ: Record<string, string>; stimmung: Record<string, string> }> {
     const metadata = await this.getAppMetadata(APP_IDS.WORKOUTS);
-    console.log('Workout Metadata:', metadata);
-    console.log('Typ Control:', metadata.controls?.typ);
-    console.log('Typ lookup_data:', metadata.controls?.typ?.lookup_data);
-    console.log('Stimmung lookup_data:', metadata.controls?.stimmung?.lookup_data);
+    console.log('Full Workout Metadata:', JSON.stringify(metadata, null, 2));
     
-    // If lookup_data contains URLs, we need to fetch the records
-    const typLookupData = metadata.controls?.typ?.lookup_data || {};
-    const stimmungLookupData = metadata.controls?.stimmung?.lookup_data || {};
+    // lookup_data is on the app level, not control level
+    const typLookupData = metadata.lookup_data?.typ || {};
+    const stimmungLookupData = metadata.lookup_data?.stimmung || {};
+    
+    console.log('Typ lookup_data:', typLookupData);
+    console.log('Stimmung lookup_data:', stimmungLookupData);
     
     // Check if the first entry is a URL
     const firstTypValue = Object.values(typLookupData)[0];
