@@ -20,7 +20,17 @@
           "type": "lookup",
           "subtype": "select",
           "fulltype": "lookup/select",
-          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "lookup_data": {
+            "brust": "Brust",
+            "ruecken": "R\u00fccken",
+            "beine": "Beine",
+            "schultern": "Schultern",
+            "bizeps": "Bizeps",
+            "trizeps": "Trizeps",
+            "bauch": "Bauch",
+            "ganzkoerper": "Ganzk\u00f6rper"
+          }
         },
         "equipment": {
           "identifier": "equipment",
@@ -28,7 +38,17 @@
           "type": "lookup",
           "subtype": "select",
           "fulltype": "lookup/select",
-          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "lookup_data": {
+            "langhantel": "Langhantel",
+            "kurzhantel": "Kurzhantel",
+            "maschine": "Maschine",
+            "kabelzug": "Kabelzug",
+            "bodyweight": "Bodyweight",
+            "kettlebell": "Kettlebell",
+            "resistance_band": "Resistance Band",
+            "sonstiges": "Sonstiges"
+          }
         },
         "schwierigkeitsgrad": {
           "identifier": "schwierigkeitsgrad",
@@ -36,7 +56,12 @@
           "type": "lookup",
           "subtype": "select",
           "fulltype": "lookup/select",
-          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "lookup_data": {
+            "anfaenger": "Anf\u00e4nger",
+            "fortgeschritten": "Fortgeschritten",
+            "experte": "Experte"
+          }
         }
       }
     },
@@ -58,7 +83,17 @@
           "type": "lookup",
           "subtype": "select",
           "fulltype": "lookup/select",
-          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "lookup_data": {
+            "push": "Push",
+            "pull": "Pull",
+            "beine": "Beine",
+            "ganzkoerper": "Ganzk\u00f6rper",
+            "oberkoerper": "Oberk\u00f6rper",
+            "unterkoerper": "Unterk\u00f6rper",
+            "cardio": "Cardio",
+            "sonstiges": "Sonstiges"
+          }
         },
         "dauer_minuten": {
           "identifier": "dauer_minuten",
@@ -75,7 +110,13 @@
           "type": "lookup",
           "subtype": "select",
           "fulltype": "lookup/select",
-          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "lookup_data": {
+            "schlecht": "Schlecht",
+            "okay": "Okay",
+            "gut": "Gut",
+            "brutal": "Brutal"
+          }
         },
         "rest_day": {
           "identifier": "rest_day",
@@ -133,7 +174,12 @@
           "type": "lookup",
           "subtype": "select",
           "fulltype": "lookup/select",
-          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "lookup_data": {
+            "aktiv": "Aktiv",
+            "erreicht": "Erreicht",
+            "verworfen": "Verworfen"
+          }
         },
         "notizen": {
           "identifier": "notizen",
@@ -163,7 +209,16 @@
           "type": "lookup",
           "subtype": "select",
           "fulltype": "lookup/select",
-          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "lookup_data": {
+            "fruehstueck": "Fr\u00fchst\u00fcck",
+            "snack": "Snack",
+            "mittagessen": "Mittagessen",
+            "abendessen": "Abendessen",
+            "pre_workout": "Pre-Workout",
+            "post_workout": "Post-Workout",
+            "sonstiges": "Sonstiges"
+          }
         },
         "beschreibung": {
           "identifier": "beschreibung",
@@ -306,7 +361,8 @@
           "type": "applookup",
           "subtype": "select",
           "fulltype": "applookup/select",
-          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`."
+          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`.",
+          "lookup_app": "https://my.living-apps.de/rest/apps/6914a7e7b773d677cf3838c1"
         },
         "uebung": {
           "identifier": "uebung",
@@ -314,7 +370,8 @@
           "type": "applookup",
           "subtype": "select",
           "fulltype": "applookup/select",
-          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`."
+          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`.",
+          "lookup_app": "https://my.living-apps.de/rest/apps/6914a7e259d98c952771c809"
         },
         "satz_nummer": {
           "identifier": "satz_nummer",
@@ -349,7 +406,19 @@
           "type": "lookup",
           "subtype": "select",
           "fulltype": "lookup/select",
-          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`."
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "lookup_data": {
+            "rpe_1": "1 - Sehr leicht",
+            "rpe_2": "2",
+            "rpe_3": "3",
+            "rpe_4": "4",
+            "rpe_5": "5 - Mittel",
+            "rpe_6": "6",
+            "rpe_7": "7",
+            "rpe_8": "8",
+            "rpe_9": "9",
+            "rpe_10": "10 - Maximal"
+          }
         }
       }
     }

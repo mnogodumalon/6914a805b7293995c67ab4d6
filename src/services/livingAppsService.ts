@@ -8,8 +8,9 @@ const API_BASE_URL = 'https://my.living-apps.de/rest';
 // --- HELPER FUNCTIONS ---
 export function extractRecordId(url: string | null | undefined): string | null {
   if (!url) return null;
-  const parts = url.split('/');
-  return parts[parts.length - 1];
+  // Extrahiere die letzten 24 Hex-Zeichen mit Regex
+  const match = url.match(/([a-f0-9]{24})$/i);
+  return match ? match[1] : null;
 }
 
 export function createRecordUrl(appId: string, recordId: string): string {
@@ -30,79 +31,6 @@ async function callApi(method: string, endpoint: string, data?: any) {
 }
 
 export class LivingAppsService {
-  // --- APP METADATA ---
-  static async getAppMetadata(appId: string): Promise<any> {
-    return callApi('GET', `/apps/${appId}`);
-  }
-
-  static async getWorkoutLookupData(): Promise<{ typ: Record<string, string>; stimmung: Record<string, string> }> {
-    const metadata = await this.getAppMetadata(APP_IDS.WORKOUTS);
-    console.log('Full Workout Metadata:', JSON.stringify(metadata, null, 2));
-    
-    // lookup_data is on the app level, not control level
-    const typLookupData = metadata.lookup_data?.typ || {};
-    const stimmungLookupData = metadata.lookup_data?.stimmung || {};
-    
-    console.log('Typ lookup_data:', typLookupData);
-    console.log('Stimmung lookup_data:', stimmungLookupData);
-    
-    // Check if the first entry is a URL
-    const firstTypValue = Object.values(typLookupData)[0];
-    console.log('First typ value:', firstTypValue);
-    
-    if (typeof firstTypValue === 'string' && firstTypValue.startsWith('https://')) {
-      // lookup_data contains URLs - need to fetch the records
-      const typRecords: Record<string, string> = {};
-      const stimmungRecords: Record<string, string> = {};
-      
-      // Fetch all typ records
-      for (const [key, url] of Object.entries(typLookupData)) {
-        try {
-          const recordId = extractRecordId(url as string);
-          if (recordId) {
-            // Extract app_id from URL
-            const appIdMatch = (url as string).match(/\/apps\/([^/]+)\/records/);
-            if (appIdMatch) {
-              const appId = appIdMatch[1];
-              const record = await callApi('GET', `/apps/${appId}/records/${recordId}`);
-              // Use the record's title or name field
-              typRecords[key] = record.fields?.name || record.fields?.title || key;
-            }
-          }
-        } catch (err) {
-          console.error(`Failed to fetch typ record for key ${key}:`, err);
-          typRecords[key] = key;
-        }
-      }
-      
-      // Fetch all stimmung records
-      for (const [key, url] of Object.entries(stimmungLookupData)) {
-        try {
-          const recordId = extractRecordId(url as string);
-          if (recordId) {
-            const appIdMatch = (url as string).match(/\/apps\/([^/]+)\/records/);
-            if (appIdMatch) {
-              const appId = appIdMatch[1];
-              const record = await callApi('GET', `/apps/${appId}/records/${recordId}`);
-              stimmungRecords[key] = record.fields?.name || record.fields?.title || key;
-            }
-          }
-        } catch (err) {
-          console.error(`Failed to fetch stimmung record for key ${key}:`, err);
-          stimmungRecords[key] = key;
-        }
-      }
-      
-      return { typ: typRecords, stimmung: stimmungRecords };
-    }
-    
-    // Otherwise, assume it's already key-value pairs
-    return {
-      typ: typLookupData as Record<string, string>,
-      stimmung: stimmungLookupData as Record<string, string>
-    };
-  }
-
   // --- UEBUNGEN ---
   static async getUebungen(): Promise<Uebungen[]> {
     const data = await callApi('GET', `/apps/${APP_IDS.UEBUNGEN}/records`);

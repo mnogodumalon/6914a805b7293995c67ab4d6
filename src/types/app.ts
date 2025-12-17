@@ -6,9 +6,9 @@ export interface Uebungen {
   updatedat: string | null;
   fields: {
     name?: string;
-    muskelgruppe?: string;
-    equipment?: string;
-    schwierigkeitsgrad?: string;
+    muskelgruppe?: 'brust' | 'ruecken' | 'beine' | 'schultern' | 'bizeps' | 'trizeps' | 'bauch' | 'ganzkoerper';
+    equipment?: 'langhantel' | 'kurzhantel' | 'maschine' | 'kabelzug' | 'bodyweight' | 'kettlebell' | 'resistance_band' | 'sonstiges';
+    schwierigkeitsgrad?: 'anfaenger' | 'fortgeschritten' | 'experte';
   };
 }
 
@@ -18,9 +18,9 @@ export interface Workouts {
   updatedat: string | null;
   fields: {
     datum?: string; // Format: YYYY-MM-DD oder ISO String
-    typ?: string;
+    typ?: 'push' | 'pull' | 'beine' | 'ganzkoerper' | 'oberkoerper' | 'unterkoerper' | 'cardio' | 'sonstiges';
     dauer_minuten?: number;
-    stimmung?: string;
+    stimmung?: 'schlecht' | 'okay' | 'gut' | 'brutal';
     rest_day?: boolean;
   };
 }
@@ -34,7 +34,7 @@ export interface Ziele {
     taeglich_protein?: number;
     trainingstage_pro_woche?: number;
     schlaf_ziel_stunden?: number;
-    status?: string;
+    status?: 'aktiv' | 'erreicht' | 'verworfen';
     notizen?: string;
   };
 }
@@ -45,7 +45,7 @@ export interface Ernaehrung {
   updatedat: string | null;
   fields: {
     datum?: string; // Format: YYYY-MM-DD oder ISO String
-    mahlzeit_typ?: string;
+    mahlzeit_typ?: 'fruehstueck' | 'snack' | 'mittagessen' | 'abendessen' | 'pre_workout' | 'post_workout' | 'sonstiges';
     beschreibung?: string;
     kalorien?: number;
     protein?: number;
@@ -76,12 +76,12 @@ export interface WorkoutLogs {
   createdat: string;
   updatedat: string | null;
   fields: {
-    workout?: string;
-    uebung?: string;
+    workout?: string; // applookup -> URL zu 'Workouts' Record
+    uebung?: string; // applookup -> URL zu 'Uebungen' Record
     satz_nummer?: number;
     gewicht?: number;
     wiederholungen?: number;
-    rpe?: string;
+    rpe?: 'rpe_1' | 'rpe_2' | 'rpe_3' | 'rpe_4' | 'rpe_5' | 'rpe_6' | 'rpe_7' | 'rpe_8' | 'rpe_9' | 'rpe_10';
   };
 }
 
