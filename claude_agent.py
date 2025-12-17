@@ -33,37 +33,28 @@ async def main():
         try:
             run_git_cmd("git config --global user.email 'lilo@livinglogic.de'")
             run_git_cmd("git config --global user.name 'Lilo'")
-
-            # Git initialisieren (funktioniert auch wenn bereits initialisiert)
-            run_git_cmd("git init")
             
-            # Branch-Handling: erst versuchen zu wechseln, dann neu erstellen
-            branch_result = subprocess.run(
-                "git checkout main",
-                shell=True,
-                cwd="/home/user/app",
-                capture_output=True,
-                text=True
-            )
-            if branch_result.returncode != 0:
+            git_push_url = os.getenv('GIT_PUSH_URL')
+            
+            # Prüfe ob Repo existiert und übernehme .git History
+            print("[DEPLOY] Prüfe ob Repo bereits existiert...")
+            try:
+                run_git_cmd(f"git clone {git_push_url} /tmp/old_repo")
+                run_git_cmd("cp -r /tmp/old_repo/.git /home/user/app/.git")
+                print("[DEPLOY] ✅ History vom existierenden Repo übernommen")
+            except:
+                # Neues Repo - von vorne initialisieren
+                print("[DEPLOY] ✅ Neues Repo wird initialisiert")
+                run_git_cmd("git init")
                 run_git_cmd("git checkout -b main")
+                run_git_cmd(f"git remote add origin {git_push_url}")
             
-            run_git_cmd("git add .")
+            # Neuen Code committen
+            run_git_cmd("git add -A")
             run_git_cmd("git commit -m 'Lilo Auto-Deploy' --allow-empty")
+            run_git_cmd("git push origin main")
             
-            # Remote-Handling: erst versuchen hinzuzufügen, dann URL aktualisieren
-            remote_result = subprocess.run(
-                f"git remote add origin {os.getenv('GIT_PUSH_URL')}",
-                shell=True,
-                cwd="/home/user/app",
-                capture_output=True,
-                text=True
-            )
-            if remote_result.returncode != 0:
-                run_git_cmd(f"git remote set-url origin {os.getenv('GIT_PUSH_URL')}")
-            
-            # Force push um bestehenden Content zu überschreiben (für Updates)
-            run_git_cmd("git push -f -u origin main")
+            print("[DEPLOY] ✅ Push erfolgreich!")
 
             return {
                 "content": [{"type": "text", "text": "✅ Deployment erfolgreich! Code wurde gepusht."}]
