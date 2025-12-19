@@ -58,10 +58,8 @@ async def main():
             
             print("[DEPLOY] ✅ Push erfolgreich!")
             
-            # Ab hier: Dashboard-Links in Living Apps hinzufügen
+            # Ab hier: Warte auf Dashboard und aktiviere Links
             if livingapps_api_key and appgroup_id:
-                print("[DEPLOY] 🔗 Füge Dashboard-Links zu Apps hinzu...")
-                
                 import httpx
                 import time
                 
@@ -91,36 +89,7 @@ async def main():
                     
                     dashboard_url = f"https://my.living-apps.de/github/{appgroup_id}/"
                     
-                    # 2. Füge inaktive Dashboard-Links hinzu
-                    print("[DEPLOY] Füge inaktive Dashboard-Links hinzu...")
-                    for app_id in app_ids:
-                        try:
-                            # URL (leer = nicht klickbar)
-                            httpx.put(
-                                f"https://my.living-apps.de/rest/apps/{app_id}/params/la_page_header_additional_url",
-                                headers=headers,
-                                json={"description": "dashboard_url", "type": "string", "value": ""},
-                                timeout=10
-                            )
-                            # Icon
-                            httpx.put(
-                                f"https://my.living-apps.de/rest/apps/{app_id}/params/la_page_header_additional_icon",
-                                headers=headers,
-                                json={"description": "dashboard_icon", "type": "string", "value": "chart-simple"},
-                                timeout=10
-                            )
-                            # Title
-                            httpx.put(
-                                f"https://my.living-apps.de/rest/apps/{app_id}/params/la_page_header_additional_title",
-                                headers=headers,
-                                json={"description": "dashboard_title", "type": "string", "value": "Dein Dashboard ist in wenigen Augenblicken verfügbar..."},
-                                timeout=10
-                            )
-                            print(f"[DEPLOY]   ✓ App {app_id}")
-                        except Exception as e:
-                            print(f"[DEPLOY]   ✗ App {app_id}: {e}")
-                    
-                    # 3. Warte bis Dashboard verfügbar ist
+                    # 2. Warte bis Dashboard verfügbar ist
                     print(f"[DEPLOY] ⏳ Warte auf Dashboard: {dashboard_url}")
                     max_attempts = 180  # Max 180 Sekunden warten
                     for attempt in range(max_attempts):
@@ -138,7 +107,7 @@ async def main():
                             print("[DEPLOY] ⚠️ Timeout - Dashboard nicht erreichbar")
                             return {"content": [{"type": "text", "text": "✅ Deployment erfolgreich! Dashboard-Links konnten nicht aktiviert werden."}]}
                     
-                    # 4. Aktiviere Dashboard-Links
+                    # 3. Aktiviere Dashboard-Links
                     print("[DEPLOY] 🎉 Aktiviere Dashboard-Links...")
                     for app_id in app_ids:
                         try:
