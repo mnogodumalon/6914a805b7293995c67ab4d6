@@ -5,12 +5,17 @@ import subprocess
 import os
 
 async def main():
-    # 1. Metadaten lesen
+    # 1. Load implementation skill
     try:
-        with open("/home/user/app/CLAUDE.md", "r") as f:
+        with open("/home/user/app/skills/frontend_implementation.md", "r") as f:
             instructions = f.read()
     except:
-        print("Kein CLAUDE.md")
+        # Fallback to old SANDBOX_PROMPT.md for backwards compatibility
+        try:
+            with open("/home/user/app/SANDBOX_PROMPT.md", "r") as f:
+                instructions = f.read()
+        except:
+            print("Kein Skill gefunden")
 
     def run_git_cmd(cmd: str):
         """Executes a Git command and throws an error on failure"""
@@ -160,16 +165,20 @@ async def main():
         "mcp__deploy_tools__deploy_to_github"
         ],
         cwd="/home/user/app",
-        model="claude-opus-4-5-20251101",
+        model="claude-sonnet-4-5-20250929",
     )
 
     print(f"[LILO] Initialisiere Client")
 
     # 4. Der Client Lifecycle
     async with ClaudeSDKClient(options=options) as client:
-        
+
         # Anfrage senden
-        await client.query("Baue das Dashboard")
+        await client.query(
+            "Build the Dashboard.tsx following design_spec.json exactly. "
+            "Use existing types and services from src/types/ and src/services/. "
+            "Deploy when done using the deploy_to_github tool."
+        )
 
         # 5. Antwort-Schleife
         # receive_response() liefert alles bis zum Ende des Auftrags

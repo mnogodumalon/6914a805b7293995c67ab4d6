@@ -1,0 +1,1032 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "created_for": "Fitness & Ern\u00e4hrungs-Tracker",
+    "domain": "health_fitness",
+    "language": "de-DE",
+    "reasoning": "This is a comprehensive fitness and nutrition tracking application for German-speaking users. Design emphasizes motivation, energy, progress visualization, and athletic aesthetics. The app tracks workouts, exercises, nutrition, body measurements, and goals - requiring a system that celebrates achievement while maintaining data clarity for metrics tracking."
+  },
+  "brand": {
+    "personality": [
+      "energetic",
+      "motivating",
+      "progressive",
+      "data-driven",
+      "bold"
+    ],
+    "target_audience": "fitness_enthusiasts",
+    "use_case": "Personal fitness tracking, workout logging, nutrition monitoring, body composition tracking, goal achievement",
+    "emotional_tone": "Empowering and achievement-focused, celebrating progress milestones while maintaining precision for quantitative data"
+  },
+  "typography": {
+    "fonts": {
+      "heading": {
+        "family": "Archivo Black",
+        "weights": [
+          400
+        ],
+        "google_fonts_url": "https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap",
+        "reasoning": "Bold, impactful display font that screams strength and determination. Used for hero metrics and section headers to create an athletic, high-energy feel that motivates users."
+      },
+      "body": {
+        "family": "Manrope",
+        "weights": [
+          400,
+          500,
+          600,
+          700
+        ],
+        "google_fonts_url": "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap",
+        "reasoning": "Modern geometric sans-serif with excellent readability at all sizes. Clean and contemporary without being overused. Perfect for data-dense tables and metric displays."
+      },
+      "mono": {
+        "family": "Roboto Mono",
+        "weights": [
+          500,
+          700
+        ],
+        "google_fonts_url": "https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&display=swap",
+        "reasoning": "For precise numeric data (weights, reps, calories, macros). The monospaced nature ensures numbers align perfectly in tables and creates a technical, measurement-focused aesthetic."
+      }
+    },
+    "scale": {
+      "h1": {
+        "size": "4rem",
+        "weight": 400,
+        "lineHeight": "1.1",
+        "letterSpacing": "-0.03em",
+        "family": "Archivo Black",
+        "usage": "Hero metrics, main dashboard title"
+      },
+      "h2": {
+        "size": "2.5rem",
+        "weight": 400,
+        "lineHeight": "1.2",
+        "letterSpacing": "-0.02em",
+        "family": "Archivo Black",
+        "usage": "Section headers"
+      },
+      "h3": {
+        "size": "1.5rem",
+        "weight": 700,
+        "lineHeight": "1.3",
+        "letterSpacing": "-0.01em",
+        "family": "Manrope",
+        "usage": "Card titles, subsections"
+      },
+      "body": {
+        "size": "1rem",
+        "weight": 400,
+        "lineHeight": "1.6",
+        "family": "Manrope"
+      },
+      "body_bold": {
+        "size": "1rem",
+        "weight": 600,
+        "lineHeight": "1.6",
+        "family": "Manrope"
+      },
+      "caption": {
+        "size": "0.875rem",
+        "weight": 500,
+        "lineHeight": "1.4",
+        "family": "Manrope",
+        "usage": "Labels, metadata"
+      },
+      "metric_large": {
+        "size": "3.5rem",
+        "weight": 700,
+        "lineHeight": "1",
+        "family": "Roboto Mono",
+        "usage": "Primary KPI numbers"
+      },
+      "metric_small": {
+        "size": "1.75rem",
+        "weight": 700,
+        "lineHeight": "1",
+        "family": "Roboto Mono",
+        "usage": "Secondary metrics"
+      }
+    }
+  },
+  "colors": {
+    "mode": "dark",
+    "reasoning": "Dark mode creates a modern, app-like aesthetic that's easier on the eyes during early morning or late evening workout logging sessions. The dark canvas makes vibrant accent colors pop dramatically for better visual hierarchy.",
+    "primary": {
+      "50": "#FFF4ED",
+      "100": "#FFE4D1",
+      "200": "#FFC49E",
+      "300": "#FF9B61",
+      "400": "#FF6B2B",
+      "500": "#FF4500",
+      "600": "#F03800",
+      "700": "#C72A00",
+      "800": "#9E2200",
+      "900": "#7A1B00",
+      "reasoning": "Intense orangered (#FF4500) - the color of energy, intensity, and physical exertion. Associated with power, determination, and heat. Creates immediate visual impact and motivational energy without being the typical fitness blue."
+    },
+    "secondary": {
+      "50": "#F0FDF4",
+      "100": "#DCFCE7",
+      "200": "#BBF7D0",
+      "300": "#86EFAC",
+      "400": "#4ADE80",
+      "500": "#22C55E",
+      "600": "#16A34A",
+      "700": "#15803D",
+      "800": "#166534",
+      "900": "#14532D",
+      "reasoning": "Vibrant green for success states, goal achievement, progress indicators. Represents growth, health, and positive outcomes."
+    },
+    "accent": {
+      "main": "#FBBF24",
+      "light": "#FDE68A",
+      "dark": "#D97706",
+      "reasoning": "Amber/gold for highlights, achievements, personal records (PRs), and premium features. Suggests excellence and achievement."
+    },
+    "semantic": {
+      "success": "#22C55E",
+      "warning": "#F59E0B",
+      "error": "#EF4444",
+      "info": "#3B82F6",
+      "rest_day": "#8B5CF6",
+      "reasoning": "Standard semantic colors plus a special purple for rest days to differentiate recovery from active training days."
+    },
+    "workout_types": {
+      "push": "#FF4500",
+      "pull": "#3B82F6",
+      "beine": "#22C55E",
+      "ganzkoerper": "#8B5CF6",
+      "cardio": "#EC4899",
+      "reasoning": "Distinct color coding for different workout types enables quick visual scanning of training patterns in calendars and charts."
+    },
+    "muscle_groups": {
+      "brust": "#FF4500",
+      "ruecken": "#3B82F6",
+      "beine": "#22C55E",
+      "schultern": "#F59E0B",
+      "bizeps": "#EC4899",
+      "trizeps": "#8B5CF6",
+      "bauch": "#EF4444",
+      "ganzkoerper": "#14B8A6",
+      "reasoning": "Color-coded muscle groups for exercise categorization and body part visualization."
+    },
+    "mood_colors": {
+      "schlecht": "#EF4444",
+      "okay": "#F59E0B",
+      "gut": "#22C55E",
+      "brutal": "#FBBF24",
+      "reasoning": "Map workout mood/feeling to intuitive colors for emotional state tracking."
+    },
+    "neutrals": {
+      "bg_primary": "#0A0A0A",
+      "bg_secondary": "#111111",
+      "bg_tertiary": "#1A1A1A",
+      "surface": "#1F1F1F",
+      "surface_elevated": "#2A2A2A",
+      "border": "#333333",
+      "border_subtle": "#262626",
+      "text": {
+        "primary": "#FFFFFF",
+        "secondary": "#A3A3A3",
+        "tertiary": "#737373",
+        "disabled": "#525252",
+        "inverse": "#0A0A0A"
+      },
+      "reasoning": "Deep blacks create premium feel with subtle layering. High contrast ensures readability for data-heavy displays."
+    },
+    "chart_palette": {
+      "primary_series": [
+        "#FF4500",
+        "#22C55E",
+        "#3B82F6",
+        "#FBBF24",
+        "#EC4899",
+        "#8B5CF6",
+        "#14B8A6"
+      ],
+      "gradient_start": "#FF4500",
+      "gradient_end": "#C72A00",
+      "grid": "#262626",
+      "reasoning": "High-contrast vibrant colors against dark background. Primary orange as hero color with complementary palette for multi-series charts."
+    }
+  },
+  "spacing": {
+    "scale": "4px",
+    "base_unit": "0.25rem",
+    "container": {
+      "max_width": "1440px",
+      "padding": "2rem",
+      "mobile_padding": "1rem"
+    },
+    "section_gap": "5rem",
+    "section_gap_mobile": "3rem",
+    "card_padding": "2rem",
+    "card_padding_mobile": "1.25rem",
+    "card_gap": "1.5rem",
+    "card_gap_mobile": "1rem",
+    "reasoning": "Generous spacing creates breathing room for data-dense content. Larger gaps emphasize section hierarchy."
+  },
+  "layout": {
+    "type": "fitness_dashboard_hybrid",
+    "structure": {
+      "hero_stats_bar": {
+        "type": "horizontal_metric_strip",
+        "columns": 5,
+        "description": "Compact, always-visible stats bar showing today's key metrics: workouts completed this week, calories consumed today, protein today, weight trend, goal progress percentage",
+        "position": "sticky_top",
+        "height": "80px"
+      },
+      "kpi_grid": {
+        "type": "metric_cards_grid",
+        "columns": 3,
+        "description": "3 large hero cards: Weekly Training Volume, Nutrition Today, Body Progress",
+        "card_aspect": "portrait",
+        "visual_prominence": "high"
+      },
+      "timeline_section": {
+        "type": "full_width_chart",
+        "description": "Recent workout activity timeline/calendar with workout types, durations, and mood indicators"
+      },
+      "split_content": {
+        "type": "2_column_asymmetric",
+        "left": "65%",
+        "right": "35%",
+        "description": "Left: Primary charts (nutrition over time, body weight progression). Right: Recent logs, quick stats, achievements sidebar"
+      },
+      "workout_detail_grid": {
+        "type": "masonry_cards",
+        "description": "Exercise library with filterable cards showing muscle groups, equipment, difficulty"
+      }
+    },
+    "responsive": {
+      "mobile": "< 640px: Single column, stack all content, sticky stats bar becomes scrollable horizontal strip",
+      "tablet": "640-1024px: 2-column layout, reduce KPI grid to 2 columns",
+      "desktop": "> 1024px: Full layout as designed, 3-column KPI grid, asymmetric split content"
+    },
+    "scroll_behavior": "Smooth scrolling with scroll-triggered animations. Sticky header with compact stats bar."
+  },
+  "components": {
+    "cards": {
+      "style": "elevated_with_glow",
+      "border_radius": "1rem",
+      "border": "1px solid rgba(255, 69, 0, 0.15)",
+      "background": "linear-gradient(135deg, rgba(31, 31, 31, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%)",
+      "shadow": "0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3)",
+      "hover_shadow": "0 20px 25px -5px rgba(255, 69, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.3)",
+      "hover_border": "1px solid rgba(255, 69, 0, 0.4)",
+      "transition": "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+      "accent_card_background": "linear-gradient(135deg, rgba(255, 69, 0, 0.1) 0%, rgba(31, 31, 31, 0.95) 100%)",
+      "reasoning": "Dark glass-morphism with subtle orange accent glow creates modern, app-like aesthetic. Hover effects provide tactile feedback."
+    },
+    "metric_cards": {
+      "layout": "vertical_stacked",
+      "number_size": "3.5rem",
+      "number_font": "Roboto Mono",
+      "label_size": "0.875rem",
+      "label_color": "text.secondary",
+      "trend_indicator": "inline_with_percentage",
+      "progress_ring": {
+        "stroke_width": "8px",
+        "track_color": "rgba(255, 255, 255, 0.1)",
+        "fill_color": "primary.500",
+        "animation": "draw_on_load",
+        "duration": "1.5s"
+      },
+      "icon": {
+        "size": "2rem",
+        "position": "top_right",
+        "color": "primary.500",
+        "opacity": 0.6
+      }
+    },
+    "buttons": {
+      "primary": {
+        "bg": "linear-gradient(135deg, #FF4500 0%, #C72A00 100%)",
+        "text": "white",
+        "radius": "0.75rem",
+        "padding": "1rem 2rem",
+        "font_weight": 600,
+        "hover": "scale(1.02) + brightness(110%) + shadow",
+        "active": "scale(0.98)",
+        "shadow": "0 4px 12px rgba(255, 69, 0, 0.4)",
+        "transition": "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+      },
+      "secondary": {
+        "bg": "transparent",
+        "border": "2px solid rgba(255, 69, 0, 0.3)",
+        "text": "primary.500",
+        "radius": "0.75rem",
+        "padding": "1rem 2rem",
+        "font_weight": 600,
+        "hover": "border: 2px solid primary.500, bg: rgba(255, 69, 0, 0.1)",
+        "transition": "all 0.2s ease-out"
+      },
+      "icon_button": {
+        "size": "3rem",
+        "bg": "surface_elevated",
+        "icon_color": "text.secondary",
+        "hover_bg": "rgba(255, 69, 0, 0.1)",
+        "hover_icon_color": "primary.500",
+        "radius": "50%"
+      },
+      "floating_action": {
+        "size": "4rem",
+        "bg": "linear-gradient(135deg, #FF4500 0%, #C72A00 100%)",
+        "icon_size": "1.5rem",
+        "position": "fixed_bottom_right",
+        "offset": "2rem",
+        "shadow": "0 8px 24px rgba(255, 69, 0, 0.5)",
+        "hover": "scale(1.1) + rotate(90deg for plus icon)",
+        "reasoning": "Prominent FAB for quick workout/meal logging"
+      }
+    },
+    "charts": {
+      "library": "recharts",
+      "color_scheme": [
+        "#FF4500",
+        "#22C55E",
+        "#3B82F6",
+        "#FBBF24",
+        "#EC4899"
+      ],
+      "background": "transparent",
+      "grid": {
+        "stroke": "#262626",
+        "strokeDasharray": "4 4",
+        "opacity": 0.3
+      },
+      "axis": {
+        "stroke": "#525252",
+        "tick_color": "#A3A3A3",
+        "tick_font": "Manrope",
+        "tick_size": "0.875rem"
+      },
+      "tooltip": {
+        "bg": "rgba(31, 31, 31, 0.98)",
+        "border": "1px solid rgba(255, 69, 0, 0.3)",
+        "text_color": "white",
+        "shadow": "0 8px 16px rgba(0, 0, 0, 0.5)"
+      },
+      "animation": {
+        "duration": 1000,
+        "easing": "ease-out",
+        "begin": 0
+      },
+      "line_chart": {
+        "stroke_width": 3,
+        "dot_radius": 5,
+        "active_dot_radius": 7,
+        "area_gradient": true
+      },
+      "bar_chart": {
+        "bar_radius": 8,
+        "bar_gap": 8
+      },
+      "progress_ring": {
+        "stroke_width": 12,
+        "size": 200,
+        "animation": "circular_progress_draw"
+      }
+    },
+    "tables": {
+      "header_bg": "rgba(255, 69, 0, 0.05)",
+      "header_text": "text.primary",
+      "header_font_weight": 700,
+      "row_bg": "transparent",
+      "row_hover_bg": "rgba(255, 255, 255, 0.03)",
+      "border": "1px solid #262626",
+      "cell_padding": "1rem",
+      "stripe_rows": false,
+      "reasoning": "Clean, minimal table design with subtle interactions. Emphasis on data readability."
+    },
+    "badges": {
+      "pill": {
+        "padding": "0.375rem 0.875rem",
+        "radius": "9999px",
+        "font_size": "0.8125rem",
+        "font_weight": 600,
+        "text_transform": "uppercase",
+        "letter_spacing": "0.05em"
+      },
+      "workout_type": {
+        "style": "filled_colored",
+        "dynamic_background": "based on workout_types colors",
+        "text": "white"
+      },
+      "difficulty": {
+        "anfaenger": {
+          "bg": "#22C55E",
+          "text": "white"
+        },
+        "fortgeschritten": {
+          "bg": "#F59E0B",
+          "text": "white"
+        },
+        "experte": {
+          "bg": "#EF4444",
+          "text": "white"
+        }
+      },
+      "status": {
+        "aktiv": {
+          "bg": "rgba(59, 130, 246, 0.2)",
+          "text": "#3B82F6",
+          "border": "1px solid #3B82F6"
+        },
+        "erreicht": {
+          "bg": "rgba(34, 197, 94, 0.2)",
+          "text": "#22C55E",
+          "border": "1px solid #22C55E"
+        },
+        "verworfen": {
+          "bg": "rgba(163, 163, 163, 0.2)",
+          "text": "#A3A3A3",
+          "border": "1px solid #525252"
+        }
+      }
+    },
+    "calendar": {
+      "type": "month_grid_with_workout_indicators",
+      "cell_size": "3rem",
+      "cell_border_radius": "0.5rem",
+      "today_border": "2px solid #FF4500",
+      "workout_day_bg": "rgba(255, 69, 0, 0.2)",
+      "rest_day_bg": "rgba(139, 92, 246, 0.2)",
+      "hover_bg": "rgba(255, 255, 255, 0.05)",
+      "workout_indicator": "colored_dot_bottom",
+      "multiple_workouts": "show_count_badge"
+    },
+    "progress_bars": {
+      "height": "12px",
+      "border_radius": "9999px",
+      "background": "rgba(255, 255, 255, 0.1)",
+      "fill": "linear-gradient(90deg, #FF4500 0%, #FBBF24 100%)",
+      "animation": "slide_in_from_left",
+      "duration": "1s",
+      "delay": "stagger_by_index",
+      "label_position": "inline_right"
+    },
+    "modals": {
+      "backdrop": "rgba(0, 0, 0, 0.85)",
+      "backdrop_blur": "8px",
+      "container_bg": "#1F1F1F",
+      "container_border": "1px solid rgba(255, 69, 0, 0.2)",
+      "container_radius": "1.5rem",
+      "container_shadow": "0 25px 50px -12px rgba(0, 0, 0, 0.8)",
+      "max_width": "600px",
+      "padding": "2rem",
+      "animation": "scale_and_fade_in"
+    },
+    "forms": {
+      "input_bg": "rgba(255, 255, 255, 0.05)",
+      "input_border": "1px solid #333333",
+      "input_focus_border": "2px solid #FF4500",
+      "input_radius": "0.75rem",
+      "input_padding": "0.875rem 1.25rem",
+      "input_text_color": "white",
+      "input_placeholder_color": "#737373",
+      "label_color": "#A3A3A3",
+      "label_font_weight": 500,
+      "label_margin_bottom": "0.5rem"
+    }
+  },
+  "motion": {
+    "philosophy": "Energetic and snappy. Quick, confident animations that match the athletic theme. Avoid slow, languid transitions.",
+    "page_load": {
+      "type": "staggered_slide_up_with_fade",
+      "base_delay": "0s",
+      "stagger_increment": "0.08s",
+      "duration": "0.5s",
+      "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "description": "Stats bar loads first, then KPI cards cascade in with slight bounce for energetic feel"
+    },
+    "hero_metrics": {
+      "type": "number_count_up",
+      "duration": "1.5s",
+      "easing": "ease-out",
+      "decimal_places": "based_on_metric_type",
+      "description": "Numbers animate from 0 to final value on page load"
+    },
+    "hover_states": {
+      "cards": {
+        "transform": "translateY(-4px) scale(1.01)",
+        "shadow": "enhanced",
+        "border_glow": "increase_opacity",
+        "duration": "0.3s",
+        "easing": "cubic-bezier(0.4, 0, 0.2, 1)"
+      },
+      "buttons": {
+        "transform": "scale(1.02)",
+        "brightness": "110%",
+        "shadow": "expand",
+        "duration": "0.2s"
+      },
+      "chart_elements": {
+        "bars": "scale(1.05) + increase_opacity",
+        "lines": "increase_stroke_width + glow",
+        "duration": "0.15s"
+      }
+    },
+    "loading": {
+      "type": "skeleton_screens_with_pulse",
+      "skeleton_bg": "rgba(255, 255, 255, 0.05)",
+      "skeleton_shimmer": "linear-gradient(90deg, transparent, rgba(255, 69, 0, 0.1), transparent)",
+      "animation": "shimmer 2s infinite",
+      "description": "Skeleton screens for cards, charts, and tables while data loads"
+    },
+    "transitions": {
+      "route_change": {
+        "type": "crossfade",
+        "duration": "0.3s"
+      },
+      "modal_open": {
+        "backdrop": "fade_in 0.2s",
+        "content": "scale(0.95) to scale(1) + fade_in 0.3s"
+      },
+      "toast_notification": {
+        "enter": "slide_in_from_top + bounce",
+        "exit": "slide_out_to_top + fade",
+        "duration": "0.4s"
+      }
+    },
+    "micro_interactions": {
+      "checkbox": "checkmark_draw_animation 0.3s",
+      "toggle": "slide_with_color_transition 0.25s",
+      "badge_appear": "pop_in_with_scale 0.2s",
+      "progress_ring": "circular_draw 1.5s ease-out",
+      "workout_complete": "celebration_confetti + success_pulse"
+    },
+    "scroll_animations": {
+      "enabled": true,
+      "trigger_point": "20% from bottom of viewport",
+      "charts": "fade_in + slide_up when entering viewport",
+      "stat_cards": "cascade_in with stagger",
+      "reasoning": "Reveal content as user scrolls for progressive disclosure and maintaining engagement"
+    }
+  },
+  "backgrounds": {
+    "body": {
+      "type": "radial_gradient_with_noise",
+      "value": "radial-gradient(circle at 15% 20%, rgba(255, 69, 0, 0.08) 0%, transparent 45%), radial-gradient(circle at 85% 80%, rgba(34, 197, 94, 0.06) 0%, transparent 45%), #0A0A0A",
+      "overlay": "subtle_noise_texture",
+      "reasoning": "Deep black base with subtle radial gradients in brand colors creates depth and atmosphere. Organic gradient placement prevents flat appearance."
+    },
+    "hero_section": {
+      "type": "gradient_with_grid_pattern",
+      "value": "linear-gradient(180deg, rgba(255, 69, 0, 0.15) 0%, rgba(10, 10, 10, 0) 100%)",
+      "pattern": "dot-grid",
+      "pattern_color": "rgba(255, 255, 255, 0.02)",
+      "pattern_size": "24px",
+      "reasoning": "Prominent orange gradient at top establishes brand immediately, fading to black for content sections"
+    },
+    "section_dividers": {
+      "type": "gradient_line",
+      "value": "linear-gradient(90deg, transparent 0%, rgba(255, 69, 0, 0.4) 50%, transparent 100%)",
+      "height": "1px",
+      "margin": "4rem 0"
+    },
+    "card_hover_effect": {
+      "type": "animated_gradient_border",
+      "value": "conic-gradient(from 0deg at 50% 50%, #FF4500, #22C55E, #3B82F6, #FF4500)",
+      "animation": "rotate 4s linear infinite",
+      "opacity": 0.3,
+      "reasoning": "Subtle animated gradient border on hover creates premium, dynamic feel"
+    },
+    "modal_backdrop": {
+      "type": "blur_with_gradient",
+      "value": "rgba(0, 0, 0, 0.85)",
+      "backdrop_filter": "blur(12px)",
+      "reasoning": "Strong backdrop blur focuses attention on modal content"
+    }
+  },
+  "iconography": {
+    "library": "lucide-react",
+    "style": "stroke",
+    "stroke_width": 2,
+    "size_scale": {
+      "xs": "1rem",
+      "sm": "1.25rem",
+      "md": "1.5rem",
+      "lg": "2rem",
+      "xl": "3rem"
+    },
+    "key_icons": {
+      "workout": "dumbbell",
+      "nutrition": "apple",
+      "body_metrics": "activity",
+      "goals": "target",
+      "calendar": "calendar",
+      "add": "plus-circle",
+      "trending_up": "trending-up",
+      "trending_down": "trending-down",
+      "edit": "edit-2",
+      "delete": "trash-2",
+      "filter": "filter",
+      "download": "download",
+      "settings": "settings"
+    },
+    "usage": "Icons should be used sparingly for clarity. Primary usage: navigation, metric labels, action buttons, status indicators"
+  },
+  "ux_strategy": {
+    "hero_section": {
+      "layout": "sticky_stats_bar",
+      "metrics": [
+        {
+          "id": "weekly_workouts",
+          "label": "Workouts diese Woche",
+          "type": "count",
+          "size": "medium",
+          "icon": "dumbbell",
+          "color": "primary.500"
+        },
+        {
+          "id": "todays_calories",
+          "label": "Kalorien heute",
+          "type": "number_with_target",
+          "format": "X / Y kcal",
+          "size": "medium",
+          "icon": "flame",
+          "color": "accent.main",
+          "progress_indicator": true
+        },
+        {
+          "id": "todays_protein",
+          "label": "Protein heute",
+          "type": "number_with_target",
+          "format": "X / Y g",
+          "size": "medium",
+          "icon": "beef",
+          "color": "secondary.500"
+        },
+        {
+          "id": "current_weight",
+          "label": "Aktuelles Gewicht",
+          "type": "number_with_trend",
+          "format": "X kg",
+          "size": "medium",
+          "icon": "trending-up",
+          "trend": "7_day_change"
+        },
+        {
+          "id": "goal_progress",
+          "label": "Zielfortschritt",
+          "type": "percentage",
+          "size": "medium",
+          "icon": "target",
+          "color": "success"
+        }
+      ],
+      "spacing": "1rem gap",
+      "background": "surface",
+      "sticky": true
+    },
+    "kpi_cards": {
+      "layout": "3_column_grid",
+      "cards": [
+        {
+          "id": "weekly_training_volume",
+          "title": "W\u00f6chentliches Trainingsvolumen",
+          "primary_metric": {
+            "value": "total_sets_this_week",
+            "label": "S\u00e4tze",
+            "size": "large",
+            "color": "primary.500"
+          },
+          "secondary_metrics": [
+            {
+              "label": "Gesamtzeit",
+              "value": "total_minutes",
+              "unit": "min"
+            },
+            {
+              "label": "Avg. RPE",
+              "value": "average_rpe",
+              "format": "X.X"
+            }
+          ],
+          "visualization": "vertical_bar_chart_7_days",
+          "chart_data": "daily_sets_last_7_days",
+          "chart_color": "primary.500"
+        },
+        {
+          "id": "nutrition_today",
+          "title": "Ern\u00e4hrung heute",
+          "primary_metric": {
+            "value": "calories_consumed_today",
+            "label": "Kalorien",
+            "target": "daily_calorie_goal",
+            "format": "X / Y kcal",
+            "size": "large"
+          },
+          "secondary_metrics": [
+            {
+              "label": "Protein",
+              "value": "protein_today",
+              "target": "protein_goal",
+              "unit": "g",
+              "color": "secondary.500"
+            },
+            {
+              "label": "Carbs",
+              "value": "carbs_today",
+              "unit": "g",
+              "color": "info"
+            },
+            {
+              "label": "Fett",
+              "value": "fat_today",
+              "unit": "g",
+              "color": "warning"
+            }
+          ],
+          "visualization": "macro_donut_chart",
+          "chart_data": "macros_breakdown_today"
+        },
+        {
+          "id": "body_progress",
+          "title": "K\u00f6rperfortschritt",
+          "primary_metric": {
+            "value": "current_weight",
+            "label": "Gewicht",
+            "unit": "kg",
+            "size": "large",
+            "trend": "30_day_change"
+          },
+          "secondary_metrics": [
+            {
+              "label": "KFA",
+              "value": "body_fat_percentage",
+              "unit": "%"
+            },
+            {
+              "label": "Letzte Messung",
+              "value": "days_since_last_measurement",
+              "format": "vor X Tagen"
+            }
+          ],
+          "visualization": "line_chart_weight_over_time",
+          "chart_data": "weight_last_30_days",
+          "chart_color": "accent.main"
+        }
+      ]
+    },
+    "visualizations": [
+      {
+        "id": "workout_calendar",
+        "title": "Training diesen Monat",
+        "type": "calendar_heatmap",
+        "position": "full_width_after_kpis",
+        "data": {
+          "source": "workouts.fields.datum",
+          "color_by": "workouts.fields.typ",
+          "indicator": "colored_dot_for_workout_type"
+        },
+        "interaction": "click_day_to_see_workout_details",
+        "styling": {
+          "cell_size": "3rem",
+          "gap": "0.25rem",
+          "today_highlight": "orange_border"
+        }
+      },
+      {
+        "id": "nutrition_timeline",
+        "title": "Kalorien & Makros (7 Tage)",
+        "type": "stacked_area_chart",
+        "position": "main_left_column",
+        "data": {
+          "x_axis": "ernaehrung.fields.datum",
+          "y_axis_stacked": [
+            "protein",
+            "carbs",
+            "fett"
+          ],
+          "colors": [
+            "#22C55E",
+            "#3B82F6",
+            "#FBBF24"
+          ],
+          "group_by": "day",
+          "aggregate": "sum"
+        },
+        "overlay": {
+          "type": "line",
+          "data": "total_calories",
+          "color": "#FF4500"
+        },
+        "reference_lines": [
+          {
+            "y": "daily_calorie_goal",
+            "label": "Kalorienziel",
+            "style": "dashed",
+            "color": "#A3A3A3"
+          }
+        ]
+      },
+      {
+        "id": "weight_progression",
+        "title": "Gewichtsentwicklung",
+        "type": "line_chart_with_trend",
+        "position": "main_left_column",
+        "data": {
+          "x_axis": "koerperdaten.fields.datum",
+          "y_axis": "koerperdaten.fields.gewicht_kg",
+          "time_range": "last_90_days"
+        },
+        "styling": {
+          "line_color": "#FBBF24",
+          "line_width": 3,
+          "area_fill": "gradient_from_amber_to_transparent",
+          "dot_size": 5,
+          "trend_line": true,
+          "trend_line_color": "#F59E0B",
+          "trend_line_style": "dashed"
+        }
+      },
+      {
+        "id": "muscle_group_distribution",
+        "title": "Muskelgruppen diese Woche",
+        "type": "donut_chart",
+        "position": "sidebar_right",
+        "data": {
+          "source": "workout_logs through uebung.fields.muskelgruppe",
+          "aggregate": "count_of_sets",
+          "time_filter": "this_week"
+        },
+        "styling": {
+          "colors": "muscle_groups color scheme",
+          "size": "200px",
+          "center_label": "total_sets",
+          "legend_position": "bottom"
+        }
+      },
+      {
+        "id": "personal_records",
+        "title": "Personal Records",
+        "type": "leaderboard_list",
+        "position": "sidebar_right",
+        "data": {
+          "source": "workout_logs",
+          "calculate": "max_weight_per_exercise",
+          "limit": 5
+        },
+        "styling": {
+          "item_layout": "exercise_name | weight + badge",
+          "badge": "trophy_icon_with_gold_color",
+          "highlight_new_pr": "pulse_animation"
+        }
+      }
+    ],
+    "actions": {
+      "primary": {
+        "label": "Workout loggen",
+        "icon": "plus-circle",
+        "type": "floating_action_button",
+        "position": "bottom_right_fixed",
+        "opens": "workout_log_modal",
+        "style": "prominent gradient button"
+      },
+      "secondary": [
+        {
+          "label": "Mahlzeit hinzuf\u00fcgen",
+          "icon": "utensils",
+          "position": "nutrition_card_header",
+          "opens": "nutrition_entry_modal"
+        },
+        {
+          "label": "K\u00f6rperdaten erfassen",
+          "icon": "activity",
+          "position": "body_progress_card_header",
+          "opens": "body_metrics_modal"
+        },
+        {
+          "label": "Filter",
+          "icon": "filter",
+          "position": "top_toolbar",
+          "opens": "filter_sidebar"
+        },
+        {
+          "label": "Export",
+          "icon": "download",
+          "position": "top_toolbar",
+          "action": "export_data"
+        }
+      ]
+    },
+    "information_hierarchy": [
+      "1. Sticky stats bar: Always-visible key metrics for quick glance",
+      "2. Hero KPI cards: Deep dive into weekly training, daily nutrition, body progress",
+      "3. Workout calendar: Visual pattern recognition for training consistency",
+      "4. Trend charts: Understand long-term progressions in nutrition and body composition",
+      "5. Sidebar widgets: Quick access to muscle group distribution, personal records, recent activity",
+      "6. Detail tables: On-demand access to granular workout logs and meal details"
+    ],
+    "mobile_optimization": {
+      "stats_bar": "Horizontal scrollable strip with snap points",
+      "kpi_cards": "Single column stack, swipeable carousel optional",
+      "charts": "Full-width, increase touch targets, simplify on small screens",
+      "fab": "Prominent, easily thumb-reachable, expands to show multiple add options",
+      "navigation": "Bottom tab bar for main sections"
+    },
+    "empty_states": {
+      "no_workouts": {
+        "icon": "dumbbell",
+        "message": "Noch keine Workouts geloggt",
+        "action": "Erstes Workout hinzuf\u00fcgen",
+        "style": "centered_with_illustration"
+      },
+      "no_nutrition": {
+        "icon": "apple",
+        "message": "Heute noch keine Mahlzeiten erfasst",
+        "action": "Erste Mahlzeit hinzuf\u00fcgen"
+      },
+      "goal_not_set": {
+        "icon": "target",
+        "message": "Setze deine Fitnessziele",
+        "action": "Ziele definieren"
+      }
+    }
+  },
+  "accessibility": {
+    "color_contrast": "WCAG AA compliant - minimum 4.5:1 for body text, 3:1 for large text. Orange on dark provides 7.2:1 ratio.",
+    "focus_states": "Visible 2px solid outline with primary.500 color, 4px offset for clear indication",
+    "keyboard_navigation": "All interactive elements (buttons, cards, charts) accessible via keyboard. Tab order follows visual hierarchy.",
+    "aria_labels": "Comprehensive labels for all charts ('Gewichtsentwicklung der letzten 90 Tage'), metrics ('W\u00f6chentliche Workouts: 5 von 3 Ziel'), and interactive elements",
+    "screen_reader": "Semantic HTML5 structure, proper heading hierarchy (h1 for page title, h2 for sections, h3 for cards), live regions for dynamic updates",
+    "reduced_motion": "@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }}",
+    "font_scaling": "All typography uses rem units to respect user font size preferences. Layout remains functional up to 200% zoom.",
+    "color_blindness": "Not solely relying on color - all status indicators include icons and/or text labels. Workout types differentiated by icon + color.",
+    "touch_targets": "Minimum 44x44px tap targets on mobile for all interactive elements (WCAG 2.5.5)"
+  },
+  "performance": {
+    "image_optimization": "Use WebP format with fallbacks. Lazy load images below fold. No large images expected - primarily icon-based UI.",
+    "font_loading": "Use font-display: swap for Google Fonts. Subset fonts to Latin + German characters only to reduce file size.",
+    "code_splitting": "Lazy load chart library (recharts) and modal components. Critical path: layout, hero stats, KPI cards.",
+    "data_fetching": "Implement SWR or React Query for caching. Prefetch likely next views (e.g., workout detail when hovering calendar day).",
+    "animations": "Use CSS transforms and opacity only (GPU-accelerated). Avoid animating layout properties (width, height, margin).",
+    "bundle_size": "Target < 200KB gzipped initial bundle. Defer non-critical dependencies."
+  },
+  "data_visualization_strategy": {
+    "philosophy": "Celebrate progress and patterns. Make achievements visible and motivating.",
+    "chart_types": {
+      "time_series": {
+        "use_for": [
+          "Weight progression",
+          "Daily calories",
+          "Workout volume over time"
+        ],
+        "style": "Area charts with gradient fills for positive emotion",
+        "interaction": "Hover for exact values, click data point to see daily detail"
+      },
+      "comparison": {
+        "use_for": [
+          "Muscle group distribution",
+          "Macro breakdown",
+          "Workout type frequency"
+        ],
+        "style": "Donut charts with center label showing total",
+        "colors": "Use semantic color schemes (muscle_groups, workout_types)"
+      },
+      "progress": {
+        "use_for": [
+          "Goal completion",
+          "Daily calorie target",
+          "Weekly workout target"
+        ],
+        "style": "Progress rings with percentage in center, colored gradient based on progress",
+        "thresholds": "< 50% = warning, 50-80% = info, > 80% = success, 100%+ = gold"
+      },
+      "calendar": {
+        "use_for": [
+          "Workout consistency",
+          "Rest day patterns",
+          "Training split visualization"
+        ],
+        "style": "Month grid with color-coded dots for workout types",
+        "interaction": "Click to expand day detail modal"
+      },
+      "leaderboard": {
+        "use_for": [
+          "Personal records",
+          "Best sets by exercise",
+          "Longest streaks"
+        ],
+        "style": "Ordered list with prominent numbers, icons, and achievement badges",
+        "motivation": "Show progression - 'PR set 3 days ago' with celebratory styling"
+      }
+    },
+    "data_density": {
+      "desktop": "High density acceptable - fitness users want detailed data. Use tables with sorting/filtering.",
+      "mobile": "Reduce to essential metrics. Provide drill-down navigation instead of showing everything at once.",
+      "progressive_disclosure": "Summary cards \u2192 expand for chart \u2192 drill down to table"
+    }
+  },
+  "localization": {
+    "language": "de-DE",
+    "date_format": "DD.MM.YYYY",
+    "number_format": "1.234,56 (German standard with comma for decimals)",
+    "unit_system": "metric",
+    "currency": "EUR (for potential premium features)",
+    "first_day_of_week": "Monday (German convention)"
+  }
+}
