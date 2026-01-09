@@ -1,78 +1,76 @@
 {
   "app_analysis": {
-    "purpose": "Comprehensive fitness & nutrition tracking dashboard for tracking workouts, meals, body progress, and goals",
+    "purpose": "Track fitness progress, workouts, nutrition, and body metrics in one place",
     "domain": "fitness",
     "data_density": "medium",
-    "primary_users": "Fitness enthusiasts tracking their training and nutrition progress",
+    "primary_users": "Fitness enthusiasts tracking their health journey",
     "key_metrics": [
-      "Training frequency this week",
-      "Calories consumed today",
-      "Protein consumed today",
-      "Weight trend",
-      "Workout streak"
+      "Weekly workout count",
+      "Daily calories vs goal",
+      "Body weight progress",
+      "Workout consistency"
     ],
-    "primary_action": "Log workout or nutrition entry",
-    "emotional_tone": "energetic and motivating"
+    "primary_action": "Log workout or meal quickly",
+    "emotional_tone": "energetic, motivating, achievement-focused"
   },
   "theme": {
     "mode": "dark",
     "font_family": "Space Grotesk",
-    "font_url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap",
+    "font_url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap",
     "colors": {
-      "background": "hsl(220, 18%, 8%)",
-      "foreground": "hsl(0, 0%, 98%)",
-      "primary": "hsl(31, 97%, 58%)",
-      "accent": "hsl(178, 65%, 48%)",
-      "muted": "hsl(220, 15%, 20%)",
-      "positive": "hsl(142, 71%, 45%)",
-      "negative": "hsl(0, 72%, 55%)",
-      "card": "hsl(220, 16%, 12%)",
-      "border": "hsl(220, 15%, 18%)"
+      "background": "hsl(220 20% 8%)",
+      "foreground": "hsl(220 10% 92%)",
+      "primary": "hsl(26 90% 58%)",
+      "accent": "hsl(165 75% 52%)",
+      "muted": "hsl(220 15% 18%)",
+      "positive": "hsl(142 70% 48%)",
+      "negative": "hsl(0 70% 55%)",
+      "card": "hsl(220 20% 12%)"
     },
     "background_style": "gradient",
-    "background_css": "background: linear-gradient(135deg, hsl(220, 18%, 8%) 0%, hsl(220, 20%, 10%) 50%, hsl(220, 18%, 8%) 100%); background-attachment: fixed;"
+    "background_css": "background: linear-gradient(180deg, hsl(220 20% 8%) 0%, hsl(220 25% 6%) 100%); background-image: radial-gradient(circle at 20% 10%, hsla(26, 90%, 58%, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, hsla(165, 75%, 52%, 0.06) 0%, transparent 50%);"
   },
   "layout": {
     "kpi_cards": [
       {
-        "title": "Workouts Diese Woche",
+        "title": "Diese Woche",
+        "description": "Trainingseinheiten",
         "source_app": "workouts",
         "calculation": "count_this_week",
         "calculation_field": "datum",
         "icon": "Dumbbell",
         "format": "number",
-        "trend_comparison": "vs last week",
-        "description": "Trainingseinheiten"
+        "trend_comparison": "vs_last_week"
       },
       {
-        "title": "Kalorien Heute",
+        "title": "Heute",
+        "description": "Kalorien / Ziel",
         "source_app": "ernaehrung",
-        "calculation": "sum_today",
+        "calculation": "sum_today_vs_goal",
         "calculation_field": "kalorien",
         "icon": "Flame",
-        "format": "number",
-        "trend_comparison": "goal_comparison",
-        "description": "kcal aufgenommen"
+        "format": "calories",
+        "trend_comparison": "vs_goal"
       },
       {
-        "title": "Protein Heute",
-        "source_app": "ernaehrung",
-        "calculation": "sum_today",
-        "calculation_field": "protein",
-        "icon": "Beef",
-        "format": "number",
-        "trend_comparison": "goal_comparison",
-        "description": "g Protein"
-      },
-      {
-        "title": "Aktuelles Gewicht",
+        "title": "Aktuell",
+        "description": "Körpergewicht",
         "source_app": "koerperdaten",
         "calculation": "latest",
         "calculation_field": "gewicht_kg",
         "icon": "Scale",
+        "format": "weight",
+        "trend_comparison": "vs_last_month"
+      },
+      {
+        "title": "Streak",
+        "description": "Tage Training",
+        "source_app": "workouts",
+        "calculation": "current_streak",
+        "calculation_field": "datum",
+        "icon": "TrendingUp",
         "format": "number",
-        "trend_comparison": "vs last entry",
-        "description": "kg"
+        "trend_comparison": "none"
       }
     ],
     "main_chart": {
@@ -88,11 +86,22 @@
         "label": "Gewicht (kg)"
       },
       "group_by": "day",
-      "limit_days": 30,
-      "color": "hsl(31, 97%, 58%)",
-      "gradient": true
-      },
+      "secondary_line": {
+        "field": "kfa_geschaetzt",
+        "label": "KFA %",
+        "axis": "right"
+      }
+    },
     "secondary_sections": [
+      {
+        "type": "chart",
+        "chart_type": "bar",
+        "title": "Training nach Typ (7 Tage)",
+        "source_app": "workouts",
+        "x_axis": "typ",
+        "y_axis": "count",
+        "limit": 7
+      },
       {
         "type": "list",
         "title": "Letzte Workouts",
@@ -105,47 +114,29 @@
         ],
         "sort_by": "datum",
         "sort_order": "desc",
-        "limit": 5,
-        "show_badges": true
-      },
-      {
-        "type": "table",
-        "title": "Heutige Mahlzeiten",
-        "source_app": "ernaehrung",
-        "fields": [
-          "mahlzeit_typ",
-          "beschreibung",
-          "kalorien",
-          "protein"
-        ],
-        "filter": "today",
-        "sort_by": "createdat",
-        "sort_order": "asc",
-        "show_totals": true
+        "limit": 5
       },
       {
         "type": "cards",
         "title": "Aktive Ziele",
         "source_app": "ziele",
+        "filter": {
+          "field": "status",
+          "value": "aktiv"
+        },
         "fields": [
           "taeglich_kalorien",
           "taeglich_protein",
           "trainingstage_pro_woche"
         ],
-        "filter": {
-          "field": "status",
-          "value": "aktiv"
-        },
-        "limit": 3,
-        "show_progress": true
+        "limit": 3
       }
     ],
     "primary_action_button": {
-      "label": "Workout Loggen",
-      "action": "navigate",
+      "label": "Workout loggen",
+      "action": "quick_log",
       "target_app": "workouts",
-      "position": "floating",
-      "icon": "Plus"
+      "position": "floating"
     }
   },
   "animations": {
@@ -161,9 +152,6 @@
       "main_chart"
     ],
     "hide_on_mobile": [],
-    "collapse_on_mobile": [
-      "secondary_sections"
-    ],
     "mobile_navigation": "none"
   }
 }

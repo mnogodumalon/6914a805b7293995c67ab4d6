@@ -28,14 +28,18 @@ Read `app_metadata.json` to understand:
 - What would be most valuable to show?
 
 ### Step 3: Design (Use frontend-design Skill)
-Create `design_spec.json` with concrete design decisions.
+Create `design_spec.json` with concrete design decisions:
+- What KPIs matter for this user
+- What visualizations make sense for this data
+- What the primary action should be
+- Theme, colors, layout
 
-**Read:** `.claude/skills/frontend-design/SKILL.md` (contains everything!)
+See `.claude/skills/frontend-design/SKILL.md`
 
 ### Step 4: Implement (Use frontend-impl Skill)
 Create `src/pages/Dashboard.tsx` following design_spec.json exactly.
 
-**Read:** `.claude/skills/frontend-impl/SKILL.md` (contains everything!)
+See `.claude/skills/frontend-impl/SKILL.md`
 
 ### Step 5: Build & Deploy
 ```bash
@@ -82,5 +86,5 @@ After completion: Call `mcp__deploy_tools__deploy_to_github` (no manual git comm
 
 ---
 
-> Design: `.claude/skills/frontend-design/SKILL.md`
-> Implementation: `.claude/skills/frontend-impl/SKILL.md`
+> For design guidelines: see `.claude/skills/frontend-design/`
+> For implementation details: see `.claude/skills/frontend-impl/`

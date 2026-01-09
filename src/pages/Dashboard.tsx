@@ -1,64 +1,28 @@
-import { useEffect, useState } from 'react';
-import { format, startOfWeek, endOfWeek, isWithinInterval, subDays, isToday, parseISO } from 'date-fns';
-import { de } from 'date-fns/locale';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { useState, useEffect, useMemo } from 'react';
+import type { Workouts, Ernaehrung, Koerperdaten, Ziele } from '@/types/app';
+import { LivingAppsService } from '@/services/livingAppsService';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Area, AreaChart, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Dumbbell, Flame, Beef, Scale, Plus, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
-import { LivingAppsService } from '@/services/livingAppsService';
-import type { Workouts, Ernaehrung, Koerperdaten, Ziele } from '@/types/app';
-
-interface KPICardProps {
-  title: string;
-  value: string | number;
-  description: string;
-  icon: React.ReactNode;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-    label: string;
-  };
-  delay: number;
-}
-
-function KPICard({ title, value, description, icon, trend, delay }: KPICardProps) {
-  return (
-    <Card
-      className="hover-lift animate-fade-in border-border/50"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
-        <div className="text-primary">{icon}</div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-3xl font-bold text-foreground">{value}</div>
-        <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        {trend && (
-          <div className="flex items-center gap-1 mt-2">
-            {trend.isPositive ? (
-              <TrendingUp className="w-4 h-4 text-positive" />
-            ) : (
-              <TrendingDown className="w-4 h-4 text-negative" />
-            )}
-            <span className={`text-xs font-medium ${trend.isPositive ? 'text-positive' : 'text-negative'}`}>
-              {trend.value > 0 ? '+' : ''}{trend.value} {trend.label}
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+import {
+  Dumbbell,
+  Flame,
+  Scale,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  Calendar,
+  Plus
+} from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { format, parseISO, subDays, startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
+import { de } from 'date-fns/locale';
 
 export default function Dashboard() {
   const [workouts, setWorkouts] = useState<Workouts[]>([]);
@@ -66,346 +30,375 @@ export default function Dashboard() {
   const [koerperdaten, setKoerperdaten] = useState<Koerperdaten[]>([]);
   const [ziele, setZiele] = useState<Ziele[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Dialog & Form State
+  const [error, setError] = useState<Error | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    datum: format(new Date(), 'yyyy-MM-dd'),
-    typ: '',
-    dauer_minuten: '',
-    stimmung: '',
-  });
 
   useEffect(() => {
-    async function loadData() {
+    async function fetchData() {
       try {
-        const [workoutsData, ernaehrungData, koerperdatenData, zieleData] = await Promise.all([
+        setLoading(true);
+        const [w, e, k, z] = await Promise.all([
           LivingAppsService.getWorkouts(),
           LivingAppsService.getErnaehrung(),
           LivingAppsService.getKoerperdaten(),
           LivingAppsService.getZiele(),
         ]);
-
-        setWorkouts(workoutsData);
-        setErnaehrung(ernaehrungData);
-        setKoerperdaten(koerperdatenData);
-        setZiele(zieleData);
-      } catch (error) {
-        console.error('Error loading data:', error);
+        setWorkouts(w);
+        setErnaehrung(e);
+        setKoerperdaten(k);
+        setZiele(z);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Unbekannter Fehler'));
       } finally {
         setLoading(false);
       }
     }
-
-    loadData();
+    fetchData();
   }, []);
 
-  // Handle workout form submission
-  async function handleCreateWorkout(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
+  // KPI Calculations
+  const kpis = useMemo(() => {
+    const today = new Date();
+    const todayStr = format(today, 'yyyy-MM-dd');
+    const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+    const lastWeekStart = subDays(weekStart, 7);
+    const lastWeekEnd = subDays(weekEnd, 7);
 
-    try {
-      await LivingAppsService.createWorkout({
-        datum: formData.datum,
-        typ: formData.typ as Workouts['fields']['typ'],
-        dauer_minuten: formData.dauer_minuten ? parseInt(formData.dauer_minuten) : undefined,
-        stimmung: formData.stimmung as Workouts['fields']['stimmung'],
-      });
-
-      // Reload workouts data
-      const updatedWorkouts = await LivingAppsService.getWorkouts();
-      setWorkouts(updatedWorkouts);
-
-      // Reset form and close dialog
-      setFormData({
-        datum: format(new Date(), 'yyyy-MM-dd'),
-        typ: '',
-        dauer_minuten: '',
-        stimmung: '',
-      });
-      setDialogOpen(false);
-    } catch (error) {
-      console.error('Error creating workout:', error);
-      alert('Fehler beim Erstellen des Workouts');
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  // Calculate KPIs
-  const now = new Date();
-  const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-  const lastWeekStart = subDays(weekStart, 7);
-  const lastWeekEnd = subDays(weekEnd, 7);
-
-  const workoutsThisWeek = workouts.filter((w) => {
-    if (!w.fields.datum) return false;
-    const date = parseISO(w.fields.datum);
-    return isWithinInterval(date, { start: weekStart, end: weekEnd });
-  }).length;
-
-  const workoutsLastWeek = workouts.filter((w) => {
-    if (!w.fields.datum) return false;
-    const date = parseISO(w.fields.datum);
-    return isWithinInterval(date, { start: lastWeekStart, end: lastWeekEnd });
-  }).length;
-
-  const todayNutrition = ernaehrung.filter((e) => {
-    if (!e.fields.datum) return false;
-    return isToday(parseISO(e.fields.datum));
-  });
-
-  const caloriesTotal = todayNutrition.reduce((sum, e) => sum + (e.fields.kalorien || 0), 0);
-  const proteinTotal = todayNutrition.reduce((sum, e) => sum + (e.fields.protein || 0), 0);
-
-  const activeGoal = ziele.find((z) => z.fields.status === 'aktiv');
-  const calorieGoal = activeGoal?.fields.taeglich_kalorien || 0;
-  const proteinGoal = activeGoal?.fields.taeglich_protein || 0;
-
-  const sortedBodyData = [...koerperdaten]
-    .filter((k) => k.fields.datum && k.fields.gewicht_kg)
-    .sort((a, b) => {
-      const dateA = parseISO(a.fields.datum!);
-      const dateB = parseISO(b.fields.datum!);
-      return dateB.getTime() - dateA.getTime();
+    // This week workouts
+    const thisWeekWorkouts = workouts.filter(w => {
+      if (!w.fields.datum) return false;
+      const date = parseISO(w.fields.datum);
+      return isWithinInterval(date, { start: weekStart, end: weekEnd });
     });
 
-  const currentWeight = sortedBodyData[0]?.fields.gewicht_kg || 0;
-  const previousWeight = sortedBodyData[1]?.fields.gewicht_kg || currentWeight;
-  const weightChange = currentWeight - previousWeight;
+    // Last week workouts
+    const lastWeekWorkouts = workouts.filter(w => {
+      if (!w.fields.datum) return false;
+      const date = parseISO(w.fields.datum);
+      return isWithinInterval(date, { start: lastWeekStart, end: lastWeekEnd });
+    });
 
-  // Prepare chart data (last 30 days)
-  const thirtyDaysAgo = subDays(now, 30);
-  const chartData = sortedBodyData
-    .filter((k) => {
-      if (!k.fields.datum) return false;
-      const date = parseISO(k.fields.datum);
-      return date >= thirtyDaysAgo;
-    })
-    .sort((a, b) => {
-      const dateA = parseISO(a.fields.datum!);
-      const dateB = parseISO(b.fields.datum!);
-      return dateA.getTime() - dateB.getTime();
-    })
-    .map((k) => ({
-      date: format(parseISO(k.fields.datum!), 'dd.MM', { locale: de }),
-      gewicht: k.fields.gewicht_kg,
+    // Today calories
+    const todayMeals = ernaehrung.filter(e => e.fields.datum === todayStr);
+    const todayCalories = todayMeals.reduce((sum, meal) => sum + (meal.fields.kalorien || 0), 0);
+
+    // Active goal
+    const activeGoal = ziele.find(z => z.fields.status === 'aktiv');
+    const goalCalories = activeGoal?.fields.taeglich_kalorien || 2000;
+
+    // Latest weight
+    const sortedWeights = [...koerperdaten]
+      .filter(k => k.fields.gewicht_kg != null)
+      .sort((a, b) => {
+        const dateA = a.fields.datum || a.createdat;
+        const dateB = b.fields.datum || b.createdat;
+        return dateB.localeCompare(dateA);
+      });
+    const latestWeight = sortedWeights[0]?.fields.gewicht_kg;
+    const lastMonthWeight = sortedWeights.find((_k, i) => i > 0)?.fields.gewicht_kg;
+    const weightChange = latestWeight && lastMonthWeight
+      ? ((latestWeight - lastMonthWeight) / lastMonthWeight) * 100
+      : null;
+
+    // Workout streak
+    const sortedWorkouts = [...workouts]
+      .filter(w => w.fields.datum && !w.fields.rest_day)
+      .sort((a, b) => (b.fields.datum || '').localeCompare(a.fields.datum || ''));
+
+    let streak = 0;
+    let currentDate = new Date();
+    for (const workout of sortedWorkouts) {
+      if (!workout.fields.datum) continue;
+      const workoutDate = parseISO(workout.fields.datum);
+      const daysDiff = Math.floor((currentDate.getTime() - workoutDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysDiff <= streak + 1) {
+        streak++;
+        currentDate = workoutDate;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      thisWeek: thisWeekWorkouts.length,
+      lastWeek: lastWeekWorkouts.length,
+      weeklyTrend: lastWeekWorkouts.length > 0
+        ? ((thisWeekWorkouts.length - lastWeekWorkouts.length) / lastWeekWorkouts.length) * 100
+        : null,
+      todayCalories,
+      goalCalories,
+      caloriesPercent: (todayCalories / goalCalories) * 100,
+      latestWeight,
+      weightChange,
+      streak,
+    };
+  }, [workouts, ernaehrung, koerperdaten, ziele]);
+
+  // Chart data for weight progress
+  const weightChartData = useMemo(() => {
+    const last30Days = subDays(new Date(), 30);
+    return koerperdaten
+      .filter(k => {
+        if (!k.fields.datum) return false;
+        const date = parseISO(k.fields.datum);
+        return date >= last30Days;
+      })
+      .sort((a, b) => (a.fields.datum || '').localeCompare(b.fields.datum || ''))
+      .map(k => ({
+        datum: format(parseISO(k.fields.datum!), 'dd.MM', { locale: de }),
+        gewicht: k.fields.gewicht_kg || 0,
+        kfa: k.fields.kfa_geschaetzt || 0,
+      }));
+  }, [koerperdaten]);
+
+  // Chart data for workout types
+  const workoutTypeData = useMemo(() => {
+    const last7Days = subDays(new Date(), 7);
+    const recentWorkouts = workouts.filter(w => {
+      if (!w.fields.datum) return false;
+      const date = parseISO(w.fields.datum);
+      return date >= last7Days;
+    });
+
+    const typeCounts: Record<string, number> = {};
+    recentWorkouts.forEach(w => {
+      const typ = w.fields.typ || 'sonstiges';
+      typeCounts[typ] = (typeCounts[typ] || 0) + 1;
+    });
+
+    const typeLabels: Record<string, string> = {
+      push: 'Push',
+      pull: 'Pull',
+      beine: 'Beine',
+      ganzkoerper: 'Ganzkörper',
+      oberkoerper: 'Oberkörper',
+      unterkoerper: 'Unterkörper',
+      cardio: 'Cardio',
+      sonstiges: 'Sonstiges',
+    };
+
+    return Object.entries(typeCounts).map(([typ, count]) => ({
+      typ: typeLabels[typ] || typ,
+      count,
     }));
+  }, [workouts]);
 
   // Recent workouts
-  const recentWorkouts = [...workouts]
-    .filter((w) => w.fields.datum)
-    .sort((a, b) => {
-      const dateA = parseISO(a.fields.datum!);
-      const dateB = parseISO(b.fields.datum!);
-      return dateB.getTime() - dateA.getTime();
-    })
-    .slice(0, 5);
+  const recentWorkouts = useMemo(() => {
+    return [...workouts]
+      .sort((a, b) => (b.fields.datum || '').localeCompare(a.fields.datum || ''))
+      .slice(0, 5);
+  }, [workouts]);
 
-  // Lookup data for display
-  const workoutTypeLabels: Record<string, string> = {
-    push: 'Push',
-    pull: 'Pull',
-    beine: 'Beine',
-    ganzkoerper: 'Ganzkörper',
-    oberkoerper: 'Oberkörper',
-    unterkoerper: 'Unterkörper',
-    cardio: 'Cardio',
-    sonstiges: 'Sonstiges',
-  };
-
-  const moodLabels: Record<string, string> = {
-    schlecht: 'Schlecht',
-    okay: 'Okay',
-    gut: 'Gut',
-    brutal: 'Brutal',
-  };
-
-  const moodColors: Record<string, string> = {
-    schlecht: 'bg-negative',
-    okay: 'bg-muted',
-    gut: 'bg-positive',
-    brutal: 'bg-primary',
-  };
-
-  const mealTypeLabels: Record<string, string> = {
-    fruehstueck: 'Frühstück',
-    snack: 'Snack',
-    mittagessen: 'Mittagessen',
-    abendessen: 'Abendessen',
-    pre_workout: 'Pre-Workout',
-    post_workout: 'Post-Workout',
-    sonstiges: 'Sonstiges',
-  };
+  // Active goals
+  const activeGoals = useMemo(() => {
+    return ziele.filter(z => z.fields.status === 'aktiv').slice(0, 3);
+  }, [ziele]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-foreground text-xl font-light">Lädt...</div>
-      </div>
-    );
+    return <LoadingState />;
+  }
+
+  if (error) {
+    return <ErrorState error={error} onRetry={() => window.location.reload()} />;
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen" style={{
+      background: 'linear-gradient(180deg, hsl(220 20% 8%) 0%, hsl(220 25% 6%) 100%)',
+      backgroundImage: 'radial-gradient(circle at 20% 10%, hsla(26, 90%, 58%, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, hsla(165, 75%, 52%, 0.06) 0%, transparent 50%)'
+    }}>
+      <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
         {/* Header */}
-        <div className="animate-fade-in" style={{ animationDelay: '0ms' }}>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">
+        <header className="mb-8 animate-fade-in">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             Fitness Dashboard
           </h1>
-          <p className="text-muted-foreground">
-            {format(now, 'EEEE, dd. MMMM yyyy', { locale: de })}
-          </p>
-        </div>
+          <p className="text-muted-foreground">Dein Fortschritt auf einen Blick</p>
+        </header>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
           <KPICard
-            title="Workouts Diese Woche"
-            value={workoutsThisWeek}
+            title="Diese Woche"
             description="Trainingseinheiten"
-            icon={<Dumbbell className="w-5 h-5" />}
-            trend={{
-              value: workoutsThisWeek - workoutsLastWeek,
-              isPositive: workoutsThisWeek >= workoutsLastWeek,
-              label: 'vs letzte Woche',
-            }}
+            value={kpis.thisWeek}
+            icon={Dumbbell}
+            trend={kpis.weeklyTrend}
             delay={0}
           />
           <KPICard
-            title="Kalorien Heute"
-            value={caloriesTotal}
-            description="kcal aufgenommen"
-            icon={<Flame className="w-5 h-5" />}
-            trend={
-              calorieGoal > 0
-                ? {
-                    value: Math.round(((caloriesTotal / calorieGoal) * 100) - 100),
-                    isPositive: caloriesTotal >= calorieGoal * 0.9 && caloriesTotal <= calorieGoal * 1.1,
-                    label: `von ${calorieGoal} Ziel`,
-                  }
-                : undefined
-            }
+            title="Heute"
+            description="Kalorien / Ziel"
+            value={`${Math.round(kpis.todayCalories)} / ${kpis.goalCalories}`}
+            icon={Flame}
+            trend={kpis.caloriesPercent - 100}
             delay={80}
+            subtitle={`${Math.round(kpis.caloriesPercent)}%`}
           />
           <KPICard
-            title="Protein Heute"
-            value={proteinTotal}
-            description="g Protein"
-            icon={<Beef className="w-5 h-5" />}
-            trend={
-              proteinGoal > 0
-                ? {
-                    value: Math.round(((proteinTotal / proteinGoal) * 100) - 100),
-                    isPositive: proteinTotal >= proteinGoal,
-                    label: `von ${proteinGoal}g Ziel`,
-                  }
-                : undefined
-            }
+            title="Aktuell"
+            description="Körpergewicht"
+            value={kpis.latestWeight ? `${kpis.latestWeight.toFixed(1)} kg` : '-'}
+            icon={Scale}
+            trend={kpis.weightChange}
             delay={160}
           />
           <KPICard
-            title="Aktuelles Gewicht"
-            value={currentWeight > 0 ? `${currentWeight.toFixed(1)}` : '-'}
-            description="kg"
-            icon={<Scale className="w-5 h-5" />}
-            trend={
-              sortedBodyData.length > 1
-                ? {
-                    value: parseFloat(weightChange.toFixed(1)),
-                    isPositive: weightChange <= 0,
-                    label: 'vs letzte Messung',
-                  }
-                : undefined
-            }
+            title="Streak"
+            description="Tage Training"
+            value={kpis.streak}
+            icon={TrendingUp}
             delay={240}
           />
         </div>
 
-        {/* Weight Chart */}
-        {chartData.length > 0 && (
-          <Card className="hover-lift animate-fade-in border-border/50" style={{ animationDelay: '320ms' }}>
+        {/* Main Chart */}
+        {weightChartData.length > 0 && (
+          <Card className="mb-6 animate-fade-in" style={{ animationDelay: '320ms' }}>
             <CardHeader>
-              <CardTitle className="text-foreground">Gewichtsverlauf (30 Tage)</CardTitle>
+              <CardTitle>Gewichtsverlauf (30 Tage)</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={{
-                  gewicht: {
-                    label: 'Gewicht (kg)',
-                    color: 'hsl(31, 97%, 58%)',
-                  },
-                }}
-                className="h-[300px] w-full"
-              >
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorGewicht" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(31, 97%, 58%)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(31, 97%, 58%)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 18%)" />
-                  <XAxis
-                    dataKey="date"
-                    stroke="hsl(220, 15%, 40%)"
-                    tick={{ fill: 'hsl(220, 15%, 60%)' }}
-                  />
-                  <YAxis
-                    stroke="hsl(220, 15%, 40%)"
-                    tick={{ fill: 'hsl(220, 15%, 60%)' }}
-                    domain={['dataMin - 2', 'dataMax + 2']}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area
-                    type="monotone"
-                    dataKey="gewicht"
-                    stroke="hsl(31, 97%, 58%)"
-                    strokeWidth={2}
-                    fill="url(#colorGewicht)"
-                  />
-                </AreaChart>
-              </ChartContainer>
+              <div className="h-[200px] sm:h-[300px] lg:h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={weightChartData}>
+                    <defs>
+                      <linearGradient id="colorGewicht" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(26 90% 58%)" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(26 90% 58%)" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
+                    <XAxis
+                      dataKey="datum"
+                      tick={{ fontSize: 12, fill: 'hsl(220 10% 70%)' }}
+                      stroke="hsl(220 15% 18%)"
+                    />
+                    <YAxis
+                      yAxisId="left"
+                      tick={{ fontSize: 12, fill: 'hsl(220 10% 70%)' }}
+                      stroke="hsl(220 15% 18%)"
+                      label={{ value: 'Gewicht (kg)', angle: -90, position: 'insideLeft', fill: 'hsl(220 10% 70%)' }}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      tick={{ fontSize: 12, fill: 'hsl(220 10% 70%)' }}
+                      stroke="hsl(220 15% 18%)"
+                      label={{ value: 'KFA (%)', angle: 90, position: 'insideRight', fill: 'hsl(220 10% 70%)' }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(220 20% 12%)',
+                        border: '1px solid hsl(220 15% 18%)',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Area
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="gewicht"
+                      stroke="hsl(26 90% 58%)"
+                      strokeWidth={2}
+                      fill="url(#colorGewicht)"
+                    />
+                    {weightChartData.some(d => d.kfa > 0) && (
+                      <Area
+                        yAxisId="right"
+                        type="monotone"
+                        dataKey="kfa"
+                        stroke="hsl(165 75% 52%)"
+                        strokeWidth={2}
+                        fill="none"
+                        strokeDasharray="5 5"
+                      />
+                    )}
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Workout Types Chart */}
+          {workoutTypeData.length > 0 && (
+            <Card className="animate-fade-in" style={{ animationDelay: '400ms' }}>
+              <CardHeader>
+                <CardTitle>Training nach Typ (7 Tage)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={workoutTypeData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
+                      <XAxis
+                        dataKey="typ"
+                        tick={{ fontSize: 12, fill: 'hsl(220 10% 70%)' }}
+                        stroke="hsl(220 15% 18%)"
+                      />
+                      <YAxis
+                        tick={{ fontSize: 12, fill: 'hsl(220 10% 70%)' }}
+                        stroke="hsl(220 15% 18%)"
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(220 20% 12%)',
+                          border: '1px solid hsl(220 15% 18%)',
+                          borderRadius: '8px',
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill="hsl(26 90% 58%)"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Recent Workouts */}
-          <Card className="hover-lift animate-fade-in border-border/50" style={{ animationDelay: '400ms' }}>
+          <Card className="animate-fade-in" style={{ animationDelay: '480ms' }}>
             <CardHeader>
-              <CardTitle className="text-foreground">Letzte Workouts</CardTitle>
+              <CardTitle>Letzte Workouts</CardTitle>
             </CardHeader>
             <CardContent>
               {recentWorkouts.length === 0 ? (
-                <p className="text-muted-foreground text-sm">Noch keine Workouts erfasst.</p>
+                <p className="text-muted-foreground text-center py-8">Keine Workouts vorhanden</p>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {recentWorkouts.map((workout) => (
                     <div
                       key={workout.record_id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-foreground">
-                            {workout.fields.typ ? workoutTypeLabels[workout.fields.typ] : 'Workout'}
-                          </span>
-                          {workout.fields.stimmung && (
-                            <Badge variant="outline" className={`${moodColors[workout.fields.stimmung]} border-none text-white text-xs`}>
-                              {moodLabels[workout.fields.stimmung]}
-                            </Badge>
-                          )}
+                      <div className="flex items-center gap-3">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">
+                            {workout.fields.typ ? workout.fields.typ.charAt(0).toUpperCase() + workout.fields.typ.slice(1) : 'Workout'}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {workout.fields.datum && format(parseISO(workout.fields.datum), 'dd.MM.yyyy', { locale: de })}
+                          </p>
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {workout.fields.datum && format(parseISO(workout.fields.datum), 'dd.MM.yyyy', { locale: de })}
-                          {workout.fields.dauer_minuten && ` • ${workout.fields.dauer_minuten} Min`}
-                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {workout.fields.dauer_minuten && (
+                          <Badge variant="outline">{workout.fields.dauer_minuten} min</Badge>
+                        )}
+                        {workout.fields.stimmung && (
+                          <Badge
+                            variant={workout.fields.stimmung === 'brutal' ? 'default' : 'secondary'}
+                          >
+                            {workout.fields.stimmung}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -413,194 +406,246 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-
-          {/* Today's Meals */}
-          <Card className="hover-lift animate-fade-in border-border/50" style={{ animationDelay: '480ms' }}>
-            <CardHeader>
-              <CardTitle className="text-foreground">Heutige Mahlzeiten</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {todayNutrition.length === 0 ? (
-                <p className="text-muted-foreground text-sm">Noch keine Mahlzeiten heute erfasst.</p>
-              ) : (
-                <div className="space-y-3">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Typ</TableHead>
-                        <TableHead className="text-right">kcal</TableHead>
-                        <TableHead className="text-right">Protein</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {todayNutrition.map((meal) => (
-                        <TableRow key={meal.record_id}>
-                          <TableCell className="font-medium">
-                            {meal.fields.mahlzeit_typ ? mealTypeLabels[meal.fields.mahlzeit_typ] : '-'}
-                          </TableCell>
-                          <TableCell className="text-right">{meal.fields.kalorien || 0}</TableCell>
-                          <TableCell className="text-right">{meal.fields.protein || 0}g</TableCell>
-                        </TableRow>
-                      ))}
-                      <TableRow className="font-bold bg-muted/20">
-                        <TableCell>Gesamt</TableCell>
-                        <TableCell className="text-right">{caloriesTotal}</TableCell>
-                        <TableCell className="text-right">{proteinTotal}g</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
 
         {/* Active Goals */}
-        {activeGoal && (
-          <Card className="hover-lift animate-fade-in border-border/50" style={{ animationDelay: '560ms' }}>
+        {activeGoals.length > 0 && (
+          <Card className="mt-6 animate-fade-in" style={{ animationDelay: '560ms' }}>
             <CardHeader>
-              <CardTitle className="text-foreground">Aktives Ziel</CardTitle>
+              <CardTitle>Aktive Ziele</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {activeGoal.fields.taeglich_kalorien && (
-                  <div className="p-4 rounded-lg bg-muted/30">
-                    <div className="text-sm text-muted-foreground mb-1">Tägliche Kalorien</div>
-                    <div className="text-2xl font-bold text-foreground">{activeGoal.fields.taeglich_kalorien} kcal</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {activeGoals.map((ziel) => (
+                  <div key={ziel.record_id} className="p-4 rounded-lg border bg-card">
+                    {ziel.fields.taeglich_kalorien && (
+                      <div className="mb-2">
+                        <p className="text-sm text-muted-foreground">Tägl. Kalorien</p>
+                        <p className="text-2xl font-bold">{ziel.fields.taeglich_kalorien} kcal</p>
+                      </div>
+                    )}
+                    {ziel.fields.taeglich_protein && (
+                      <div className="mb-2">
+                        <p className="text-sm text-muted-foreground">Tägl. Protein</p>
+                        <p className="text-2xl font-bold">{ziel.fields.taeglich_protein} g</p>
+                      </div>
+                    )}
+                    {ziel.fields.trainingstage_pro_woche && (
+                      <div className="mb-2">
+                        <p className="text-sm text-muted-foreground">Trainingstage/Woche</p>
+                        <p className="text-2xl font-bold">{ziel.fields.trainingstage_pro_woche}</p>
+                      </div>
+                    )}
                   </div>
-                )}
-                {activeGoal.fields.taeglich_protein && (
-                  <div className="p-4 rounded-lg bg-muted/30">
-                    <div className="text-sm text-muted-foreground mb-1">Tägliches Protein</div>
-                    <div className="text-2xl font-bold text-foreground">{activeGoal.fields.taeglich_protein}g</div>
-                  </div>
-                )}
-                {activeGoal.fields.trainingstage_pro_woche && (
-                  <div className="p-4 rounded-lg bg-muted/30">
-                    <div className="text-sm text-muted-foreground mb-1">Trainingstage/Woche</div>
-                    <div className="text-2xl font-bold text-foreground">{activeGoal.fields.trainingstage_pro_woche}</div>
-                  </div>
-                )}
-                {activeGoal.fields.schlaf_ziel_stunden && (
-                  <div className="p-4 rounded-lg bg-muted/30">
-                    <div className="text-sm text-muted-foreground mb-1">Schlafziel</div>
-                    <div className="text-2xl font-bold text-foreground">{activeGoal.fields.schlaf_ziel_stunden}h</div>
-                  </div>
-                )}
+                ))}
               </div>
             </CardContent>
           </Card>
         )}
-
-        {/* Floating Action Button with Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="fixed bottom-6 right-6 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-4 h-auto shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center gap-2 font-medium"
-            >
-              <Plus className="w-6 h-6" />
-              <span className="hidden sm:inline">Workout Loggen</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Neues Workout</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleCreateWorkout} className="space-y-4 mt-4">
-              {/* Datum */}
-              <div className="space-y-2">
-                <Label htmlFor="datum">Datum</Label>
-                <Input
-                  id="datum"
-                  type="date"
-                  value={formData.datum}
-                  onChange={(e) => setFormData({ ...formData, datum: e.target.value })}
-                  required
-                />
-              </div>
-
-              {/* Trainingstyp */}
-              <div className="space-y-2">
-                <Label htmlFor="typ">Trainingstyp</Label>
-                <Select
-                  value={formData.typ || "none"}
-                  onValueChange={(v) => setFormData({ ...formData, typ: v === "none" ? "" : v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Typ auswählen..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Bitte wählen...</SelectItem>
-                    <SelectItem value="push">Push</SelectItem>
-                    <SelectItem value="pull">Pull</SelectItem>
-                    <SelectItem value="beine">Beine</SelectItem>
-                    <SelectItem value="ganzkoerper">Ganzkörper</SelectItem>
-                    <SelectItem value="oberkoerper">Oberkörper</SelectItem>
-                    <SelectItem value="unterkoerper">Unterkörper</SelectItem>
-                    <SelectItem value="cardio">Cardio</SelectItem>
-                    <SelectItem value="sonstiges">Sonstiges</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Dauer */}
-              <div className="space-y-2">
-                <Label htmlFor="dauer">Dauer (Minuten)</Label>
-                <Input
-                  id="dauer"
-                  type="number"
-                  min="1"
-                  placeholder="z.B. 60"
-                  value={formData.dauer_minuten}
-                  onChange={(e) => setFormData({ ...formData, dauer_minuten: e.target.value })}
-                />
-              </div>
-
-              {/* Stimmung */}
-              <div className="space-y-2">
-                <Label htmlFor="stimmung">Stimmung</Label>
-                <Select
-                  value={formData.stimmung || "none"}
-                  onValueChange={(v) => setFormData({ ...formData, stimmung: v === "none" ? "" : v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wie war's?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Bitte wählen...</SelectItem>
-                    <SelectItem value="schlecht">Schlecht 😓</SelectItem>
-                    <SelectItem value="okay">Okay 😐</SelectItem>
-                    <SelectItem value="gut">Gut 💪</SelectItem>
-                    <SelectItem value="brutal">Brutal 🔥</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setDialogOpen(false)}
-                  disabled={submitting}
-                >
-                  Abbrechen
-                </Button>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Speichern...
-                    </>
-                  ) : (
-                    'Speichern'
-                  )}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
+
+      {/* Floating Action Button */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogTrigger asChild>
+          <Button
+            size="lg"
+            className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+            style={{ backgroundColor: 'hsl(26 90% 58%)', color: 'white' }}
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Workout loggen</DialogTitle>
+          </DialogHeader>
+          <QuickLogForm onSuccess={() => {
+            setDialogOpen(false);
+            window.location.reload();
+          }} />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function KPICard({
+  title,
+  description,
+  value,
+  icon: Icon,
+  trend,
+  delay,
+  subtitle
+}: {
+  title: string;
+  description: string;
+  value: string | number;
+  icon: any;
+  trend?: number | null;
+  delay: number;
+  subtitle?: string;
+}) {
+  return (
+    <Card
+      className="relative overflow-hidden hover:shadow-md transition-all animate-fade-in"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+      <CardHeader className="relative pb-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-1">{title}</p>
+            <p className="text-xs text-muted-foreground/70">{description}</p>
+          </div>
+          <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: 'hsl(220 20% 12%)' }}>
+            <Icon className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: 'hsl(26 90% 58%)' }} />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="relative">
+        <p className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1">
+          {value}
+        </p>
+        {subtitle && (
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
+        )}
+        {trend != null && (
+          <div className="flex items-center gap-1 mt-1">
+            {trend > 0 ? (
+              <TrendingUp className="h-3 w-3 text-green-500" />
+            ) : trend < 0 ? (
+              <TrendingDown className="h-3 w-3 text-red-500" />
+            ) : null}
+            <p className={`text-xs sm:text-sm ${trend > 0 ? 'text-green-500' : trend < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+              {trend > 0 ? '+' : ''}{trend.toFixed(1)}%
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function QuickLogForm({ onSuccess }: { onSuccess: () => void }) {
+  const [formData, setFormData] = useState({
+    datum: format(new Date(), 'yyyy-MM-dd'),
+    typ: '',
+    dauer_minuten: '',
+    stimmung: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!formData.datum || !formData.typ) return;
+
+    setSubmitting(true);
+    try {
+      await LivingAppsService.createWorkout({
+        datum: formData.datum,
+        typ: formData.typ as any,
+        dauer_minuten: formData.dauer_minuten ? Number(formData.dauer_minuten) : undefined,
+        stimmung: formData.stimmung as any || undefined,
+      });
+      onSuccess();
+    } catch (err) {
+      console.error('Failed to create workout:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="datum">Datum</Label>
+        <Input
+          id="datum"
+          type="date"
+          value={formData.datum}
+          onChange={(e) => setFormData({ ...formData, datum: e.target.value })}
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="typ">Trainingstyp</Label>
+        <Select value={formData.typ} onValueChange={(v) => setFormData({ ...formData, typ: v })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Wähle einen Typ..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="push">Push</SelectItem>
+            <SelectItem value="pull">Pull</SelectItem>
+            <SelectItem value="beine">Beine</SelectItem>
+            <SelectItem value="ganzkoerper">Ganzkörper</SelectItem>
+            <SelectItem value="oberkoerper">Oberkörper</SelectItem>
+            <SelectItem value="unterkoerper">Unterkörper</SelectItem>
+            <SelectItem value="cardio">Cardio</SelectItem>
+            <SelectItem value="sonstiges">Sonstiges</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor="dauer">Dauer (Minuten)</Label>
+        <Input
+          id="dauer"
+          type="number"
+          value={formData.dauer_minuten}
+          onChange={(e) => setFormData({ ...formData, dauer_minuten: e.target.value })}
+          placeholder="60"
+        />
+      </div>
+      <div>
+        <Label htmlFor="stimmung">Stimmung</Label>
+        <Select value={formData.stimmung} onValueChange={(v) => setFormData({ ...formData, stimmung: v })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Wie war's?" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="schlecht">Schlecht</SelectItem>
+            <SelectItem value="okay">Okay</SelectItem>
+            <SelectItem value="gut">Gut</SelectItem>
+            <SelectItem value="brutal">Brutal</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <Button type="submit" className="w-full" disabled={submitting}>
+        {submitting ? 'Wird gespeichert...' : 'Workout hinzufügen'}
+      </Button>
+    </form>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="min-h-screen" style={{ background: 'hsl(220 20% 8%)' }}>
+      <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
+        <Skeleton className="h-12 w-64 mb-8" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+        <Skeleton className="h-96 mb-6" />
+      </div>
+    </div>
+  );
+}
+
+function ErrorState({ error, onRetry }: { error: Error; onRetry: () => void }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'hsl(220 20% 8%)' }}>
+      <Alert variant="destructive" className="max-w-md">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Fehler beim Laden</AlertTitle>
+        <AlertDescription className="flex flex-col gap-2">
+          <span>{error.message}</span>
+          <Button variant="outline" size="sm" onClick={onRetry}>
+            Erneut versuchen
+          </Button>
+        </AlertDescription>
+      </Alert>
     </div>
   );
 }
