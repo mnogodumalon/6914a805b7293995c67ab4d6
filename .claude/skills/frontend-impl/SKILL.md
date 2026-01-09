@@ -310,7 +310,14 @@ toast({
 
 ---
 
-## Reference Files
+## ⚠️ REQUIRED READING - Read These Files NOW!
 
-- See `living-apps-api.md` for API details (dates, applookup, responses)
-- See `code-patterns.md` for TypeScript patterns and examples
+Before implementing Dashboard.tsx, you **MUST** read these files in the same directory:
+
+1. **`living-apps-api.md`** - URL formats (/apps/ not /app/!), date formats, API rules
+2. **`code-patterns.md`** - Dialog patterns, form handling, Chart examples
+
+**Failure to read these files will result in:**
+- Wrong URL format (external links instead of dialogs)
+- Date format errors
+- Broken API calls

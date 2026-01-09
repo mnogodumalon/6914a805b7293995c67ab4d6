@@ -242,7 +242,14 @@ Before finalizing design_spec.json:
 
 ---
 
-## Reference Files
+## ⚠️ REQUIRED READING - Read These Files NOW!
 
-- See `design-system.md` for typography, color, and spacing tokens
-- See `ui-patterns.md` for responsive patterns and component guidelines
+Before creating design_spec.json, you **MUST** read these files in the same directory:
+
+1. **`design-system.md`** - CSS variable format (hsl() syntax!), color palettes, typography
+2. **`ui-patterns.md`** - Responsive patterns, component guidelines
+
+**Failure to read these files will result in:**
+- Wrong CSS format (OKLCH vs HSL)
+- Generic "AI slop" designs
+- Broken themes

@@ -34,12 +34,18 @@ Create `design_spec.json` with concrete design decisions:
 - What the primary action should be
 - Theme, colors, layout
 
-See `.claude/skills/frontend-design/SKILL.md`
+**⚠️ MUST READ ALL FILES in `.claude/skills/frontend-design/`:**
+- `SKILL.md` - Main design workflow
+- `design-system.md` - **CSS format, colors, typography** ← CRITICAL!
+- `ui-patterns.md` - Component patterns
 
 ### Step 4: Implement (Use frontend-impl Skill)
 Create `src/pages/Dashboard.tsx` following design_spec.json exactly.
 
-See `.claude/skills/frontend-impl/SKILL.md`
+**⚠️ MUST READ ALL FILES in `.claude/skills/frontend-impl/`:**
+- `SKILL.md` - Main implementation workflow
+- `living-apps-api.md` - **URL formats, API rules** ← CRITICAL!
+- `code-patterns.md` - **Dialog/Form patterns** ← CRITICAL!
 
 ### Step 5: Build & Deploy
 ```bash
