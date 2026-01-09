@@ -5,10 +5,6 @@ description: |
   - Starting a new dashboard build
   - User asks about design decisions
   - Creating design_spec.json
-  
-  ⚠️ BEFORE designing, you MUST also read:
-  - design-system.md (CSS format: use hsl() not OKLCH!)
-  - ui-patterns.md (responsive patterns)
 allowed-tools:
   - Read
   - Write
@@ -20,6 +16,10 @@ allowed-tools:
 # Frontend Design Skill
 
 You are a UI/UX designer. Your job is to **analyze the app and create a design specification** (`design_spec.json`) that the implementation agent will follow exactly.
+
+---
+
+# PART 1: Design Philosophy
 
 ## ⚠️ CRITICAL: Avoid "AI Slop" Aesthetic
 
@@ -141,7 +141,146 @@ Ask yourself:
 
 ---
 
-## Your Output: design_spec.json
+# PART 2: CSS & Design System
+
+## ⚠️ CSS Variable Format - CRITICAL!
+
+**ALWAYS use full `hsl()` syntax in design_spec.json!**
+
+```css
+/* ✅ CORRECT - Full hsl() wrapper */
+--background: hsl(220, 18%, 8%);
+--primary: hsl(31, 97%, 58%);
+
+/* ❌ WRONG - Space-separated values (old Tailwind format) */
+--background: 220 18% 8%;
+--primary: 31 97% 58%;
+
+/* ❌ WRONG - OKLCH format (not compatible) */
+--background: oklch(0.145 0 0);
+```
+
+The implementation agent MUST update `src/index.css` directly with HSL values.
+
+---
+
+## Color Palettes
+
+### Don't Use
+❌ `#007bff` (Bootstrap blue)
+❌ Purple gradients on white
+❌ `#f5f5f5` gray backgrounds
+❌ Generic Material Design colors
+
+### Palette Strategies
+
+**1. Monochrome + One Accent**
+```css
+--background: hsl(220, 20%, 10%);
+--foreground: hsl(220, 10%, 90%);
+--accent: hsl(150, 80%, 50%);
+```
+
+**2. Warm & Grounded**
+```css
+--background: hsl(30, 20%, 8%);
+--foreground: hsl(30, 10%, 90%);
+--accent: hsl(25, 90%, 55%);
+```
+
+**3. Cool & Professional**
+```css
+--background: hsl(210, 30%, 8%);
+--foreground: hsl(210, 20%, 95%);
+--accent: hsl(190, 80%, 50%);
+```
+
+---
+
+## Typography Size Scale
+
+| Purpose | Size | Weight | Example |
+|---------|------|--------|---------|
+| Hero KPI | 48-72px | 700-900 | Main number users care about |
+| Section Title | 24-32px | 600-700 | Clear hierarchy |
+| Card Title | 18-20px | 500-600 | Scannable |
+| Body | 14-16px | 400 | Readable content |
+| Labels/Meta | 11-13px | 400-500 | Supporting info |
+
+---
+
+## Responsive Breakpoints
+
+```
+xs: < 640px    → Single column, stacked layout
+sm: 640px      → Two columns possible
+md: 768px      → Tablet layout
+lg: 1024px     → Desktop layout
+xl: 1280px     → Wide desktop
+```
+
+---
+
+# PART 3: UI Patterns
+
+## Responsive Layout Patterns
+
+### Mobile-First Page Structure
+```tsx
+<div className="min-h-screen bg-background">
+  <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b p-4">
+    <h1 className="text-xl font-bold">{appName}</h1>
+  </header>
+  <main className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+    {/* Content here */}
+  </main>
+</div>
+```
+
+### Responsive Grid System
+```tsx
+// KPI cards - 1 on mobile, 2 on tablet, 4 on desktop
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+
+// Main + Sidebar - stacked on mobile, side-by-side on desktop
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div className="lg:col-span-2">{/* Main content */}</div>
+  <div>{/* Sidebar */}</div>
+</div>
+```
+
+---
+
+## Animation Patterns
+
+### Staggered Page Load (Wow Moment!)
+```tsx
+{items.map((item, i) => (
+  <Card 
+    key={item.id}
+    className="animate-fade-in"
+    style={{ animationDelay: `${i * 100}ms` }}
+  />
+))}
+```
+
+```css
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+```
+
+---
+
+# PART 4: Your Output
+
+## design_spec.json Structure
 
 After analyzing the app, create `design_spec.json` with your concrete design decisions:
 
@@ -205,13 +344,9 @@ After analyzing the app, create `design_spec.json` with your concrete design dec
     "primary_action_button": {
       "label": "Button text",
       "action": "add_record | navigate | toggle",
-      "target_app": "app identifier from app_metadata.json (e.g. 'workouts')",
+      "target_app": "app identifier from app_metadata.json",
       "position": "header | floating | inline"
     }
-    
-    // NOTE: The implementation agent will construct the URL as:
-    // https://my.living-apps.de/apps/{app_id}
-    // where app_id comes from app_metadata.json
   },
   "animations": {
     "page_load": "stagger | fade | slide",
@@ -243,17 +378,3 @@ Before finalizing design_spec.json:
 - [ ] Is the primary action obvious and accessible?
 - [ ] Will it create a "wow" moment for the user?
 - [ ] Is it mobile-first AND excellent on desktop?
-
----
-
-## ⚠️ REQUIRED READING - Read These Files NOW!
-
-Before creating design_spec.json, you **MUST** read these files in the same directory:
-
-1. **`design-system.md`** - CSS variable format (hsl() syntax!), color palettes, typography
-2. **`ui-patterns.md`** - Responsive patterns, component guidelines
-
-**Failure to read these files will result in:**
-- Wrong CSS format (OKLCH vs HSL)
-- Generic "AI slop" designs
-- Broken themes
