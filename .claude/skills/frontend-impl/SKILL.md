@@ -208,7 +208,7 @@ Before completing:
 The dashboard is complete when:
 
 1. ✅ **User experience excellent**: Intuitive, clear, professional
-2. ✅ **Action button for main action works** (with Dialog/Modal)
+2. ✅ **Action button uses Dialog with form** (NOT external link!)
 3. ✅ All KPIs/Stats calculated correctly
 4. ✅ Loading state works (Skeleton, not empty page)
 5. ✅ Error handling implemented (friendly messages)
@@ -218,6 +218,38 @@ The dashboard is complete when:
 9. ✅ No console errors in browser
 10. ✅ Business logic correct
 11. ✅ Living Apps API rules followed (dates, applookup, response)
+
+---
+
+## ⚠️ Primary Action Button Implementation
+
+**NEVER use external links for add_record actions!**
+
+```typescript
+// ❌ WRONG - Opens external tab, data entry outside dashboard
+<a href="https://my.living-apps.de/apps/..." target="_blank">
+  Add Item
+</a>
+
+// ✅ CORRECT - Dialog with form, uses LivingAppsService
+<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+  <DialogTrigger asChild>
+    <Button>Add Item</Button>
+  </DialogTrigger>
+  <DialogContent>
+    <form onSubmit={handleSubmit}>
+      {/* Form fields */}
+      <Button type="submit">Save</Button>
+    </form>
+  </DialogContent>
+</Dialog>
+
+// Form submission uses the service:
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  await LivingAppsService.createWorkout(formData);
+  // Reload data and close dialog
+}
 
 ---
 
