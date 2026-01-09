@@ -5,8 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Area, AreaChart, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Dumbbell, Flame, Beef, Scale, Plus, TrendingUp, TrendingDown } from 'lucide-react';
+import { Dumbbell, Flame, Beef, Scale, Plus, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
 import { LivingAppsService } from '@/services/livingAppsService';
 import type { Workouts, Ernaehrung, Koerperdaten, Ziele } from '@/types/app';
 
@@ -61,6 +66,16 @@ export default function Dashboard() {
   const [koerperdaten, setKoerperdaten] = useState<Koerperdaten[]>([]);
   const [ziele, setZiele] = useState<Ziele[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Dialog & Form State
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    datum: format(new Date(), 'yyyy-MM-dd'),
+    typ: '',
+    dauer_minuten: '',
+    stimmung: '',
+  });
 
   useEffect(() => {
     async function loadData() {
@@ -85,6 +100,39 @@ export default function Dashboard() {
 
     loadData();
   }, []);
+
+  // Handle workout form submission
+  async function handleCreateWorkout(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      await LivingAppsService.createWorkout({
+        datum: formData.datum,
+        typ: formData.typ as Workouts['fields']['typ'],
+        dauer_minuten: formData.dauer_minuten ? parseInt(formData.dauer_minuten) : undefined,
+        stimmung: formData.stimmung as Workouts['fields']['stimmung'],
+      });
+
+      // Reload workouts data
+      const updatedWorkouts = await LivingAppsService.getWorkouts();
+      setWorkouts(updatedWorkouts);
+
+      // Reset form and close dialog
+      setFormData({
+        datum: format(new Date(), 'yyyy-MM-dd'),
+        typ: '',
+        dauer_minuten: '',
+        stimmung: '',
+      });
+      setDialogOpen(false);
+    } catch (error) {
+      console.error('Error creating workout:', error);
+      alert('Fehler beim Erstellen des Workouts');
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   // Calculate KPIs
   const now = new Date();
@@ -444,16 +492,114 @@ export default function Dashboard() {
           </Card>
         )}
 
-        {/* Floating Action Button */}
-        <a
-          href="https://my.living-apps.de/apps/6914a7e7b773d677cf3838c1"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fixed bottom-6 right-6 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center gap-2 font-medium"
-        >
-          <Plus className="w-6 h-6" />
-          <span className="hidden sm:inline">Workout Loggen</span>
-        </a>
+        {/* Floating Action Button with Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className="fixed bottom-6 right-6 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-4 h-auto shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center gap-2 font-medium"
+            >
+              <Plus className="w-6 h-6" />
+              <span className="hidden sm:inline">Workout Loggen</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Neues Workout</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateWorkout} className="space-y-4 mt-4">
+              {/* Datum */}
+              <div className="space-y-2">
+                <Label htmlFor="datum">Datum</Label>
+                <Input
+                  id="datum"
+                  type="date"
+                  value={formData.datum}
+                  onChange={(e) => setFormData({ ...formData, datum: e.target.value })}
+                  required
+                />
+              </div>
+
+              {/* Trainingstyp */}
+              <div className="space-y-2">
+                <Label htmlFor="typ">Trainingstyp</Label>
+                <Select
+                  value={formData.typ || "none"}
+                  onValueChange={(v) => setFormData({ ...formData, typ: v === "none" ? "" : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Typ auswählen..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Bitte wählen...</SelectItem>
+                    <SelectItem value="push">Push</SelectItem>
+                    <SelectItem value="pull">Pull</SelectItem>
+                    <SelectItem value="beine">Beine</SelectItem>
+                    <SelectItem value="ganzkoerper">Ganzkörper</SelectItem>
+                    <SelectItem value="oberkoerper">Oberkörper</SelectItem>
+                    <SelectItem value="unterkoerper">Unterkörper</SelectItem>
+                    <SelectItem value="cardio">Cardio</SelectItem>
+                    <SelectItem value="sonstiges">Sonstiges</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Dauer */}
+              <div className="space-y-2">
+                <Label htmlFor="dauer">Dauer (Minuten)</Label>
+                <Input
+                  id="dauer"
+                  type="number"
+                  min="1"
+                  placeholder="z.B. 60"
+                  value={formData.dauer_minuten}
+                  onChange={(e) => setFormData({ ...formData, dauer_minuten: e.target.value })}
+                />
+              </div>
+
+              {/* Stimmung */}
+              <div className="space-y-2">
+                <Label htmlFor="stimmung">Stimmung</Label>
+                <Select
+                  value={formData.stimmung || "none"}
+                  onValueChange={(v) => setFormData({ ...formData, stimmung: v === "none" ? "" : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Wie war's?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Bitte wählen...</SelectItem>
+                    <SelectItem value="schlecht">Schlecht 😓</SelectItem>
+                    <SelectItem value="okay">Okay 😐</SelectItem>
+                    <SelectItem value="gut">Gut 💪</SelectItem>
+                    <SelectItem value="brutal">Brutal 🔥</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDialogOpen(false)}
+                  disabled={submitting}
+                >
+                  Abbrechen
+                </Button>
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Speichern...
+                    </>
+                  ) : (
+                    'Speichern'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
