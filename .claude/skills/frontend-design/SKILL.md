@@ -5,6 +5,10 @@ description: |
   - Starting a new dashboard build
   - User asks about design decisions
   - Creating design_spec.json
+  
+  ⚠️ BEFORE designing, you MUST also read:
+  - design-system.md (CSS format: use hsl() not OKLCH!)
+  - ui-patterns.md (responsive patterns)
 allowed-tools:
   - Read
   - Write

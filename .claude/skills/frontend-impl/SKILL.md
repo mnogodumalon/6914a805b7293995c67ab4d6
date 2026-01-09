@@ -6,6 +6,12 @@ description: |
   - Following design_spec.json
   - Writing React/TypeScript code
   - Integrating with Living Apps API
+  
+  ⚠️ BEFORE implementing, you MUST also read:
+  - living-apps-api.md (URL format: /apps/ not /app/!, date formats)
+  - code-patterns.md (Dialog forms, NOT external links!)
+  
+  ⚠️ MUST update index.css with theme colors (never inject styles via JS!)
 allowed-tools:
   - Read
   - Write
