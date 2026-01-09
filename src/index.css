@@ -116,35 +116,5 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Space Grotesk', sans-serif;
-  }
-
-  /* Custom theme colors from design spec */
-  :root {
-    --background: 220 20% 8%;
-    --foreground: 220 10% 92%;
-    --primary: 26 90% 58%;
-    --accent: 165 75% 52%;
-    --muted: 220 15% 18%;
-    --card: 220 20% 12%;
-    --positive: 142 70% 48%;
-    --negative: 0 70% 55%;
-  }
-
-  /* Animation keyframes */
-  @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-fade-in {
-    animation: fade-in-up 0.5s ease-out forwards;
-    opacity: 0;
   }
 }

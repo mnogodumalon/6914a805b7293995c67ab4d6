@@ -1,157 +1,227 @@
 {
-  "app_analysis": {
-    "purpose": "Track fitness progress, workouts, nutrition, and body metrics in one place",
-    "domain": "fitness",
-    "data_density": "medium",
-    "primary_users": "Fitness enthusiasts tracking their health journey",
-    "key_metrics": [
-      "Weekly workout count",
-      "Daily calories vs goal",
-      "Body weight progress",
-      "Workout consistency"
-    ],
-    "primary_action": "Log workout or meal quickly",
-    "emotional_tone": "energetic, motivating, achievement-focused"
-  },
+  "dashboard_name": "Fitness & Ernährungs-Tracker Dashboard",
+  "description": "A comprehensive fitness and nutrition tracking dashboard showing workout progress, nutrition goals, body measurements, and training insights",
+
   "theme": {
-    "mode": "dark",
-    "font_family": "Space Grotesk",
-    "font_url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap",
-    "colors": {
-      "background": "hsl(220 20% 8%)",
-      "foreground": "hsl(220 10% 92%)",
-      "primary": "hsl(26 90% 58%)",
-      "accent": "hsl(165 75% 52%)",
-      "muted": "hsl(220 15% 18%)",
-      "positive": "hsl(142 70% 48%)",
-      "negative": "hsl(0 70% 55%)",
-      "card": "hsl(220 20% 12%)"
-    },
-    "background_style": "gradient",
-    "background_css": "background: linear-gradient(180deg, hsl(220 20% 8%) 0%, hsl(220 25% 6%) 100%); background-image: radial-gradient(circle at 20% 10%, hsla(26, 90%, 58%, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, hsla(165, 75%, 52%, 0.06) 0%, transparent 50%);"
+    "primary_color": "blue",
+    "accent_color": "green",
+    "style": "modern_minimal",
+    "reasoning": "Blue represents trust and fitness, green represents health and nutrition. Modern minimal style keeps focus on data and progress"
   },
+
   "layout": {
-    "kpi_cards": [
+    "type": "multi_section",
+    "sections": [
       {
-        "title": "Diese Woche",
-        "description": "Trainingseinheiten",
-        "source_app": "workouts",
-        "calculation": "count_this_week",
-        "calculation_field": "datum",
-        "icon": "Dumbbell",
-        "format": "number",
-        "trend_comparison": "vs_last_week"
-      },
-      {
+        "id": "hero_kpis",
         "title": "Heute",
-        "description": "Kalorien / Ziel",
-        "source_app": "ernaehrung",
-        "calculation": "sum_today_vs_goal",
-        "calculation_field": "kalorien",
-        "icon": "Flame",
-        "format": "calories",
-        "trend_comparison": "vs_goal"
+        "position": "top",
+        "columns": 4,
+        "description": "Today's key metrics at a glance"
       },
       {
-        "title": "Aktuell",
-        "description": "Körpergewicht",
-        "source_app": "koerperdaten",
-        "calculation": "latest",
-        "calculation_field": "gewicht_kg",
-        "icon": "Scale",
-        "format": "weight",
-        "trend_comparison": "vs_last_month"
+        "id": "weekly_overview",
+        "title": "Diese Woche",
+        "position": "middle",
+        "columns": 2,
+        "description": "Weekly training and nutrition overview"
       },
       {
-        "title": "Streak",
-        "description": "Tage Training",
-        "source_app": "workouts",
-        "calculation": "current_streak",
-        "calculation_field": "datum",
-        "icon": "TrendingUp",
-        "format": "number",
-        "trend_comparison": "none"
+        "id": "progress_tracking",
+        "title": "Fortschritt",
+        "position": "bottom",
+        "columns": 2,
+        "description": "Long-term progress tracking"
       }
-    ],
-    "main_chart": {
-      "type": "area",
-      "title": "Gewichtsverlauf (30 Tage)",
-      "source_app": "koerperdaten",
-      "x_axis": {
-        "field": "datum",
-        "label": "Datum"
-      },
-      "y_axis": {
-        "field": "gewicht_kg",
-        "label": "Gewicht (kg)"
-      },
-      "group_by": "day",
-      "secondary_line": {
-        "field": "kfa_geschaetzt",
-        "label": "KFA %",
-        "axis": "right"
-      }
+    ]
+  },
+
+  "kpis": [
+    {
+      "id": "today_workout",
+      "title": "Heutiges Training",
+      "data_source": "workouts",
+      "calculation": "Check if there's a workout today (datum = today) and show type/duration or 'Ruhetag' if rest_day",
+      "visualization": "stat_card",
+      "icon": "Dumbbell",
+      "color": "blue",
+      "priority": 1
     },
-    "secondary_sections": [
-      {
-        "type": "chart",
-        "chart_type": "bar",
-        "title": "Training nach Typ (7 Tage)",
-        "source_app": "workouts",
-        "x_axis": "typ",
-        "y_axis": "count",
-        "limit": 7
+    {
+      "id": "today_calories",
+      "title": "Kalorien Heute",
+      "data_source": "ernaehrung",
+      "calculation": "Sum of kalorien where datum = today",
+      "visualization": "progress_ring",
+      "target_source": "ziele.taeglich_kalorien",
+      "show_percentage": true,
+      "color": "orange",
+      "priority": 2
+    },
+    {
+      "id": "today_protein",
+      "title": "Protein Heute",
+      "data_source": "ernaehrung",
+      "calculation": "Sum of protein where datum = today",
+      "visualization": "progress_ring",
+      "target_source": "ziele.taeglich_protein",
+      "show_percentage": true,
+      "color": "green",
+      "priority": 3
+    },
+    {
+      "id": "weekly_workouts",
+      "title": "Trainings diese Woche",
+      "data_source": "workouts",
+      "calculation": "Count workouts where datum is in current week and rest_day = false",
+      "visualization": "stat_card",
+      "target_source": "ziele.trainingstage_pro_woche",
+      "show_comparison": true,
+      "icon": "Activity",
+      "color": "blue",
+      "priority": 4
+    }
+  ],
+
+  "charts": [
+    {
+      "id": "workout_frequency",
+      "title": "Trainingsfrequenz (Letzte 4 Wochen)",
+      "type": "bar",
+      "data_source": "workouts",
+      "x_axis": "week",
+      "y_axis": "count",
+      "filters": {
+        "rest_day": false,
+        "date_range": "last_28_days"
       },
-      {
-        "type": "list",
-        "title": "Letzte Workouts",
-        "source_app": "workouts",
-        "fields": [
-          "datum",
-          "typ",
-          "dauer_minuten",
-          "stimmung"
-        ],
-        "sort_by": "datum",
-        "sort_order": "desc",
-        "limit": 5
+      "color": "blue",
+      "position": "weekly_overview",
+      "show_target_line": true,
+      "target_source": "ziele.trainingstage_pro_woche"
+    },
+    {
+      "id": "training_types_distribution",
+      "title": "Trainingsarten (Letzter Monat)",
+      "type": "pie",
+      "data_source": "workouts",
+      "group_by": "typ",
+      "filters": {
+        "rest_day": false,
+        "date_range": "last_30_days"
       },
-      {
-        "type": "cards",
-        "title": "Aktive Ziele",
-        "source_app": "ziele",
-        "filter": {
-          "field": "status",
-          "value": "aktiv"
+      "position": "weekly_overview"
+    },
+    {
+      "id": "weight_progress",
+      "title": "Gewichtsentwicklung",
+      "type": "line",
+      "data_source": "koerperdaten",
+      "x_axis": "datum",
+      "y_axis": "gewicht_kg",
+      "filters": {
+        "date_range": "last_90_days"
+      },
+      "color": "purple",
+      "position": "progress_tracking",
+      "show_trend": true
+    },
+    {
+      "id": "nutrition_consistency",
+      "title": "Ernährungsconsistenz (14 Tage)",
+      "type": "bar",
+      "data_source": "ernaehrung",
+      "x_axis": "datum",
+      "y_axis": ["kalorien", "protein"],
+      "comparison_type": "stacked",
+      "filters": {
+        "date_range": "last_14_days"
+      },
+      "colors": ["orange", "green"],
+      "position": "progress_tracking",
+      "show_target_lines": true
+    }
+  ],
+
+  "tables": [
+    {
+      "id": "recent_workouts",
+      "title": "Letzte Trainings",
+      "data_source": "workouts",
+      "columns": [
+        {
+          "field": "datum",
+          "label": "Datum",
+          "format": "date_german"
         },
-        "fields": [
-          "taeglich_kalorien",
-          "taeglich_protein",
-          "trainingstage_pro_woche"
-        ],
-        "limit": 3
-      }
-    ],
-    "primary_action_button": {
-      "label": "Workout loggen",
-      "action": "quick_log",
-      "target_app": "workouts",
-      "position": "floating"
+        {
+          "field": "typ",
+          "label": "Typ",
+          "format": "lookup_label"
+        },
+        {
+          "field": "dauer_minuten",
+          "label": "Dauer",
+          "format": "number_with_unit",
+          "unit": "min"
+        },
+        {
+          "field": "stimmung",
+          "label": "Stimmung",
+          "format": "badge"
+        }
+      ],
+      "limit": 5,
+      "sort": {
+        "field": "datum",
+        "order": "desc"
+      },
+      "position": "bottom_section"
+    }
+  ],
+
+  "filters": {
+    "date_range": {
+      "enabled": true,
+      "default": "last_30_days",
+      "options": ["last_7_days", "last_14_days", "last_30_days", "last_90_days", "all_time"]
     }
   },
-  "animations": {
-    "page_load": "stagger",
-    "stagger_delay_ms": 80,
-    "hover_effects": true,
-    "card_hover": "lift"
+
+  "primary_action": {
+    "type": "none",
+    "reasoning": "This is a read-only analytics dashboard. Users input data via Living Apps interface."
   },
-  "responsive": {
-    "mobile_priority": [
-      "kpi_cards",
-      "primary_action",
-      "main_chart"
-    ],
-    "hide_on_mobile": [],
-    "mobile_navigation": "none"
+
+  "responsive_behavior": {
+    "mobile": "Stack all cards vertically, reduce chart heights",
+    "tablet": "2-column grid for KPIs, single column for charts",
+    "desktop": "Full 4-column grid as specified"
+  },
+
+  "data_relationships": {
+    "workout_logs_to_workouts": "workout_logs.workout -> workouts (applookup)",
+    "workout_logs_to_uebungen": "workout_logs.uebung -> uebungen (applookup)",
+    "notes": "These relationships allow showing exercise details within workout context"
+  },
+
+  "empty_states": {
+    "no_workouts": "Noch keine Trainings erfasst. Starte dein erstes Training!",
+    "no_nutrition": "Keine Mahlzeiten erfasst. Tracke deine Ernährung!",
+    "no_goals": "Keine Ziele definiert. Setze dir Ziele!",
+    "no_body_data": "Keine Körperdaten erfasst. Tracke deinen Fortschritt!"
+  },
+
+  "ui_specifications": {
+    "card_style": "border rounded-lg with hover shadow",
+    "spacing": "consistent 4-unit grid (16px base)",
+    "typography": {
+      "headings": "font-bold text-2xl",
+      "subheadings": "font-semibold text-lg",
+      "body": "text-sm",
+      "numbers": "text-3xl font-bold for KPIs"
+    },
+    "loading_states": "Skeleton loaders for all cards",
+    "error_handling": "Toast notifications for errors"
   }
 }

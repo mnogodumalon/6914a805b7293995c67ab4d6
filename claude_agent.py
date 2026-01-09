@@ -190,6 +190,7 @@ Starte JETZT mit Schritt 1!"""
     else:
         # Normal-Mode: Neues Dashboard bauen
         query = (
+            "Use frontend-design Skill to create analyse app structure and generate design_spec.json"
             "Build the Dashboard.tsx following design_spec.json exactly. "
             "Use existing types and services from src/types/ and src/services/. "
             "Deploy when done using the deploy_to_github tool."
