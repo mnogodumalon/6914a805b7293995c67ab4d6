@@ -76,38 +76,42 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+html {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
 .dark {
   --background: 220 25% 6%;
-  --foreground: 220 10% 94%;
+  --foreground: 60 15% 92%;
   --card: 220 20% 10%;
-  --card-foreground: 220 10% 94%;
+  --card-foreground: 60 15% 92%;
   --popover: 220 20% 10%;
-  --popover-foreground: 220 10% 94%;
+  --popover-foreground: 60 15% 92%;
   --primary: 25 95% 58%;
   --primary-foreground: 220 25% 6%;
-  --secondary: 220 15% 20%;
-  --secondary-foreground: 220 10% 94%;
-  --muted: 220 15% 20%;
-  --muted-foreground: 220 10% 70%;
-  --accent: 165 80% 50%;
+  --secondary: 220 20% 12%;
+  --secondary-foreground: 60 15% 92%;
+  --muted: 220 15% 25%;
+  --muted-foreground: 220 10% 65%;
+  --accent: 170 70% 45%;
   --accent-foreground: 220 25% 6%;
-  --destructive: 0 70% 55%;
+  --destructive: 0 75% 58%;
   --border: 220 15% 18%;
   --input: 220 15% 18%;
-  --ring: 165 80% 50%;
+  --ring: 170 70% 45%;
   --chart-1: 25 95% 58%;
-  --chart-2: 142 70% 50%;
-  --chart-3: 165 80% 50%;
-  --chart-4: 220 70% 50%;
-  --chart-5: 280 70% 50%;
+  --chart-2: 170 70% 45%;
+  --chart-3: 0 75% 58%;
+  --chart-4: 40 90% 55%;
+  --chart-5: 142 70% 50%;
   --sidebar: 220 20% 10%;
-  --sidebar-foreground: 220 10% 94%;
+  --sidebar-foreground: 60 15% 92%;
   --sidebar-primary: 25 95% 58%;
   --sidebar-primary-foreground: 220 25% 6%;
-  --sidebar-accent: 220 15% 20%;
-  --sidebar-accent-foreground: 220 10% 94%;
+  --sidebar-accent: 220 15% 25%;
+  --sidebar-accent-foreground: 60 15% 92%;
   --sidebar-border: 220 15% 18%;
-  --sidebar-ring: 165 80% 50%;
+  --sidebar-ring: 170 70% 45%;
 }
 
 @layer base {
@@ -116,16 +120,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-  }
-  .dark body {
-    background: radial-gradient(ellipse at top, hsl(220 30% 10%) 0%, hsl(220 25% 6%) 60%);
-    background-image:
-      radial-gradient(ellipse at top, hsl(220 30% 10%) 0%, hsl(220 25% 6%) 60%),
-      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-    background-size: 100% 100%, 24px 24px, 24px 24px;
+    background: linear-gradient(180deg, hsl(220 25% 6%) 0%, hsl(220 30% 4%) 50%, hsl(15 20% 5%) 100%);
     background-attachment: fixed;
+    min-height: 100vh;
   }
 }
 
@@ -140,7 +137,16 @@
   }
 }
 
-.animate-fade-in-up {
+.animate-in {
   animation: fade-in-up 0.5s ease-out forwards;
   opacity: 0;
+}
+
+.card-lift {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
 }

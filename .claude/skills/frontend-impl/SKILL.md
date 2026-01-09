@@ -177,6 +177,34 @@ And update `index.html`:
 <html lang="de" class="dark">
 ```
 
+#### ⚠️ CRITICAL: CSS Color Format
+
+The CSS variables **MUST use complete color functions**, not raw values!
+
+**❌ WRONG - Raw values break Tailwind:**
+```css
+.dark {
+  --background: 220 25% 6%;        /* ❌ Just numbers - NOT a valid CSS color! */
+  --card: 220 20% 10%;             /* ❌ Browser ignores this, uses fallback! */
+}
+```
+
+**✅ CORRECT - Complete color functions:**
+```css
+.dark {
+  --background: hsl(220 25% 6%);   /* ✓ Complete hsl() function */
+  --card: hsl(220 20% 10%);        /* ✓ Tailwind can use this */
+}
+```
+
+**Why raw values fail:**
+- Tailwind reads `var(--background)` directly for `bg-background`
+- If `--background` is `220 25% 6%` (just numbers), it's NOT a valid CSS color
+- Browser ignores invalid colors → falls back to white/transparent
+- Result: Light backgrounds with dark text = invisible!
+
+**Always copy the FULL hsl() or oklch() function from design_spec.json, including the function name!**
+
 #### Why This Matters
 
 Without this step:

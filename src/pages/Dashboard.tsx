@@ -1,45 +1,375 @@
-import { useState, useEffect, useMemo } from 'react';
-import type { Workouts, Ernaehrung, Koerperdaten, Ziele } from '@/types/app';
-import { LivingAppsService } from '@/services/livingAppsService';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Dumbbell, Flame, Beef, TrendingUp, AlertCircle, ExternalLink } from 'lucide-react';
-import { AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { format, parseISO, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { LivingAppsService } from '@/services/livingAppsService';
+import type { Workouts, Ernaehrung, Koerperdaten, Ziele } from '@/types/app';
+import {
+  Dumbbell,
+  Timer,
+  Flame,
+  Scale,
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  Activity
+} from 'lucide-react';
+import {
+  Area,
+  AreaChart,
+  Line,
+  LineChart,
+  Bar,
+  BarChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell
+} from 'recharts';
+import { format, parseISO, startOfWeek, endOfWeek, subDays, isWithinInterval } from 'date-fns';
 import { de } from 'date-fns/locale';
 
-interface KPICardProps {
-  title: string;
-  value: string | number;
-  suffix?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  trend?: number;
-  delay: number;
+interface DashboardData {
+  workouts: Workouts[];
+  ernaehrung: Ernaehrung[];
+  koerperdaten: Koerperdaten[];
+  ziele: Ziele[];
 }
 
-function KPICard({ title, value, suffix, icon: Icon, trend, delay }: KPICardProps) {
-  return (
-    <Card
-      className="relative overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+interface KPIData {
+  value: number | string;
+  trend?: number;
+  unit: string;
+}
+
+const MOOD_COLORS = {
+  schlecht: 'hsl(0 75% 58%)',
+  okay: 'hsl(40 90% 55%)',
+  gut: 'hsl(142 70% 50%)',
+  brutal: 'hsl(170 80% 50%)'
+};
+
+const MOOD_LABELS = {
+  schlecht: 'Schlecht',
+  okay: 'Okay',
+  gut: 'Gut',
+  brutal: 'Brutal'
+};
+
+const TYP_LABELS: Record<string, string> = {
+  push: 'Push',
+  pull: 'Pull',
+  beine: 'Beine',
+  ganzkoerper: 'Ganzkörper',
+  oberkoerper: 'Oberkörper',
+  unterkoerper: 'Unterkörper',
+  cardio: 'Cardio',
+  sonstiges: 'Sonstiges'
+};
+
+export default function Dashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [workouts, ernaehrung, koerperdaten, ziele] = await Promise.all([
+        LivingAppsService.getWorkouts(),
+        LivingAppsService.getErnaehrung(),
+        LivingAppsService.getKoerperdaten(),
+        LivingAppsService.getZiele()
+      ]);
+
+      setData({ workouts, ernaehrung, koerperdaten, ziele });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Fehler beim Laden der Daten');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const calculateKPIs = (): Record<string, KPIData> => {
+    if (!data) return {};
+
+    const today = new Date();
+    const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+    const lastWeekStart = subDays(weekStart, 7);
+    const lastWeekEnd = subDays(weekEnd, 7);
+
+    // Workouts this week (non-rest days)
+    const workoutsThisWeek = data.workouts.filter(w => {
+      if (!w.fields.datum || w.fields.rest_day) return false;
+      const date = parseISO(w.fields.datum);
+      return isWithinInterval(date, { start: weekStart, end: weekEnd });
+    }).length;
+
+    const workoutsLastWeek = data.workouts.filter(w => {
+      if (!w.fields.datum || w.fields.rest_day) return false;
+      const date = parseISO(w.fields.datum);
+      return isWithinInterval(date, { start: lastWeekStart, end: lastWeekEnd });
+    }).length;
+
+    const workoutsTrend = workoutsLastWeek > 0
+      ? Math.round(((workoutsThisWeek - workoutsLastWeek) / workoutsLastWeek) * 100)
+      : 0;
+
+    // Training time this week
+    const trainingTimeThisWeek = data.workouts
+      .filter(w => {
+        if (!w.fields.datum) return false;
+        const date = parseISO(w.fields.datum);
+        return isWithinInterval(date, { start: weekStart, end: weekEnd });
+      })
+      .reduce((sum, w) => sum + (w.fields.dauer_minuten || 0), 0);
+
+    const trainingTimeLastWeek = data.workouts
+      .filter(w => {
+        if (!w.fields.datum) return false;
+        const date = parseISO(w.fields.datum);
+        return isWithinInterval(date, { start: lastWeekStart, end: lastWeekEnd });
+      })
+      .reduce((sum, w) => sum + (w.fields.dauer_minuten || 0), 0);
+
+    const timeTrend = trainingTimeLastWeek > 0
+      ? Math.round(((trainingTimeThisWeek - trainingTimeLastWeek) / trainingTimeLastWeek) * 100)
+      : 0;
+
+    // Calories today
+    const todayStr = format(today, 'yyyy-MM-dd');
+    const caloriesToday = data.ernaehrung
+      .filter(e => e.fields.datum === todayStr)
+      .reduce((sum, e) => sum + (e.fields.kalorien || 0), 0);
+
+    // Get active goal
+    const activeGoal = data.ziele.find(z => z.fields.status === 'aktiv');
+    const calorieGoal = activeGoal?.fields.taeglich_kalorien || 0;
+    const calorieProgress = calorieGoal > 0 ? (caloriesToday / calorieGoal) * 100 : 0;
+
+    // Current weight
+    const sortedWeight = [...data.koerperdaten]
+      .filter(k => k.fields.gewicht_kg != null)
+      .sort((a, b) => {
+        if (!a.fields.datum || !b.fields.datum) return 0;
+        return new Date(b.fields.datum).getTime() - new Date(a.fields.datum).getTime();
+      });
+
+    const currentWeight = sortedWeight[0]?.fields.gewicht_kg || 0;
+    const previousWeight = sortedWeight[1]?.fields.gewicht_kg || 0;
+    const weightChange = previousWeight > 0 ? currentWeight - previousWeight : 0;
+
+    return {
+      workouts: {
+        value: workoutsThisWeek,
+        trend: workoutsTrend,
+        unit: 'Trainings'
+      },
+      trainingTime: {
+        value: Math.round(trainingTimeThisWeek),
+        trend: timeTrend,
+        unit: 'min'
+      },
+      calories: {
+        value: Math.round(caloriesToday),
+        trend: Math.round(calorieProgress - 100),
+        unit: 'kcal'
+      },
+      weight: {
+        value: currentWeight.toFixed(1),
+        trend: weightChange ? parseFloat((weightChange).toFixed(1)) : undefined,
+        unit: 'kg'
+      },
+      calorieGoal: {
+        value: calorieGoal,
+        unit: ''
+      },
+      proteinGoal: {
+        value: activeGoal?.fields.taeglich_protein || 0,
+        unit: ''
+      },
+      calorieProgress: {
+        value: Math.min(calorieProgress, 100),
+        unit: ''
+      },
+      proteinToday: {
+        value: data.ernaehrung
+          .filter(e => e.fields.datum === todayStr)
+          .reduce((sum, e) => sum + (e.fields.protein || 0), 0),
+        unit: ''
+      }
+    };
+  };
+
+  const getWorkoutChartData = () => {
+    if (!data) return [];
+
+    const last30Days = Array.from({ length: 30 }, (_, i) => {
+      const date = subDays(new Date(), 29 - i);
+      return format(date, 'yyyy-MM-dd');
+    });
+
+    return last30Days.map(dateStr => {
+      const workout = data.workouts.find(w => w.fields.datum === dateStr);
+      return {
+        date: format(parseISO(dateStr), 'dd.MM', { locale: de }),
+        fullDate: dateStr,
+        dauer: workout?.fields.dauer_minuten || 0,
+        stimmung: workout?.fields.stimmung,
+        restDay: workout?.fields.rest_day || false
+      };
+    });
+  };
+
+  const getWeightChartData = () => {
+    if (!data) return [];
+
+    const last90Days = subDays(new Date(), 90);
+
+    return data.koerperdaten
+      .filter(k => k.fields.datum && k.fields.gewicht_kg != null)
+      .filter(k => {
+        const date = parseISO(k.fields.datum!);
+        return date >= last90Days;
+      })
+      .sort((a, b) => {
+        if (!a.fields.datum || !b.fields.datum) return 0;
+        return new Date(a.fields.datum).getTime() - new Date(b.fields.datum).getTime();
+      })
+      .map(k => ({
+        date: format(parseISO(k.fields.datum!), 'dd.MM', { locale: de }),
+        gewicht: k.fields.gewicht_kg
+      }));
+  };
+
+  const getWorkoutTypeDistribution = () => {
+    if (!data) return [];
+
+    const last30Days = subDays(new Date(), 30);
+    const recentWorkouts = data.workouts.filter(w => {
+      if (!w.fields.datum || w.fields.rest_day) return false;
+      const date = parseISO(w.fields.datum);
+      return date >= last30Days;
+    });
+
+    const typeCounts: Record<string, number> = {};
+    recentWorkouts.forEach(w => {
+      const typ = w.fields.typ || 'sonstiges';
+      typeCounts[typ] = (typeCounts[typ] || 0) + 1;
+    });
+
+    return Object.entries(typeCounts)
+      .map(([typ, count]) => ({
+        typ: TYP_LABELS[typ] || typ,
+        count
+      }))
+      .sort((a, b) => b.count - a.count);
+  };
+
+  const getRecentWorkouts = () => {
+    if (!data) return [];
+
+    return [...data.workouts]
+      .filter(w => w.fields.datum)
+      .sort((a, b) => {
+        if (!a.fields.datum || !b.fields.datum) return 0;
+        return new Date(b.fields.datum).getTime() - new Date(a.fields.datum).getTime();
+      })
+      .slice(0, 5);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <div className="sticky top-0 z-50 bg-card/80 backdrop-blur-sm border-b border-border">
+          <div className="max-w-7xl mx-auto p-4 md:p-6">
+            <Skeleton className="h-8 w-64" />
+          </div>
+        </div>
+        <main className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <Skeleton key={i} className="h-32 w-full" />
+            ))}
+          </div>
+          <Skeleton className="h-96 w-full" />
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex flex-col gap-3">
+            <span>{error}</span>
+            <Button variant="outline" size="sm" onClick={loadData}>
+              Erneut versuchen
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const kpis = calculateKPIs();
+  const workoutChartData = getWorkoutChartData();
+  const weightChartData = getWeightChartData();
+  const workoutTypeDist = getWorkoutTypeDistribution();
+  const recentWorkouts = getRecentWorkouts();
+
+  const KPICard = ({
+    title,
+    value,
+    unit,
+    trend,
+    icon: Icon,
+    delay
+  }: {
+    title: string;
+    value: number | string;
+    unit: string;
+    trend?: number;
+    icon: any;
+    delay: number;
+  }) => (
+    <Card className="card-lift animate-in relative overflow-hidden" style={{ animationDelay: `${delay}ms` }}>
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent" />
       <CardContent className="p-4 sm:p-6 relative">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-xs sm:text-sm text-muted-foreground mb-1 font-medium">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-1">
               {title}
             </p>
             <p className="text-2xl sm:text-3xl lg:text-4xl font-bold">
-              {value}{suffix && <span className="text-lg sm:text-xl text-muted-foreground ml-1">{suffix}</span>}
+              {value} <span className="text-lg sm:text-xl text-muted-foreground font-medium">{unit}</span>
             </p>
             {trend !== undefined && trend !== 0 && (
-              <p className={`text-xs sm:text-sm mt-2 font-medium ${trend > 0 ? 'text-chart-2' : 'text-destructive'}`}>
-                {trend > 0 ? '↑' : '↓'} {Math.abs(trend).toFixed(0)}%
-              </p>
+              <div className="flex items-center gap-1 mt-2">
+                {trend > 0 ? (
+                  <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-positive" />
+                ) : (
+                  <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 text-destructive" />
+                )}
+                <span className={`text-xs sm:text-sm font-medium ${trend > 0 ? 'text-positive' : 'text-destructive'}`}>
+                  {Math.abs(trend)}{unit === 'kg' ? ' kg' : '%'}
+                </span>
+              </div>
             )}
           </div>
           <div className="p-2 sm:p-3 rounded-full bg-primary/10">
@@ -49,250 +379,54 @@ function KPICard({ title, value, suffix, icon: Icon, trend, delay }: KPICardProp
       </CardContent>
     </Card>
   );
-}
 
-function LoadingState() {
-  return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <Skeleton className="h-12 w-64" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-32" />
-          ))}
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+          <p className="text-sm font-medium mb-1">{data.fullDate || data.date}</p>
+          {data.dauer !== undefined && (
+            <p className="text-sm text-muted-foreground">
+              Dauer: {data.dauer} min
+            </p>
+          )}
+          {data.stimmung && (
+            <p className="text-sm">
+              Stimmung: <span style={{ color: MOOD_COLORS[data.stimmung as keyof typeof MOOD_COLORS] }}>
+                {MOOD_LABELS[data.stimmung as keyof typeof MOOD_LABELS]}
+              </span>
+            </p>
+          )}
+          {data.gewicht !== undefined && (
+            <p className="text-sm text-muted-foreground">
+              Gewicht: {data.gewicht} kg
+            </p>
+          )}
         </div>
-        <Skeleton className="h-96" />
-      </div>
-    </div>
-  );
-}
-
-function ErrorState({ error, onRetry }: { error: Error; onRetry: () => void }) {
-  return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8 flex items-center justify-center">
-      <Alert variant="destructive" className="max-w-md">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Fehler beim Laden</AlertTitle>
-        <AlertDescription className="mt-2 space-y-2">
-          <p>{error.message}</p>
-          <Button variant="outline" size="sm" onClick={onRetry}>
-            Erneut versuchen
-          </Button>
-        </AlertDescription>
-      </Alert>
-    </div>
-  );
-}
-
-export default function Dashboard() {
-  const [workouts, setWorkouts] = useState<Workouts[]>([]);
-  const [ernaehrung, setErnaehrung] = useState<Ernaehrung[]>([]);
-  const [koerperdaten, setKoerperdaten] = useState<Koerperdaten[]>([]);
-  const [ziele, setZiele] = useState<Ziele[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const [w, e, k, z] = await Promise.all([
-        LivingAppsService.getWorkouts(),
-        LivingAppsService.getErnaehrung(),
-        LivingAppsService.getKoerperdaten(),
-        LivingAppsService.getZiele(),
-      ]);
-      setWorkouts(w);
-      setErnaehrung(e);
-      setKoerperdaten(k);
-      setZiele(z);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unbekannter Fehler'));
-    } finally {
-      setLoading(false);
+      );
     }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  // Calculate KPIs
-  const kpis = useMemo(() => {
-    const today = new Date();
-    const todayStr = format(today, 'yyyy-MM-dd');
-    const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 });
-    const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
-    const startOfLastWeek = startOfWeek(subDays(today, 7), { weekStartsOn: 1 });
-    const endOfLastWeek = endOfWeek(subDays(today, 7), { weekStartsOn: 1 });
-    const lastMonth = subDays(today, 30);
-
-    // Workouts this week
-    const workoutsThisWeek = workouts.filter(w => {
-      if (!w.fields.datum) return false;
-      const date = parseISO(w.fields.datum);
-      return date >= startOfThisWeek && date <= endOfThisWeek;
-    }).length;
-
-    const workoutsLastWeek = workouts.filter(w => {
-      if (!w.fields.datum) return false;
-      const date = parseISO(w.fields.datum);
-      return date >= startOfLastWeek && date <= endOfLastWeek;
-    }).length;
-
-    const workoutsTrend = workoutsLastWeek > 0
-      ? ((workoutsThisWeek - workoutsLastWeek) / workoutsLastWeek) * 100
-      : 0;
-
-    // Calories today
-    const caloriesToday = ernaehrung
-      .filter(e => e.fields.datum === todayStr)
-      .reduce((sum, e) => sum + (e.fields.kalorien || 0), 0);
-
-    const activeGoal = ziele.find(z => z.fields.status === 'aktiv');
-    const calorieGoal = activeGoal?.fields.taeglich_kalorien || 0;
-    const calorieTrend = calorieGoal > 0 ? ((caloriesToday / calorieGoal) * 100) - 100 : 0;
-
-    // Protein today
-    const proteinToday = ernaehrung
-      .filter(e => e.fields.datum === todayStr)
-      .reduce((sum, e) => sum + (e.fields.protein || 0), 0);
-
-    const proteinGoal = activeGoal?.fields.taeglich_protein || 0;
-    const proteinTrend = proteinGoal > 0 ? ((proteinToday / proteinGoal) * 100) - 100 : 0;
-
-    // Current weight
-    const sortedWeights = [...koerperdaten]
-      .filter(k => k.fields.gewicht_kg != null)
-      .sort((a, b) => {
-        const dateA = a.fields.datum ? parseISO(a.fields.datum) : new Date(a.createdat);
-        const dateB = b.fields.datum ? parseISO(b.fields.datum) : new Date(b.createdat);
-        return dateB.getTime() - dateA.getTime();
-      });
-
-    const currentWeight = sortedWeights[0]?.fields.gewicht_kg || 0;
-
-    const lastMonthWeights = koerperdaten.filter(k => {
-      const date = k.fields.datum ? parseISO(k.fields.datum) : new Date(k.createdat);
-      return date >= lastMonth && k.fields.gewicht_kg != null;
-    });
-    const avgLastMonth = lastMonthWeights.length > 0
-      ? lastMonthWeights.reduce((sum, k) => sum + (k.fields.gewicht_kg || 0), 0) / lastMonthWeights.length
-      : 0;
-
-    const weightTrend = avgLastMonth > 0 ? ((currentWeight - avgLastMonth) / avgLastMonth) * 100 : 0;
-
-    return {
-      workoutsThisWeek,
-      workoutsTrend,
-      caloriesToday,
-      calorieTrend,
-      proteinToday,
-      proteinTrend,
-      currentWeight,
-      weightTrend,
-    };
-  }, [workouts, ernaehrung, koerperdaten, ziele]);
-
-  // Chart data for last 4 weeks
-  const workoutChartData = useMemo(() => {
-    const last28Days = Array.from({ length: 28 }, (_, i) => {
-      const date = subDays(new Date(), 27 - i);
-      return format(date, 'yyyy-MM-dd');
-    });
-
-    return last28Days.map(dateStr => {
-      const dayWorkouts = workouts.filter(w => w.fields.datum === dateStr);
-      const totalDuration = dayWorkouts.reduce((sum, w) => sum + (w.fields.dauer_minuten || 0), 0);
-      return {
-        date: format(parseISO(dateStr), 'dd.MM', { locale: de }),
-        dauer: totalDuration,
-      };
-    });
-  }, [workouts]);
-
-  // Weight trend chart (last 30 days)
-  const weightChartData = useMemo(() => {
-    const sortedData = [...koerperdaten]
-      .filter(k => k.fields.gewicht_kg != null && k.fields.datum)
-      .sort((a, b) => {
-        const dateA = parseISO(a.fields.datum!);
-        const dateB = parseISO(b.fields.datum!);
-        return dateA.getTime() - dateB.getTime();
-      })
-      .slice(-30);
-
-    return sortedData.map(k => ({
-      date: format(parseISO(k.fields.datum!), 'dd.MM', { locale: de }),
-      gewicht: k.fields.gewicht_kg,
-    }));
-  }, [koerperdaten]);
-
-  // Recent workouts
-  const recentWorkouts = useMemo(() => {
-    return [...workouts]
-      .filter(w => w.fields.datum)
-      .sort((a, b) => {
-        const dateA = parseISO(a.fields.datum!);
-        const dateB = parseISO(b.fields.datum!);
-        return dateB.getTime() - dateA.getTime();
-      })
-      .slice(0, 5);
-  }, [workouts]);
-
-  // Active goals
-  const activeGoals = useMemo(() => {
-    return ziele.filter(z => z.fields.status === 'aktiv');
-  }, [ziele]);
-
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState error={error} onRetry={loadData} />;
-
-  const getStimmungColor = (stimmung?: string) => {
-    switch (stimmung) {
-      case 'brutal': return 'bg-chart-2 text-black';
-      case 'gut': return 'bg-chart-3 text-black';
-      case 'okay': return 'bg-chart-4 text-white';
-      case 'schlecht': return 'bg-destructive text-white';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getTypLabel = (typ?: string) => {
-    const labels: Record<string, string> = {
-      push: 'Push',
-      pull: 'Pull',
-      beine: 'Beine',
-      ganzkoerper: 'Ganzkörper',
-      oberkoerper: 'Oberkörper',
-      unterkoerper: 'Unterkörper',
-      cardio: 'Cardio',
-      sonstiges: 'Sonstiges',
-    };
-    return labels[typ || ''] || typ || '-';
+    return null;
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dark">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b p-4 animate-fade-in-up">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">Fitness & Ernährungs-Tracker</h1>
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-sm border-b border-border">
+        <div className="max-w-7xl mx-auto p-4 md:p-6 flex items-center justify-between">
+          <div className="animate-in" style={{ animationDelay: '0ms' }}>
+            <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <Activity className="w-6 h-6 text-primary" />
+              Fitness Tracker
+            </h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              {format(new Date(), 'PPP', { locale: de })}
+              {format(new Date(), "EEEE, d. MMMM yyyy", { locale: de })}
             </p>
           </div>
-          <Button asChild>
-            <a
-              href="https://my.living-apps.de/workspaces/6914a805b7293995c67ab4d6"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2"
-            >
-              Workout loggen
-              <ExternalLink className="w-4 h-4" />
-            </a>
+          <Button className="animate-in" style={{ animationDelay: '80ms' }}>
+            <Plus className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Workout Eintragen</span>
+            <span className="sm:hidden">Neu</span>
           </Button>
         </div>
       </header>
@@ -300,79 +434,73 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <KPICard
             title="Workouts Diese Woche"
-            value={kpis.workoutsThisWeek}
-            suffix=" Sessions"
+            value={kpis.workouts.value}
+            unit={kpis.workouts.unit}
+            trend={kpis.workouts.trend}
             icon={Dumbbell}
-            trend={kpis.workoutsTrend}
-            delay={100}
+            delay={80}
+          />
+          <KPICard
+            title="Trainingszeit"
+            value={kpis.trainingTime.value}
+            unit={kpis.trainingTime.unit}
+            trend={kpis.trainingTime.trend}
+            icon={Timer}
+            delay={160}
           />
           <KPICard
             title="Kalorien Heute"
-            value={Math.round(kpis.caloriesToday)}
-            suffix=" kcal"
+            value={kpis.calories.value}
+            unit={kpis.calories.unit}
+            trend={kpis.calories.trend}
             icon={Flame}
-            trend={kpis.calorieTrend}
-            delay={180}
-          />
-          <KPICard
-            title="Protein Heute"
-            value={Math.round(kpis.proteinToday)}
-            suffix="g"
-            icon={Beef}
-            trend={kpis.proteinTrend}
-            delay={260}
+            delay={240}
           />
           <KPICard
             title="Aktuelles Gewicht"
-            value={kpis.currentWeight.toFixed(1)}
-            suffix=" kg"
-            icon={TrendingUp}
-            trend={kpis.weightTrend}
-            delay={340}
+            value={kpis.weight.value}
+            unit={kpis.weight.unit}
+            trend={kpis.weight.trend}
+            icon={Scale}
+            delay={320}
           />
         </div>
 
         {/* Main Chart */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: '420ms' }}>
+        <Card className="card-lift animate-in" style={{ animationDelay: '400ms' }}>
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Trainingsvolumen (letzte 4 Wochen)</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Workouts & Stimmung (Letzte 30 Tage)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px] sm:h-[300px] lg:h-[350px]">
+            <div className="h-[200px] sm:h-[300px] lg:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={workoutChartData}>
                   <defs>
                     <linearGradient id="colorDauer" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="hsl(25 95% 58%)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(25 95% 58%)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                    stroke="hsl(var(--border))"
+                    tick={{ fontSize: 12, fill: 'hsl(220 10% 65%)' }}
+                    stroke="hsl(220 15% 18%)"
+                    interval="preserveStartEnd"
                   />
                   <YAxis
-                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                    stroke="hsl(var(--border))"
-                    label={{ value: 'Minuten', angle: -90, position: 'insideLeft', fill: 'hsl(var(--muted-foreground))' }}
+                    tick={{ fontSize: 12, fill: 'hsl(220 10% 65%)' }}
+                    stroke="hsl(220 15% 18%)"
+                    label={{ value: 'Minuten', angle: -90, position: 'insideLeft', fill: 'hsl(220 10% 65%)' }}
                   />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      color: 'hsl(var(--foreground))',
-                    }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  />
+                  <Tooltip content={<CustomTooltip />} />
                   <Area
                     type="monotone"
                     dataKey="dauer"
-                    stroke="hsl(var(--primary))"
+                    stroke="hsl(25 95% 58%)"
                     strokeWidth={2}
                     fill="url(#colorDauer)"
                   />
@@ -382,136 +510,153 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Secondary Sections */}
+        {/* Secondary Sections Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Recent Workouts */}
-          <Card className="animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+          {/* Nutrition Progress */}
+          <Card className="card-lift animate-in" style={{ animationDelay: '480ms' }}>
             <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Letzte Workouts</CardTitle>
+              <CardTitle className="text-lg">Heutige Ernährung</CardTitle>
             </CardHeader>
-            <CardContent>
-              {recentWorkouts.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">Noch keine Workouts vorhanden</p>
-              ) : (
-                <div className="space-y-3">
-                  {recentWorkouts.map((workout, idx) => (
-                    <div
-                      key={workout.record_id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                      style={{ animationDelay: `${500 + idx * 50}ms` }}
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className="text-xs">
-                            {getTypLabel(workout.fields.typ)}
-                          </Badge>
-                          {workout.fields.stimmung && (
-                            <Badge className={`text-xs ${getStimmungColor(workout.fields.stimmung)}`}>
-                              {workout.fields.stimmung}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {workout.fields.datum ? format(parseISO(workout.fields.datum), 'PPP', { locale: de }) : '-'}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold">{workout.fields.dauer_minuten || 0}</p>
-                        <p className="text-xs text-muted-foreground">Minuten</p>
-                      </div>
-                    </div>
-                  ))}
+            <CardContent className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Kalorien</span>
+                  <span className="text-sm text-muted-foreground">
+                    {Math.round(kpis.calories.value as number)} / {kpis.calorieGoal.value} kcal
+                  </span>
                 </div>
-              )}
+                <Progress value={kpis.calorieProgress.value as number} className="h-2" />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Protein</span>
+                  <span className="text-sm text-muted-foreground">
+                    {Math.round(kpis.proteinToday.value as number)} / {kpis.proteinGoal.value} g
+                  </span>
+                </div>
+                <Progress
+                  value={(kpis.proteinGoal.value as number) > 0 ? Math.min((kpis.proteinToday.value as number / (kpis.proteinGoal.value as number)) * 100, 100) : 0}
+                  className="h-2"
+                />
+              </div>
             </CardContent>
           </Card>
 
-          {/* Weight Trend */}
-          <Card className="animate-fade-in-up" style={{ animationDelay: '580ms' }}>
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Körpergewicht Trend (30 Tage)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {weightChartData.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">Noch keine Körperdaten vorhanden</p>
-              ) : (
-                <div className="h-[200px] sm:h-[250px]">
+          {/* Weight Chart */}
+          {weightChartData.length > 0 && (
+            <Card className="card-lift animate-in" style={{ animationDelay: '560ms' }}>
+              <CardHeader>
+                <CardTitle className="text-lg">Gewichtsverlauf (90 Tage)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[150px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={weightChartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
                       <XAxis
                         dataKey="date"
-                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                        stroke="hsl(var(--border))"
+                        tick={{ fontSize: 11, fill: 'hsl(220 10% 65%)' }}
+                        stroke="hsl(220 15% 18%)"
                       />
                       <YAxis
-                        tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                        stroke="hsl(var(--border))"
-                        domain={['dataMin - 1', 'dataMax + 1']}
+                        tick={{ fontSize: 11, fill: 'hsl(220 10% 65%)' }}
+                        stroke="hsl(220 15% 18%)"
+                        domain={['dataMin - 2', 'dataMax + 2']}
                       />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px',
-                          color: 'hsl(var(--foreground))',
-                        }}
-                        labelStyle={{ color: 'hsl(var(--foreground))' }}
-                      />
+                      <Tooltip content={<CustomTooltip />} />
                       <Line
                         type="monotone"
                         dataKey="gewicht"
-                        stroke="hsl(var(--accent))"
+                        stroke="hsl(170 70% 45%)"
                         strokeWidth={2}
-                        dot={{ fill: 'hsl(var(--accent))', r: 4 }}
+                        dot={{ fill: 'hsl(170 70% 45%)', r: 3 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
-        {/* Active Goals */}
-        {activeGoals.length > 0 && (
-          <Card className="animate-fade-in-up" style={{ animationDelay: '660ms' }}>
+        {/* Bottom Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Recent Workouts */}
+          <Card className="card-lift animate-in" style={{ animationDelay: '640ms' }}>
             <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Aktive Ziele</CardTitle>
+              <CardTitle className="text-lg">Letzte Workouts</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {activeGoals.map((goal) => (
-                  <div key={goal.record_id} className="space-y-2">
-                    {goal.fields.taeglich_kalorien != null && (
-                      <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground mb-1">Tägliche Kalorien</p>
-                        <p className="text-xl font-bold">{goal.fields.taeglich_kalorien} kcal</p>
+              <div className="space-y-3">
+                {recentWorkouts.map((workout) => (
+                  <div
+                    key={workout.record_id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {workout.fields.datum ? format(parseISO(workout.fields.datum), 'dd.MM.yyyy', { locale: de }) : '-'}
+                        </span>
+                        {workout.fields.rest_day && (
+                          <Badge variant="outline" className="text-xs">Ruhetag</Badge>
+                        )}
                       </div>
-                    )}
-                    {goal.fields.taeglich_protein != null && (
-                      <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground mb-1">Tägliches Protein</p>
-                        <p className="text-xl font-bold">{goal.fields.taeglich_protein}g</p>
+                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <span>{workout.fields.typ ? TYP_LABELS[workout.fields.typ] : '-'}</span>
+                        {workout.fields.dauer_minuten && (
+                          <>
+                            <span>•</span>
+                            <span>{workout.fields.dauer_minuten} min</span>
+                          </>
+                        )}
                       </div>
-                    )}
-                    {goal.fields.trainingstage_pro_woche != null && (
-                      <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground mb-1">Trainingstage/Woche</p>
-                        <p className="text-xl font-bold">{goal.fields.trainingstage_pro_woche}</p>
-                      </div>
-                    )}
-                    {goal.fields.schlaf_ziel_stunden != null && (
-                      <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground mb-1">Schlafziel</p>
-                        <p className="text-xl font-bold">{goal.fields.schlaf_ziel_stunden}h</p>
-                      </div>
+                    </div>
+                    {workout.fields.stimmung && (
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: MOOD_COLORS[workout.fields.stimmung] }}
+                        title={MOOD_LABELS[workout.fields.stimmung]}
+                      />
                     )}
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-        )}
+
+          {/* Workout Type Distribution */}
+          {workoutTypeDist.length > 0 && (
+            <Card className="card-lift animate-in" style={{ animationDelay: '720ms' }}>
+              <CardHeader>
+                <CardTitle className="text-lg">Workout-Typ Verteilung (30 Tage)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={workoutTypeDist} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
+                      <XAxis
+                        type="number"
+                        tick={{ fontSize: 12, fill: 'hsl(220 10% 65%)' }}
+                        stroke="hsl(220 15% 18%)"
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="typ"
+                        tick={{ fontSize: 11, fill: 'hsl(220 10% 65%)' }}
+                        stroke="hsl(220 15% 18%)"
+                        width={100}
+                      />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="hsl(25 95% 58%)" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </main>
     </div>
   );
