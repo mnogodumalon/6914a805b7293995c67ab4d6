@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { format, startOfWeek, endOfWeek, isWithinInterval, subDays, isToday, startOfDay, parseISO } from 'date-fns';
+import { format, startOfWeek, endOfWeek, isWithinInterval, subDays, isToday, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,62 +9,6 @@ import { Area, AreaChart, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Dumbbell, Flame, Beef, Scale, Plus, TrendingUp, TrendingDown } from 'lucide-react';
 import { LivingAppsService } from '@/services/livingAppsService';
 import type { Workouts, Ernaehrung, Koerperdaten, Ziele } from '@/types/app';
-
-// Import Google Font
-const fontLink = document.createElement('link');
-fontLink.href = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap';
-fontLink.rel = 'stylesheet';
-document.head.appendChild(fontLink);
-
-// Apply theme styles
-const styleElement = document.createElement('style');
-styleElement.textContent = `
-  :root {
-    --background: 220 18% 8%;
-    --foreground: 0 0% 98%;
-    --primary: 31 97% 58%;
-    --accent: 178 65% 48%;
-    --muted: 220 15% 20%;
-    --positive: 142 71% 45%;
-    --negative: 0 72% 55%;
-    --card: 220 16% 12%;
-    --card-foreground: 0 0% 98%;
-    --border: 220 15% 18%;
-  }
-
-  body {
-    font-family: 'Space Grotesk', -apple-system, sans-serif;
-    background: linear-gradient(135deg, hsl(220, 18%, 8%) 0%, hsl(220, 20%, 10%) 50%, hsl(220, 18%, 8%) 100%);
-    background-attachment: fixed;
-    min-height: 100vh;
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-fade-in {
-    animation: fadeInUp 0.6s ease-out forwards;
-    opacity: 0;
-  }
-
-  .hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
-  }
-`;
-document.head.appendChild(styleElement);
 
 interface KPICardProps {
   title: string;
@@ -502,10 +446,10 @@ export default function Dashboard() {
 
         {/* Floating Action Button */}
         <a
-          href="https://my.living-apps.de/app/6914a7e7b773d677cf3838c1"
+          href="https://my.living-apps.de/apps/6914a7e7b773d677cf3838c1"
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-6 right-6 bg-primary hover:bg-primary/90 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center gap-2 font-medium"
+          className="fixed bottom-6 right-6 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center gap-2 font-medium"
         >
           <Plus className="w-6 h-6" />
           <span className="hidden sm:inline">Workout Loggen</span>
