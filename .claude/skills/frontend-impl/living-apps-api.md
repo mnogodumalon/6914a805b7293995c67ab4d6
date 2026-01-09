@@ -6,6 +6,35 @@ These rules are **non-negotiable**. Breaking them causes runtime errors.
 
 ---
 
+## 0. App URLs (For Links/Navigation)
+
+When linking to Living Apps in the UI, use the correct URL format:
+
+| Purpose | URL Format |
+|---------|------------|
+| App Form (for users) | `https://my.living-apps.de/apps/{app_id}` |
+| REST API | `https://my.living-apps.de/rest/apps/{app_id}` |
+
+### ⚠️ Common Mistake
+```typescript
+// ❌ WRONG - /app/ (singular) doesn't exist!
+href="https://my.living-apps.de/app/6914a7e7b773d677cf3838c1"
+
+// ✅ CORRECT - /apps/ (plural)
+href="https://my.living-apps.de/apps/6914a7e7b773d677cf3838c1"
+```
+
+### Getting the App ID
+From `app_metadata.json`:
+```typescript
+const workoutsAppId = metadata.apps.workouts.app_id;
+// → "6914a7e7b773d677cf3838c1"
+
+const appUrl = `https://my.living-apps.de/apps/${workoutsAppId}`;
+```
+
+---
+
 ## 1. Date Formats
 
 Living Apps has strict date format requirements:

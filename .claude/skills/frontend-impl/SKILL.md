@@ -71,11 +71,70 @@ import { LivingAppsService } from '@/services/livingAppsService';
 // 5. Implement primary action from design_spec.json
 ```
 
-### Step 4: Add Font from Spec
+### Step 4: Update index.css with Theme
 
-In `index.html`, add the font URL from design_spec.json:
-```html
-<link href="{font_url from spec}" rel="stylesheet">
+⚠️ **CRITICAL: Update `src/index.css` directly! NEVER inject styles via JavaScript!**
+
+The project uses Tailwind CSS v4 with CSS variables. You MUST update `index.css` to apply the theme from design_spec.json:
+
+```css
+/* src/index.css */
+
+/* 1. Google Fonts FIRST (before all other imports!) */
+@import url('https://fonts.googleapis.com/css2?family={Font+Name}:wght@300;500;700&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ... existing @theme inline block ... */
+
+/* 2. Update :root with theme colors from design_spec.json */
+/* ALWAYS use hsl() format with the full hsl() wrapper! */
+:root {
+  --radius: 0.625rem;
+  --background: hsl(220, 18%, 8%);      /* From design_spec.json */
+  --foreground: hsl(0, 0%, 98%);
+  --card: hsl(220, 16%, 12%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(31, 97%, 58%);         /* Accent color */
+  --primary-foreground: hsl(220, 18%, 8%);
+  --muted: hsl(220, 15%, 20%);
+  --muted-foreground: hsl(220, 10%, 55%);
+  --border: hsl(220, 15%, 18%);
+  /* Add custom colors if needed */
+  --positive: hsl(142, 71%, 45%);
+  --negative: hsl(0, 72%, 55%);
+}
+
+/* 3. Body styles */
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Font Name', system-ui, sans-serif;
+    /* Optional: gradient background */
+    background: linear-gradient(135deg, hsl(220, 18%, 8%) 0%, hsl(220, 20%, 10%) 100%);
+    background-attachment: fixed;
+  }
+}
+
+/* 4. Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+```
+
+**⚠️ NEVER DO THIS:**
+```typescript
+// ❌ WRONG - Dynamic style injection doesn't work properly!
+const styleElement = document.createElement('style');
+styleElement.textContent = `...`;
+document.head.appendChild(styleElement);
 ```
 
 ### Step 5: Build and Test
@@ -130,12 +189,14 @@ const dateForAPI = formData.date + 'T12:00';
 
 Before completing:
 
-- [ ] Font loaded from design_spec.json font_url
+- [ ] **index.css updated** with theme colors from design_spec.json (NOT dynamic injection!)
+- [ ] Font import added at TOP of index.css (before other @imports)
+- [ ] CSS variables use full `hsl()` syntax (not OKLCH or space-separated)
 - [ ] Colors match design_spec.json exactly
 - [ ] All KPIs from spec implemented
 - [ ] Chart matches spec (type, data source)
-- [ ] Primary action implemented
-- [ ] Animations match spec (stagger, hover)
+- [ ] Primary action button uses correct URL format (`/apps/` not `/app/`)
+- [ ] Animations added to index.css (fadeInUp, hover-lift, etc.)
 - [ ] Mobile responsive
 - [ ] `npm run build` passes
 - [ ] No console errors

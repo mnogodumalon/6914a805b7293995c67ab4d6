@@ -6,6 +6,27 @@ This file provides tokens and options—not prescriptions. Choose based on the a
 
 ---
 
+## ⚠️ CSS Variable Format
+
+**ALWAYS use full `hsl()` syntax in design_spec.json and index.css!**
+
+```css
+/* ✅ CORRECT - Full hsl() wrapper */
+--background: hsl(220, 18%, 8%);
+--primary: hsl(31, 97%, 58%);
+
+/* ❌ WRONG - Space-separated values (old Tailwind format) */
+--background: 220 18% 8%;
+--primary: 31 97% 58%;
+
+/* ❌ WRONG - OKLCH format (not compatible with our design system) */
+--background: oklch(0.145 0 0);
+```
+
+The implementation agent MUST update `src/index.css` directly, replacing the default OKLCH values with HSL values from design_spec.json.
+
+---
+
 ## Typography
 
 ### Font Loading (Google Fonts)

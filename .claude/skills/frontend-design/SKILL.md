@@ -201,9 +201,13 @@ After analyzing the app, create `design_spec.json` with your concrete design dec
     "primary_action_button": {
       "label": "Button text",
       "action": "add_record | navigate | toggle",
-      "target_app": "Which app for add_record",
+      "target_app": "app identifier from app_metadata.json (e.g. 'workouts')",
       "position": "header | floating | inline"
     }
+    
+    // NOTE: The implementation agent will construct the URL as:
+    // https://my.living-apps.de/apps/{app_id}
+    // where app_id comes from app_metadata.json
   },
   "animations": {
     "page_load": "stagger | fade | slide",
@@ -228,8 +232,10 @@ Before finalizing design_spec.json:
 - [ ] Would this look "AI-generated" to a design expert? (If yes, redesign)
 - [ ] Is the typography distinctive and appropriate for this app?
 - [ ] Does the color palette create a cohesive atmosphere?
+- [ ] **All colors use full `hsl(...)` syntax** (not space-separated, not OKLCH)
 - [ ] Are the KPIs actually meaningful for this app's users?
 - [ ] Does the chart type make sense for this data?
+- [ ] **Primary action target_app matches an app identifier from app_metadata.json**
 - [ ] Is the primary action obvious and accessible?
 - [ ] Will it create a "wow" moment for the user?
 - [ ] Is it mobile-first AND excellent on desktop?
