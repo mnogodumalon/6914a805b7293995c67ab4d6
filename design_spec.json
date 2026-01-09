@@ -1,145 +1,148 @@
 {
   "app_analysis": {
-    "purpose": "Track fitness workouts, nutrition intake, body metrics, and progress toward health goals",
+    "purpose": "Personal fitness and nutrition tracking dashboard for tracking workouts, meals, body metrics, and progress toward goals",
     "domain": "fitness",
     "data_density": "medium",
-    "primary_users": "Fitness enthusiasts tracking their training, diet, and body composition",
+    "primary_users": "Fitness enthusiasts tracking their training, nutrition, and body composition progress",
     "key_metrics": [
-      "Workouts this week",
-      "Daily calories consumed vs goal",
-      "Training consistency (streak)",
-      "Weight progress trend",
-      "Weekly protein intake average"
+      "Total workouts completed",
+      "Training consistency (workout frequency)",
+      "Daily calorie and protein intake vs goals",
+      "Body weight trend",
+      "Training volume and intensity"
     ],
-    "primary_action": "Log a workout or meal - these happen daily",
-    "emotional_tone": "energetic and motivating - users want to feel pumped about their progress"
+    "primary_action": "Quick log workout or meal entry",
+    "emotional_tone": "energetic and motivating - users want to feel pumped and see clear progress"
   },
   "theme": {
     "mode": "dark",
     "font_family": "Space Grotesk",
     "font_url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;800&display=swap",
     "colors": {
-      "background": "hsl(215 28% 7%)",
-      "foreground": "hsl(215 10% 92%)",
-      "primary": "hsl(25 95% 53%)",
-      "accent": "hsl(173 80% 45%)",
-      "muted": "hsl(215 15% 20%)",
-      "positive": "hsl(142 76% 36%)",
-      "negative": "hsl(0 84% 60%)",
-      "card": "hsl(215 25% 12%)",
-      "border": "hsl(215 20% 18%)"
+      "background": "hsl(220 25% 6%)",
+      "foreground": "hsl(220 10% 94%)",
+      "card": "hsl(220 20% 10%)",
+      "border": "hsl(220 15% 18%)",
+      "primary": "hsl(25 95% 58%)",
+      "accent": "hsl(165 80% 50%)",
+      "muted": "hsl(220 15% 20%)",
+      "positive": "hsl(142 70% 50%)",
+      "negative": "hsl(0 70% 55%)"
     },
-    "background_style": "geometric pattern with radial gradient",
-    "background_css": "background: radial-gradient(ellipse at top right, hsl(173 80% 10% / 0.15) 0%, transparent 50%), radial-gradient(ellipse at bottom left, hsl(25 95% 10% / 0.12) 0%, transparent 50%), hsl(215 28% 7%); background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;"
+    "background_style": "radial gradient with subtle grid pattern",
+    "background_css": "background: radial-gradient(ellipse at top, hsl(220 30% 10%) 0%, hsl(220 25% 6%) 60%); background-image: radial-gradient(ellipse at top, hsl(220 30% 10%) 0%, hsl(220 25% 6%) 60%), linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px); background-size: 100% 100%, 24px 24px, 24px 24px;"
   },
   "layout": {
     "kpi_cards": [
       {
-        "title": "Workouts This Week",
+        "title": "Workouts Diese Woche",
         "source_app": "workouts",
-        "calculation": "count",
+        "calculation": "count_this_week",
         "calculation_field": "datum",
-        "filter_period": "this_week",
         "icon": "Dumbbell",
         "format": "number",
-        "trend_comparison": "vs last week",
-        "color": "accent"
+        "suffix": " Sessions",
+        "trend_comparison": "vs last week"
       },
       {
-        "title": "Calories Today",
+        "title": "Kalorien Heute",
         "source_app": "ernaehrung",
-        "calculation": "sum",
+        "calculation": "sum_today",
         "calculation_field": "kalorien",
-        "filter_period": "today",
         "icon": "Flame",
         "format": "number",
-        "trend_comparison": "vs goal",
-        "color": "primary",
-        "show_goal_progress": true
+        "suffix": " kcal",
+        "trend_comparison": "vs goal"
       },
       {
-        "title": "Current Weight",
+        "title": "Protein Heute",
+        "source_app": "ernaehrung",
+        "calculation": "sum_today",
+        "calculation_field": "protein",
+        "icon": "Beef",
+        "format": "number",
+        "suffix": "g",
+        "trend_comparison": "vs goal"
+      },
+      {
+        "title": "Aktuelles Gewicht",
         "source_app": "koerperdaten",
         "calculation": "latest",
         "calculation_field": "gewicht_kg",
-        "icon": "Scale",
-        "format": "number_with_unit",
-        "unit": "kg",
-        "trend_comparison": "vs last month",
-        "color": "foreground"
-      },
-      {
-        "title": "Protein Today",
-        "source_app": "ernaehrung",
-        "calculation": "sum",
-        "calculation_field": "protein",
-        "filter_period": "today",
-        "icon": "Beef",
-        "format": "number_with_unit",
-        "unit": "g",
-        "trend_comparison": "vs goal",
-        "color": "positive",
-        "show_goal_progress": true
+        "icon": "TrendingUp",
+        "format": "number",
+        "suffix": " kg",
+        "trend_comparison": "vs last month"
       }
     ],
     "main_chart": {
       "type": "area",
-      "title": "Weight Progress",
-      "source_app": "koerperdaten",
-      "x_axis": { "field": "datum", "label": "Date" },
-      "y_axis": { "field": "gewicht_kg", "label": "Weight (kg)" },
+      "title": "Trainingsvolumen (letzte 4 Wochen)",
+      "source_app": "workouts",
+      "x_axis": {
+        "field": "datum",
+        "label": "Datum"
+      },
+      "y_axis": {
+        "field": "dauer_minuten",
+        "label": "Dauer (Min)"
+      },
       "group_by": "day",
-      "color": "accent",
-      "gradient": true,
-      "smooth": true,
-      "show_dots": true
+      "additional_info": "Show workout duration over time with distinct colors for workout types (typ field)"
     },
     "secondary_sections": [
       {
         "type": "list",
-        "title": "Recent Workouts",
+        "title": "Letzte Workouts",
         "source_app": "workouts",
-        "fields": ["datum", "typ", "dauer_minuten", "stimmung"],
+        "fields": [
+          "datum",
+          "typ",
+          "dauer_minuten",
+          "stimmung"
+        ],
         "sort_by": "datum",
         "sort_order": "desc",
-        "limit": 5,
-        "show_icon": true,
-        "icon_field": "typ"
+        "limit": 5
       },
       {
         "type": "cards",
-        "title": "Active Goals",
+        "title": "Aktive Ziele",
         "source_app": "ziele",
-        "fields": ["taeglich_kalorien", "taeglich_protein", "trainingstage_pro_woche", "schlaf_ziel_stunden"],
-        "filter": { "status": "aktiv" },
-        "layout": "compact",
-        "show_progress": true
+        "filter": {
+          "field": "status",
+          "value": "aktiv"
+        },
+        "fields": [
+          "taeglich_kalorien",
+          "taeglich_protein",
+          "trainingstage_pro_woche",
+          "schlaf_ziel_stunden"
+        ],
+        "limit": 3
       },
       {
-        "type": "table",
-        "title": "Today's Meals",
-        "source_app": "ernaehrung",
-        "fields": ["mahlzeit_typ", "beschreibung", "kalorien", "protein"],
-        "filter_period": "today",
-        "sort_by": "mahlzeit_typ",
-        "compact_mobile": true
+        "type": "chart",
+        "title": "Körpergewicht Trend (30 Tage)",
+        "chart_type": "line",
+        "source_app": "koerperdaten",
+        "x_axis": {
+          "field": "datum",
+          "label": "Datum"
+        },
+        "y_axis": {
+          "field": "gewicht_kg",
+          "label": "Gewicht (kg)"
+        },
+        "group_by": "day"
       }
     ],
     "primary_action_button": {
-      "label": "Log Workout",
+      "label": "Workout loggen",
       "action": "navigate",
-      "target_url": "https://my.living-apps.de/apps/6914a7e7b773d677cf3838c1",
+      "target_url": "https://my.living-apps.de/workspaces/6914a805b7293995c67ab4d6",
       "position": "header",
-      "variant": "default",
-      "size": "default"
-    },
-    "secondary_action_button": {
-      "label": "Add Meal",
-      "action": "navigate",
-      "target_url": "https://my.living-apps.de/apps/6914a7e8078cdd936a7fe8bf",
-      "position": "header",
-      "variant": "outline",
-      "size": "default"
+      "variant": "default"
     }
   },
   "animations": {
@@ -149,16 +152,13 @@
     "card_hover": "lift"
   },
   "responsive": {
-    "mobile_priority": ["kpi_cards", "primary_action_button", "main_chart"],
+    "mobile_priority": [
+      "kpi_cards",
+      "primary_action",
+      "main_chart"
+    ],
     "hide_on_mobile": [],
-    "collapse_on_mobile": ["secondary_sections"],
-    "mobile_navigation": "none"
-  },
-  "design_notes": {
-    "why_space_grotesk": "Technical, clean aesthetic perfect for data-heavy fitness tracking. Strong weight contrast (300-800) creates clear hierarchy between labels and values.",
-    "why_dark_mode": "Fitness apps work better in dark mode - less eye strain during early morning/late night workouts. The energetic orange/teal accent colors pop dramatically against dark backgrounds.",
-    "why_geometric_pattern": "Subtle grid suggests structure and discipline - core values in fitness. Doesn't compete with data.",
-    "color_meaning": "Orange (primary) = energy, motivation, fire. Teal (accent) = calm focus, recovery, water. Together they represent the balance of intensity and recovery in fitness.",
-    "distinctive_element": "Extreme font weights (800 for KPI numbers, 300 for labels) + staggered card entrance animation creates immediate visual impact and energy."
+    "mobile_navigation": "none",
+    "mobile_notes": "Stack all sections vertically on mobile, show 2 KPI cards per row on small screens, 4 on desktop"
   }
 }

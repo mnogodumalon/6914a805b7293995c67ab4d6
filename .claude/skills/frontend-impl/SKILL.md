@@ -71,20 +71,138 @@ import { LivingAppsService } from '@/services/livingAppsService';
 // 5. Implement primary action from design_spec.json
 ```
 
-### Step 4: Add Font from Spec
+### Step 4: Apply Theme to CSS Variables (CRITICAL!)
+
+shadcn/ui components use **Tailwind CSS variables** for colors. These are defined in `src/index.css`. If you don't update them, components like `<Card>` will use **default colors** that don't match your design!
+
+#### How the CSS Variable System Works
+
+```
+design_spec.json → src/index.css → Tailwind classes → shadcn components
+    (your design)     (CSS variables)   (bg-card, text-foreground)   (Card, Button, etc.)
+```
+
+shadcn components use classes like `bg-card`, `text-foreground`, `border-border`. These classes read from CSS variables like `--card`, `--foreground`, `--border`. If you don't set these variables, the components use defaults that may not match your design.
+
+#### Step 4a: Determine Light or Dark Mode
+
+Look at `design_spec.json → theme.mode`:
+- If `"dark"`: Add `class="dark"` to `<html>` in `index.html`
+- If `"light"`: Remove `class="dark"` (or leave default)
+
+```html
+<!-- index.html -->
+<html lang="de" class="dark">  <!-- Add 'dark' for dark themes! -->
+```
+
+#### Step 4b: Update CSS Variables in `src/index.css`
+
+Map the design_spec colors to the CSS variables. The structure in `src/index.css`:
+
+```css
+:root {
+  /* Light mode defaults - used when NO .dark class */
+}
+
+.dark {
+  /* Dark mode - used when <html class="dark"> */
+}
+```
+
+**Color Mapping Table:**
+
+| design_spec.json path | CSS Variable | Used by |
+|----------------------|--------------|---------|
+| `theme.colors.background` | `--background` | `bg-background`, body |
+| `theme.colors.foreground` | `--foreground` | `text-foreground`, body text |
+| `theme.colors.card` | `--card` | `<Card>` background |
+| `theme.colors.foreground` | `--card-foreground` | Text inside cards |
+| `theme.colors.primary` | `--primary` | `<Button>` default |
+| `theme.colors.accent` | `--accent` | Accent elements |
+| `theme.colors.muted` | `--muted` | Muted backgrounds |
+| `theme.colors.border` | `--border` | All borders |
+| `theme.colors.positive` | `--chart-2` | Success/positive in charts |
+| `theme.colors.negative` | `--destructive` | Error/negative |
+
+#### Step 4c: Example - Applying a Dark Theme
+
+If design_spec.json says:
+```json
+{
+  "theme": {
+    "mode": "dark",
+    "colors": {
+      "background": "hsl(215 28% 7%)",
+      "foreground": "hsl(215 10% 92%)",
+      "card": "hsl(215 25% 12%)",
+      "primary": "hsl(25 95% 53%)",
+      "accent": "hsl(173 80% 45%)",
+      "muted": "hsl(215 15% 20%)",
+      "border": "hsl(215 20% 18%)"
+    }
+  }
+}
+```
+
+Then update `src/index.css`:
+
+```css
+.dark {
+  --background: hsl(215 28% 7%);
+  --foreground: hsl(215 10% 92%);
+  
+  --card: hsl(215 25% 12%);
+  --card-foreground: hsl(215 10% 92%);
+  
+  --popover: hsl(215 25% 12%);
+  --popover-foreground: hsl(215 10% 92%);
+  
+  --primary: hsl(25 95% 53%);
+  --primary-foreground: hsl(215 28% 7%);
+  
+  --accent: hsl(173 80% 45%);
+  --accent-foreground: hsl(215 28% 7%);
+  
+  --muted: hsl(215 15% 20%);
+  --muted-foreground: hsl(215 10% 70%);
+  
+  --border: hsl(215 20% 18%);
+  --input: hsl(215 20% 18%);
+  --ring: hsl(173 80% 45%);
+}
+```
+
+And update `index.html`:
+```html
+<html lang="de" class="dark">
+```
+
+#### Why This Matters
+
+Without this step:
+- `<Card>` uses default background (light/white)
+- Text colors (from design_spec) are for dark backgrounds
+- Result: **Light text on light cards = invisible!**
+
+With this step:
+- All shadcn components automatically use your theme colors
+- Consistent look across all UI elements
+- No need to add inline styles everywhere
+
+### Step 5: Add Font from Spec
 
 In `index.html`, add the font URL from design_spec.json:
 ```html
 <link href="{font_url from spec}" rel="stylesheet">
 ```
 
-### Step 5: Build and Test
+### Step 6: Build and Test
 
 ```bash
 npm run build  # Must compile without errors
 ```
 
-### Step 6: Deploy
+### Step 7: Deploy
 
 ```
 Call mcp__deploy_tools__deploy_to_github
@@ -130,8 +248,9 @@ const dateForAPI = formData.date + 'T12:00';
 
 Before completing:
 
-- [ ] Font loaded from design_spec.json font_url
-- [ ] Colors match design_spec.json exactly
+- [ ] `index.html` has correct `class="dark"` or no class (based on theme.mode)
+- [ ] `src/index.css` CSS variables updated to match design_spec.json colors
+- [ ] Font loaded from design_spec.json font_url in `index.html`
 - [ ] All KPIs from spec implemented
 - [ ] Chart matches spec (type, data source)
 - [ ] Primary action implemented

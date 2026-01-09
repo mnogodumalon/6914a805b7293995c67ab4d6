@@ -159,6 +159,8 @@ After analyzing the app, create `design_spec.json` with your concrete design dec
     "colors": {
       "background": "hsl(...)",
       "foreground": "hsl(...)",
+      "card": "hsl(...)",
+      "border": "hsl(...)",
       "primary": "hsl(...)",
       "accent": "hsl(...)",
       "muted": "hsl(...)",
@@ -221,6 +223,53 @@ After analyzing the app, create `design_spec.json` with your concrete design dec
 
 ---
 
+## ⚠️ How Colors Are Applied (Important for Contrast!)
+
+Your colors in `design_spec.json` will be mapped to **Tailwind CSS variables** in `src/index.css`. shadcn components use these variables automatically.
+
+**Color Mapping:**
+
+| Your design_spec color | CSS Variable | Used by |
+|------------------------|--------------|---------|
+| `background` | `--background` | Page background, body |
+| `foreground` | `--foreground` | Default text color |
+| `card` | `--card` | Card backgrounds |
+| `foreground` | `--card-foreground` | Text inside cards |
+| `primary` | `--primary` | Primary buttons, links |
+| `accent` | `--accent` | Accent elements, highlights |
+| `muted` | `--muted` | Muted/secondary backgrounds |
+| `border` | `--border` | All borders, dividers |
+| `positive` | (used in components) | Success states |
+| `negative` | `--destructive` | Error states |
+
+**Critical Contrast Rule:**
+- `foreground` must be readable on `background`
+- `foreground` must ALSO be readable on `card` (since `card-foreground` = `foreground`)
+- For dark mode: light text, dark backgrounds
+- For light mode: dark text, light backgrounds
+
+**Example - Dark Mode:**
+```json
+"colors": {
+  "background": "hsl(220 20% 8%)",   // Very dark
+  "foreground": "hsl(220 10% 92%)",  // Very light (readable on dark)
+  "card": "hsl(220 20% 12%)",        // Slightly lighter than background
+  // foreground works on BOTH background AND card ✓
+}
+```
+
+**Example - Light Mode:**
+```json
+"colors": {
+  "background": "hsl(220 20% 98%)",  // Very light
+  "foreground": "hsl(220 20% 10%)",  // Very dark (readable on light)
+  "card": "hsl(0 0% 100%)",          // White or near-white
+  // foreground works on BOTH background AND card ✓
+}
+```
+
+---
+
 ## Quality Checklist
 
 Before finalizing design_spec.json:
@@ -228,6 +277,8 @@ Before finalizing design_spec.json:
 - [ ] Would this look "AI-generated" to a design expert? (If yes, redesign)
 - [ ] Is the typography distinctive and appropriate for this app?
 - [ ] Does the color palette create a cohesive atmosphere?
+- [ ] **Is `foreground` readable on BOTH `background` AND `card`?** (Critical for contrast!)
+- [ ] Are all required colors defined? (`background`, `foreground`, `card`, `border`, `primary`, `accent`, `muted`, `positive`, `negative`)
 - [ ] Are the KPIs actually meaningful for this app's users?
 - [ ] Does the chart type make sense for this data?
 - [ ] Is the primary action obvious and accessible?
