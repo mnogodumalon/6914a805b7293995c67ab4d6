@@ -3,59 +3,58 @@
 ## 1. App Analysis
 
 ### What This App Does
-This is a comprehensive fitness and nutrition tracking app designed for German-speaking gym enthusiasts. It combines workout logging (exercises, sets, reps, weight), nutrition tracking (calories, macros), body measurements, and personal goals into a unified dashboard. The user can track their progress across multiple dimensions: training consistency, nutritional intake vs goals, and body composition changes over time.
+This is a comprehensive fitness and nutrition tracking app that helps users monitor their workouts, nutrition intake, and body measurements over time. It connects exercise sessions (workouts) with detailed workout logs (sets, reps, weights), tracks daily meals with macro breakdowns, and records body measurements for progress tracking.
 
 ### Who Uses This
-Dedicated fitness enthusiasts who take their training seriously. They track their workouts religiously, care about their macros, and want to see their progress visualized. They're likely following a structured program (Push/Pull/Legs, Full Body, etc.) and want accountability. They open this app daily - after workouts to log sets, throughout the day to track meals, and periodically to check body measurements.
+Dedicated fitness enthusiasts who are serious about tracking their progress. They want quick visibility into whether they're hitting their daily nutrition targets, staying consistent with their training schedule, and seeing their body composition change over time. They're likely German-speaking gym-goers who follow structured training programs (Push/Pull/Legs splits).
 
 ### The ONE Thing Users Care About Most
-**"Am I on track this week?"** - Users want an immediate visual confirmation that they're meeting their training and nutrition goals. This means: workouts completed this week vs target, and today's calories/protein vs daily goal.
+**"Am I on track today?"** - Users want to instantly see if they've hit their daily protein target, logged their workout, and stayed consistent this week. The primary concern is daily compliance with their fitness goals.
 
 ### Primary Actions
-1. **See today's nutrition status** - How much have I eaten? Am I hitting my protein goal?
-2. **Check weekly training progress** - How many workouts this week? Am I consistent?
-3. **Log a new workout or meal** - Quick access to add entries
-4. **Review recent workouts** - What exercises did I do? What weights?
-5. **Track body weight trend** - Am I gaining/losing as planned?
+1. Check today's nutrition progress (calories & protein vs. goals)
+2. See this week's workout consistency (workouts completed vs. target)
+3. View recent body weight trend
+4. Quick access to log new workout or meal
 
 ---
 
 ## 2. What Makes This Design Distinctive
 
-This design uses a **warm, earthy color palette with a deep olive-green accent** that evokes nature, health, and sustainable fitness habits - moving away from the aggressive reds and electric blues common in fitness apps. The warm cream background creates a calm, inviting space rather than the clinical white of most trackers. Typography uses **Outfit** - a geometric sans-serif that feels athletic and modern without being aggressive. The key distinctive element is the **circular progress ring** for the hero metric that pulses with energy, making daily goal tracking feel motivating rather than punitive.
+The design evokes a premium fitness app like **Strong** or **MacroFactor** - not the cluttered, gamified look of generic fitness apps. A warm stone-gray background with a bold **coral/terracotta accent** creates an energetic yet grounded feel. The accent color appears only on progress elements (progress bars, today's stats) making goal achievement visually rewarding. Large, bold typography for numbers creates a "scoreboard" effect where hitting targets feels like winning.
 
 ---
 
 ## 3. Theme & Colors
 
 ### Font
-- **Family:** Outfit
-- **URL:** `https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap`
-- **Why this font:** Outfit is geometric and sporty, with excellent weight variation for creating hierarchy. Its rounded terminals feel approachable and healthy, not aggressive. Perfect for fitness without being cliché.
+- **Family:** Space Grotesk
+- **URL:** `https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap`
+- **Why this font:** Space Grotesk has a technical, data-driven feel with distinctive character. Its geometric forms suit a fitness tracking app focused on numbers and progress, while remaining highly readable for metric displays.
 
 ### Color Palette
 All colors as complete hsl() functions:
 
 | Purpose | Color | CSS Variable |
 |---------|-------|--------------|
-| Page background | `hsl(45 30% 97%)` | `--background` |
+| Page background | `hsl(30 15% 97%)` | `--background` |
 | Main text | `hsl(30 10% 15%)` | `--foreground` |
 | Card background | `hsl(0 0% 100%)` | `--card` |
 | Card text | `hsl(30 10% 15%)` | `--card-foreground` |
-| Borders | `hsl(45 15% 88%)` | `--border` |
-| Primary action | `hsl(85 35% 35%)` | `--primary` |
+| Borders | `hsl(30 10% 90%)` | `--border` |
+| Primary action | `hsl(12 76% 61%)` | `--primary` |
 | Text on primary | `hsl(0 0% 100%)` | `--primary-foreground` |
-| Accent highlight | `hsl(85 40% 45%)` | `--accent` |
-| Muted background | `hsl(45 20% 93%)` | `--muted` |
-| Muted text | `hsl(30 5% 45%)` | `--muted-foreground` |
-| Success/positive | `hsl(145 50% 40%)` | (component use) |
-| Error/negative | `hsl(0 65% 50%)` | `--destructive` |
+| Accent highlight | `hsl(12 76% 61%)` | `--accent` |
+| Muted background | `hsl(30 10% 94%)` | `--muted` |
+| Muted text | `hsl(30 8% 46%)` | `--muted-foreground` |
+| Success/positive | `hsl(152 60% 42%)` | (component use) |
+| Error/negative | `hsl(0 72% 51%)` | `--destructive` |
 
 ### Why These Colors
-The **warm cream background** (slight yellow undertone) creates a grounded, natural feel that's easy on the eyes during frequent daily use. The **olive-green primary** is distinctive - most fitness apps use blue or red. Olive green suggests natural health, sustainable habits, and growth without the aggressive "beast mode" energy of typical gym apps. It's serious but approachable. The color scheme says "I care about my health holistically" rather than "I'm chasing PRs at any cost."
+The warm off-white background (`hsl(30 15% 97%)`) avoids clinical coldness while maintaining a clean, premium feel. The coral/terracotta primary (`hsl(12 76% 61%)`) is energetic and motivating without being aggressive - it's the color of healthy skin, warmth, and vitality. This accent pops against the neutral base, making progress indicators and CTAs unmissable.
 
 ### Background Treatment
-The page background is a warm cream `hsl(45 30% 97%)` - not pure white. This creates visual warmth and reduces the clinical feel. Cards float on this cream background with subtle shadows, creating depth without distraction.
+The page background uses a subtle warm off-white (`hsl(30 15% 97%)`) - not pure white. Cards are pure white (`hsl(0 0% 100%)`) to create gentle elevation without relying on heavy shadows. This layering creates depth through color rather than shadows.
 
 ---
 
@@ -66,215 +65,170 @@ Design mobile as a COMPLETELY SEPARATE experience, not squeezed desktop.
 ### What Users See (Top to Bottom)
 
 **Header:**
-- Left: App title "Mein Fitness" in Outfit 600 weight, 20px
-- Right: Current date (e.g., "So, 12. Jan") in muted text
+- App title "Fitness Tracker" on the left (20px, font-weight 600)
+- Today's date on the right (14px, muted color)
+- Simple, minimal, no icons in header
 
 **Hero Section (The FIRST thing users see):**
-A large card containing two circular progress rings side by side:
-- **Left ring:** Weekly training progress (e.g., "4/5 Workouts") - Shows workouts completed this week vs goal from Ziele
-- **Right ring:** Today's protein progress (e.g., "124/150g") - Shows protein eaten today vs daily goal
-- Rings are 100px diameter with 10px stroke width
-- Primary color for filled portion, muted for track
-- Below rings: Small text labels "Diese Woche" and "Heute Protein"
-- **Why this is the hero:** These are the two metrics users check most - training consistency and daily protein. Showing both immediately answers "Am I on track?"
+A large **"Today's Progress"** card showing:
+- **Protein progress ring** (120px diameter) showing percentage of daily protein goal hit
+- Large number in center of ring: current protein grams
+- Below ring: "von [goal]g Protein" in muted text
+- This is the hero because protein intake is the #1 daily concern for fitness enthusiasts
 
-**Section 2: Heute's Nutrition Summary**
-Horizontal card showing today's nutrition breakdown:
-- Four metrics in a row: Kalorien | Protein | Carbs | Fett
-- Large number (24px bold), small label below (12px muted)
-- Calories show progress bar underneath (vs daily goal)
-- Compact: ~80px tall total
+**Section 2: Today's Macros**
+A horizontal row of 3 compact stat cards:
+- Calories: icon + large number + "kcal" + small progress bar
+- Carbs: icon + large number + "g"
+- Fett: icon + large number + "g"
+Cards are white with subtle border, equal width
 
-**Section 3: Letzte Workouts**
-- Section title: "Letzte Workouts" with count badge
-- 3 most recent workout cards stacked vertically:
-  - Each card shows: Date (left), Workout type badge (center), Duration (right)
-  - Colored left border indicating workout type (Push=olive, Pull=teal, Beine=amber, etc.)
-  - Tap to expand would show exercises (but not implemented in MVP)
+**Section 3: Weekly Workouts**
+- Section title: "Diese Woche" (16px, semibold)
+- Large number showing workouts completed this week (e.g., "4")
+- Progress text: "von [goal] Trainings"
+- Visual: 7 small circles for each day (Mon-Sun), filled if workout logged that day
+- Tapping reveals this week's workout list
 
-**Section 4: Körper-Trend**
-- Small sparkline chart (area chart) showing body weight over last 30 days
-- Current weight displayed large (e.g., "78.5 kg")
-- Small delta showing change (e.g., "↓ 0.8 kg" in last 30 days)
-- ~120px tall
+**Section 4: Body Weight Trend**
+- Section title: "Gewicht" (16px, semibold)
+- Large number: latest weight with "kg" suffix
+- Small trend indicator: +/- vs last week
+- Compact sparkline chart (last 14 days)
+- Height: ~100px total
+
+**Section 5: Recent Workouts**
+- Section title: "Letzte Workouts" (16px, semibold)
+- List of last 3 workouts as simple cards:
+  - Workout type badge (Push, Pull, etc.)
+  - Date
+  - Duration in minutes
+  - Mood indicator
 
 **Bottom Navigation / Action:**
-- No fixed bottom nav (scroll is fine)
-- Floating action button (FAB) in bottom-right corner
-- Primary color, "+" icon
-- On tap: Opens sheet with quick add options (Workout, Mahlzeit, Körperdaten)
+- Fixed bottom action button: "Workout starten" (coral/primary color)
+- Full width with padding, 48px height
+- This is the primary action - starting a new workout
 
 ### What is HIDDEN on Mobile
-- Detailed workout logs (exercises, sets, reps) - too much detail for overview
-- Body measurement history beyond weight - chart only shows weight
-- Extended nutrition history - only today shown
-- Goal editing interface - separate screen
+- Detailed body measurement history (only weight shown)
+- Exercise library
+- Full nutrition breakdown by meal
+- Charts with long date ranges
 
 ### Touch Targets
-- All interactive elements minimum 44x44px
-- Cards have full-width tap area
-- FAB is 56px diameter
-- Progress rings are display only (not tappable)
+- All tappable elements minimum 44px height
+- Cards have generous padding (16px)
+- The bottom CTA button is extra large for easy thumb access
 
 ---
 
 ## 5. Desktop Layout
 
 ### Overall Structure
-Two-column layout with a maximum width of 1200px, centered. Generous padding (32px) creates breathing room.
+Two-column layout with a 60/40 split. The left column contains the main metrics and charts, the right column shows lists and secondary information. Maximum content width of 1200px, centered on larger screens.
 
 ### Column Layout
-- **Left column (60%):** Hero metrics + Nutrition today + Recent workouts list
-- **Right column (40%):** Body weight chart (taller) + Quick stats cards
-
-### Header (Desktop)
-- Full-width header bar
-- Left: "Mein Fitness" title + current date
-- Right: (future: settings icon, profile)
+- **Left column (60%)**: Hero protein ring (larger, 160px), Today's macros row, Weight chart (expanded to show 30 days), Weekly consistency visualization
+- **Right column (40%)**: Recent workouts list (show 5 instead of 3), Quick actions card (Log Workout, Log Meal buttons), Active goals summary
 
 ### What Appears on Hover
-- Workout cards: Subtle elevation increase + border color intensifies
-- Cards: Shadow deepens slightly
-- FAB: Scale up 1.05x
-
-### Desktop-Specific Elements
-- Body weight chart is larger (240px height) with more data points visible
-- Recent workouts shows 5 entries instead of 3
-- Nutrition card shows weekly average alongside today's values
+- Workout cards: show full exercise list preview
+- Chart data points: tooltip with exact value and date
+- Macro cards: show percentage of daily goal
 
 ---
 
 ## 6. Components
 
-### Hero KPI: Dual Progress Rings
+### Hero KPI: Protein Progress Ring
 The MOST important metric that users see first.
 
-**Training Progress Ring (Left)**
-- **Title:** "Diese Woche"
-- **Data source:** Workouts app - count records where `datum` is within current week and `rest_day` is not true
-- **Goal source:** Ziele app - `trainingstage_pro_woche` field from active goal
-- **Calculation:** Count of workouts this week / weekly target
-- **Display:** Circular progress ring, 100px diameter, 10px stroke
-- **Color:** Primary (olive) for filled, muted for track
-- **Center text:** "4/5" format - large current number, small /goal
-
-**Protein Progress Ring (Right)**
-- **Title:** "Heute Protein"
-- **Data source:** Ernährung app - sum of `protein` where `datum` is today
-- **Goal source:** Ziele app - `taeglich_protein` from active goal
-- **Calculation:** Sum of today's protein / daily target
-- **Display:** Same ring style as training
-- **Color:** Accent (lighter olive) for filled
-
-**Why this is the hero:** Users obsess over two things: "Did I train enough this week?" and "Did I hit my protein today?" Both questions answered instantly with visual rings.
+- **Title:** Protein heute
+- **Data source:** Ernährung app (today's entries)
+- **Calculation:** Sum of `protein` field for all records where `datum` = today
+- **Display:** Large circular progress ring (SVG), 120px on mobile, 160px on desktop. Current value displayed as large bold number (48px) in center. Goal displayed below in muted text.
+- **Context shown:** Progress toward daily goal (from Ziele app, `taeglich_protein` field)
+- **Why this is the hero:** Protein intake is the single most tracked macro for muscle building. Users check this multiple times per day.
 
 ### Secondary KPIs
 
-**Today's Calories**
-- Source: Ernährung (sum of `kalorien` where `datum` = today)
-- Goal: Ziele `taeglich_kalorien`
-- Format: Number with "kcal" suffix
-- Display: Progress bar below number
+**Calories Today**
+- Source: Ernährung (today's records)
+- Calculation: Sum of `kalorien`
+- Format: number with "kcal" suffix
+- Display: Compact card with small progress bar underneath
 
-**Today's Macros (Carbs, Fett)**
-- Source: Ernährung (sum of respective fields where `datum` = today)
-- Format: Number with "g" suffix
-- Display: Inline in horizontal card, no progress bars (protein already shown in hero)
+**Carbs Today**
+- Source: Ernährung (today's records)
+- Calculation: Sum of `carbs`
+- Format: number with "g" suffix
+- Display: Compact stat card
 
-**Current Body Weight**
-- Source: Köperdaten - most recent entry's `gewicht_kg`
-- Format: Number with "kg" suffix, 1 decimal
-- Display: Large number above sparkline chart
+**Fat Today**
+- Source: Ernährung (today's records)
+- Calculation: Sum of `fett`
+- Format: number with "g" suffix
+- Display: Compact stat card
 
-**Weight Change**
-- Source: Compare most recent `gewicht_kg` to entry 30 days ago
-- Format: Signed number with "kg" suffix (e.g., "-0.8 kg")
-- Display: Small text, colored (green if loss, red if gain - assume weight loss goal)
+**Workouts This Week**
+- Source: Workouts (this week's records where `rest_day` !== true)
+- Calculation: Count of records in current week
+- Format: "X von Y"
+- Display: Large number with day-of-week dots visualization
 
-### Chart: Body Weight Trend
+**Current Weight**
+- Source: Köperdaten (latest by datum)
+- Calculation: Latest `gewicht_kg` value
+- Format: number with "kg" suffix, trend arrow
+- Display: Large number with sparkline
 
-- **Type:** Area chart with gradient fill - WHY: Area charts show trends clearly and the fill creates visual weight that draws the eye. Better than line alone for showing "progress over time."
-- **Title:** "Gewichtsverlauf"
+### Chart: Weight Trend
+- **Type:** Area chart with gradient fill (WHY: area charts show trend direction better than lines, the filled area creates visual weight showing progress)
+- **Title:** Gewichtsverlauf
 - **What question it answers:** "Is my weight trending in the right direction?"
-- **Data source:** Köperdaten app - `datum` and `gewicht_kg` fields
-- **X-axis:** Date, formatted "DD.MM" (German format)
-- **Y-axis:** Weight in kg, auto-scaled with some padding
-- **Color:** Primary color with 20% opacity fill
-- **Mobile simplification:** Last 30 days, fewer X-axis labels (every 7 days)
-- **Desktop:** Last 60 days, labels every 14 days
+- **Data source:** Köperdaten app
+- **X-axis:** datum (formatted as "DD.MM" for German locale)
+- **Y-axis:** gewicht_kg (kg)
+- **Mobile simplification:** Show last 14 days only, minimal labels
+- **Desktop:** Show last 30 days, more detailed axis labels
 
-### Lists: Recent Workouts
+### Lists/Tables
 
-**Section Name:** Letzte Workouts
+**Recent Workouts List**
+- Purpose: Quick reference to recent training history
+- Source: Workouts app
+- Fields shown: typ (as colored badge), datum (formatted), dauer_minuten, stimmung (as emoji or icon)
+- Mobile style: Stacked cards with left color accent bar
+- Desktop style: Same cards but in narrower column
+- Sort: By datum descending
+- Limit: 3 on mobile, 5 on desktop
 
-- **Purpose:** Quick reference to recent training - what type, when, how long
-- **Source:** Workouts app, sorted by `datum` descending
-- **Fields shown:**
-  - `datum` - formatted "dd.MM" (e.g., "12.01")
-  - `typ` - displayed as badge with translated label
-  - `dauer_minuten` - formatted as "X min"
-  - `stimmung` - small emoji or icon indicator
-- **Mobile style:** Compact cards with colored left border
-- **Desktop style:** Same cards, slightly more spacing
-- **Sort:** By `datum` descending
-- **Limit:** Mobile: 3, Desktop: 5
-- **Empty state:** "Noch keine Workouts - Zeit loszulegen!"
-
-**Workout Type Colors (Left Border):**
-- Push: `hsl(85 35% 35%)` (olive - primary)
-- Pull: `hsl(175 40% 35%)` (teal)
-- Beine: `hsl(35 60% 50%)` (amber)
-- Ganzkörper: `hsl(260 40% 50%)` (purple)
-- Cardio: `hsl(350 60% 50%)` (coral)
-- Others: `hsl(30 5% 45%)` (muted)
-
-**Stimmung Indicators:**
-- schlecht: 😓
-- okay: 😐
-- gut: 😊
-- brutal: 💪
-
-### Primary Action Button (FAB)
-
-- **Label:** "+" icon (no text)
-- **Action:** Opens a bottom sheet with options: "Workout loggen", "Mahlzeit eintragen", "Körperdaten"
-- **Target:** Each option would navigate to respective form (future implementation)
-- **Mobile position:** Fixed bottom-right, 16px from edges
-- **Desktop position:** Fixed bottom-right, 24px from edges
-- **Size:** 56px diameter
-- **Color:** Primary with white icon
-- **Shadow:** Elevated (lg shadow)
+### Primary Action Button
+- **Label:** "Workout starten"
+- **Action:** Opens workout logging flow (for now, placeholder alert)
+- **Target:** Would navigate to workout creation
+- **Mobile position:** Fixed at bottom of screen, full width
+- **Desktop position:** In right sidebar, prominent button
 
 ---
 
 ## 7. Visual Details
 
 ### Border Radius
-- Cards: 12px (rounded, friendly)
-- Buttons: 8px
-- Badges: 999px (pill)
-- Progress bars: 999px (pill)
-- FAB: 50% (circle)
+Rounded (8px) - soft enough to feel friendly, sharp enough to feel professional
 
 ### Shadows
-Subtle but present - creates depth without heaviness:
-- Cards: `0 1px 3px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.04)`
-- Cards on hover: `0 2px 6px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.05)`
-- FAB: `0 4px 12px rgba(0,0,0,0.15)`
+Subtle - cards use `shadow-sm` only on hover, otherwise rely on white background against off-white page for elevation
 
 ### Spacing
-Normal to spacious - fitness dashboards need breathing room:
-- Page padding: 16px mobile, 32px desktop
-- Card padding: 16px mobile, 20px desktop
-- Between cards: 12px mobile, 16px desktop
-- Between sections: 24px mobile, 32px desktop
+Normal - 16px padding inside cards, 16px gap between cards, 24px section margins
 
 ### Animations
-- **Page load:** Cards fade in with subtle stagger (50ms delay between cards)
-- **Hover effects:** 150ms ease-out transition on shadow and border color
-- **Progress rings:** Animate from 0 to value on load (1s ease-out)
-- **Chart:** Lines draw in from left (0.8s)
-- **FAB hover:** Scale 1.05x with 150ms ease
+- **Page load:** Stagger fade-in for cards (each card 50ms delay)
+- **Hover effects:** Cards lift slightly (translate-y -2px) with shadow increase
+- **Tap feedback:** Quick scale down (0.98) on touch
+- **Progress ring:** Animates from 0 to current value on load (1s ease-out)
 
 ---
 
@@ -284,65 +238,49 @@ The implementer MUST copy these values exactly into `src/index.css`:
 
 ```css
 :root {
-  --background: hsl(45 30% 97%);
+  --radius: 0.5rem;
+  --background: hsl(30 15% 97%);
   --foreground: hsl(30 10% 15%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(30 10% 15%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(30 10% 15%);
-  --primary: hsl(85 35% 35%);
+  --primary: hsl(12 76% 61%);
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(45 20% 93%);
+  --secondary: hsl(30 10% 94%);
   --secondary-foreground: hsl(30 10% 25%);
-  --muted: hsl(45 20% 93%);
-  --muted-foreground: hsl(30 5% 45%);
-  --accent: hsl(85 40% 45%);
+  --muted: hsl(30 10% 94%);
+  --muted-foreground: hsl(30 8% 46%);
+  --accent: hsl(12 76% 61%);
   --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 65% 50%);
-  --border: hsl(45 15% 88%);
-  --input: hsl(45 15% 88%);
-  --ring: hsl(85 35% 35%);
-  --radius: 0.75rem;
+  --destructive: hsl(0 72% 51%);
+  --border: hsl(30 10% 90%);
+  --input: hsl(30 10% 90%);
+  --ring: hsl(12 76% 61%);
+  --chart-1: hsl(12 76% 61%);
+  --chart-2: hsl(152 60% 42%);
+  --chart-3: hsl(30 10% 60%);
+  --chart-4: hsl(45 90% 55%);
+  --chart-5: hsl(200 70% 50%);
 }
 ```
 
 ---
 
-## 9. Lookup Value Translations
-
-For display purposes, translate these lookup keys:
-
-**Workout Types (typ):**
-- push → "Push"
-- pull → "Pull"
-- beine → "Beine"
-- ganzkoerper → "Ganzkörper"
-- oberkoerper → "Oberkörper"
-- unterkoerper → "Unterkörper"
-- cardio → "Cardio"
-- sonstiges → "Sonstiges"
-
-**Stimmung:**
-- schlecht → "😓"
-- okay → "😐"
-- gut → "😊"
-- brutal → "💪"
-
----
-
-## 10. Implementation Checklist
+## 9. Implementation Checklist
 
 The implementer should verify:
-- [ ] Font loaded from URL above (Outfit)
-- [ ] All CSS variables copied exactly to index.css
-- [ ] Mobile layout matches Section 4 (vertical flow, hero rings prominent)
-- [ ] Desktop layout matches Section 5 (two columns, 60/40 split)
-- [ ] Hero element shows dual progress rings prominently
-- [ ] Colors create warm, earthy mood described in Section 2
-- [ ] Workout type badges use correct colors
-- [ ] Body weight chart uses area fill with primary color
-- [ ] FAB is fixed position with proper styling
-- [ ] Empty states handled gracefully
-- [ ] All data fetched from LivingAppsService
-- [ ] Dates formatted in German format (DD.MM.YYYY)
-- [ ] Numbers formatted appropriately (1 decimal for weight)
+- [ ] Font loaded from URL above (Space Grotesk)
+- [ ] All CSS variables copied exactly
+- [ ] Mobile layout matches Section 4 (single column, hero ring first)
+- [ ] Desktop layout matches Section 5 (two columns 60/40)
+- [ ] Hero element (protein ring) is prominent as described
+- [ ] Colors create the warm, energetic mood described in Section 2
+- [ ] Bottom action button fixed on mobile
+- [ ] Weekly workout dots visualization implemented
+- [ ] Weight trend sparkline/chart implemented
+- [ ] Recent workouts show type badge with appropriate color
+- [ ] All data fetched from correct apps via LivingAppsService
+- [ ] Date formatting uses German locale (DD.MM.YYYY)
+- [ ] Loading states with skeleton components
+- [ ] Empty states with helpful messaging
