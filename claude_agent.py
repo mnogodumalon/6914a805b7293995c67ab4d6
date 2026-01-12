@@ -159,7 +159,7 @@ async def main():
         "mcp__deploy_tools__deploy_to_github"
         ],
         cwd="/home/user/app",
-        model="claude-sonnet-4-5-20250929",
+        model="claude-opus-4-5-20251101",
     )
 
     # User Prompt aus Environment Variable lesen (für /build/continue)
