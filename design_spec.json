@@ -1,193 +1,257 @@
 {
   "app_analysis": {
-    "purpose": "Track fitness progress, workouts, nutrition, and body metrics in one place",
-    "primary_user_goal": "Understand training performance and nutrition compliance at a glance",
-    "key_data": [
-      "Recent workout frequency and duration",
-      "Daily calorie and protein intake vs goals",
-      "Body weight progression",
-      "Training volume (sets/reps/weight)"
-    ],
+    "purpose": "Track fitness progress, workout performance, nutrition, and body metrics in one comprehensive dashboard",
+    "primary_user_goal": "See their current fitness progress at a glance and log today's workout or meal",
+    "hero_metric": "Total workouts completed this month with trend comparison",
     "key_actions": [
-      "Log a new workout",
-      "Add nutrition entry",
-      "Record body measurements",
-      "View progress trends"
+      "Log today's workout",
+      "Check if nutrition goals are met today",
+      "View workout performance trends",
+      "Track body measurements over time"
     ],
-    "mental_model": "Fitness dashboard showing 'How am I doing?' with weekly/monthly trends"
+    "mental_model": "Users think chronologically: 'How am I doing this week/month?' and 'What do I need to do today?'"
   },
 
   "theme": {
     "mode": "light",
-    "font_family": "Inter",
-    "font_url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+    "distinctive_element": "Warm energetic gradient background with fitness-focused orange-red accent color. Uses Outfit font family for a modern, athletic feel with distinctive number displays.",
+    "font_family": "Outfit",
+    "font_url": "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap",
+    "base_tone": "warm",
     "colors": {
-      "background": "hsl(0 0% 100%)",
-      "foreground": "hsl(0 0% 10%)",
+      "background": "hsl(30 30% 97%)",
+      "foreground": "hsl(20 15% 15%)",
       "card": "hsl(0 0% 100%)",
-      "card_foreground": "hsl(0 0% 10%)",
-      "border": "hsl(0 0% 90%)",
-      "primary": "hsl(142 70% 40%)",
+      "card_foreground": "hsl(20 15% 15%)",
+      "border": "hsl(30 20% 90%)",
+      "primary": "hsl(14 90% 53%)",
       "primary_foreground": "hsl(0 0% 100%)",
-      "accent": "hsl(142 70% 45%)",
-      "muted": "hsl(0 0% 96%)",
-      "muted_foreground": "hsl(0 0% 45%)",
-      "positive": "hsl(142 70% 40%)",
-      "negative": "hsl(0 70% 50%)"
-    }
+      "accent": "hsl(30 85% 95%)",
+      "muted": "hsl(30 25% 94%)",
+      "muted_foreground": "hsl(30 10% 45%)",
+      "positive": "hsl(142 71% 45%)",
+      "negative": "hsl(0 84% 60%)"
+    },
+    "background_treatment": "Subtle radial gradient from warm cream to light orange-tinted white, creating an energetic but calm atmosphere"
   },
 
   "layout": {
     "mobile": {
-      "structure": "Single column vertical scroll with hero KPIs at top, followed by quick-add actions, then charts/lists",
-      "hero_element": "Today's overview card with 3 core KPIs: Workouts this week, Calories today, Weight trend",
+      "structure": "Single column vertical scroll with hero KPI card at top, followed by stacked sections",
+      "hero_element": "Large workout count card with this month's total and comparison to last month",
       "sections_order": [
-        "Hero KPIs (Today's overview)",
-        "Quick Actions (Add workout, Add meal, Log weight)",
-        "Weekly Training Chart",
+        "Hero: Monthly Workout Count",
+        "Quick Stats Grid (2x2): Calories Today, Protein Today, Current Weight, Last Workout",
         "Recent Workouts List (last 5)",
-        "Nutrition Today",
-        "Goals Status"
+        "Nutrition This Week Chart",
+        "Body Weight Trend (30 days)"
       ],
       "hidden_from_mobile": [
-        "Full exercise library",
-        "Detailed body measurements history"
+        "Detailed exercise library",
+        "Full workout logs table",
+        "Body measurements breakdown (shown in simplified version)"
       ],
-      "bottom_action": null,
-      "navigation": "Scrollable single page dashboard"
+      "primary_action_position": "bottom_fixed",
+      "navigation": "scroll"
     },
     "desktop": {
-      "structure": "Two-column layout: Left column (60%) for KPIs and charts, Right column (40%) for lists and recent activity",
-      "columns": "Left: Hero KPIs grid (3 cards), Primary chart below. Right: Quick actions, Recent workouts, Nutrition summary",
-      "sidebar": null,
-      "sections_order": [
-        "Top: Hero KPI grid (3 cards spanning full width)",
-        "Left: Weekly workout chart + Nutrition chart",
-        "Right: Quick actions + Recent workouts list + Today's nutrition"
+      "structure": "Three-column grid layout with hero section spanning two columns, sidebar for quick actions",
+      "column_arrangement": "2fr 2fr 1fr - Main content takes 4 parts, sidebar takes 1",
+      "sidebar": "Quick stats, active goals, primary action button",
+      "sections_arrangement": [
+        "Row 1: Hero KPI (span 2 cols) + Sidebar",
+        "Row 2: Workout Performance Chart (span 2 cols) + Sidebar continues",
+        "Row 3: Recent Workouts Table + Nutrition Summary + Goals Progress",
+        "Row 4: Body Metrics Chart (span full width)"
       ],
-      "hover_interactions": [
-        "KPI cards show trend details on hover",
-        "Chart data points show exact values on hover",
-        "Recent workout items expand to show exercises on hover"
+      "hover_reveals": [
+        "Workout cards show exercise details on hover",
+        "Chart data points show exact values",
+        "Quick stats show change percentage"
       ]
     }
   },
 
   "components": {
-    "kpis": [
+    "hero_kpi": {
+      "title": "Workouts This Month",
+      "source_app": "workouts",
+      "calculation": "Count all workout records where datum is in current month AND rest_day is false or null",
+      "display_size": "extra-large",
+      "context_shown": "Comparison to last month (e.g., '+3 vs last month') and weekly average"
+    },
+    "secondary_kpis": [
       {
-        "title": "Workouts diese Woche",
-        "source_app": "workouts",
-        "calculation": "count",
-        "field": "datum",
-        "filter": "last 7 days where rest_day is false",
-        "format": "number",
-        "context": "Goal: from ziele.trainingstage_pro_woche"
-      },
-      {
-        "title": "Kalorien heute",
+        "title": "Calories Today",
         "source_app": "ernaehrung",
-        "calculation": "sum",
-        "field": "kalorien",
-        "filter": "today",
+        "calculation": "Sum of kalorien field where datum equals today",
         "format": "number",
-        "context": "Goal: from ziele.taeglich_kalorien"
+        "context": "vs daily goal from ziele"
       },
       {
-        "title": "Protein heute",
+        "title": "Protein Today",
         "source_app": "ernaehrung",
-        "calculation": "sum",
-        "field": "protein",
-        "filter": "today",
+        "calculation": "Sum of protein field where datum equals today",
         "format": "number",
-        "context": "Goal: from ziele.taeglich_protein (in grams)"
+        "context": "vs daily goal from ziele"
       },
       {
-        "title": "Aktuelles Gewicht",
+        "title": "Current Weight",
         "source_app": "koerperdaten",
-        "calculation": "latest",
-        "field": "gewicht_kg",
+        "calculation": "Most recent gewicht_kg entry",
         "format": "number",
-        "context": "Show trend vs previous week"
+        "context": "Change from 30 days ago"
+      },
+      {
+        "title": "Last Workout",
+        "source_app": "workouts",
+        "calculation": "Most recent workout datum and typ",
+        "format": "text",
+        "context": "Days ago"
       }
     ],
     "charts": [
       {
         "type": "bar",
-        "title": "Trainingsaktivität (7 Tage)",
+        "title": "Workout Performance (Last 30 Days)",
+        "purpose": "Show workout consistency and training type distribution",
         "source_app": "workouts",
-        "purpose": "Show workout frequency and duration over the last 7 days",
-        "x_axis": { "field": "datum", "label": "Datum" },
-        "y_axis": { "field": "dauer_minuten", "label": "Dauer (Min)" },
-        "mobile_simplification": "Show last 5 days only, larger touch targets"
+        "x_axis": {
+          "field": "datum",
+          "label": "Date"
+        },
+        "y_axis": {
+          "field": "count",
+          "label": "Workouts"
+        },
+        "grouping": "by week, colored by typ (workout type)",
+        "mobile_treatment": "Show last 14 days only, simplified to simple bars without type breakdown"
       },
       {
         "type": "line",
-        "title": "Gewichtsverlauf (30 Tage)",
+        "title": "Nutrition This Week",
+        "purpose": "Track daily calorie and protein intake vs goals",
+        "source_app": "ernaehrung",
+        "x_axis": {
+          "field": "datum",
+          "label": "Day"
+        },
+        "y_axis": {
+          "field": "kalorien",
+          "label": "Calories"
+        },
+        "secondary_line": {
+          "field": "protein",
+          "label": "Protein (g)"
+        },
+        "goal_lines": "Show target lines from ziele app",
+        "mobile_treatment": "Show last 7 days, single metric toggle (calories OR protein)"
+      },
+      {
+        "type": "area",
+        "title": "Body Weight Trend",
+        "purpose": "Visualize weight changes over time with smoothed trend line",
         "source_app": "koerperdaten",
-        "purpose": "Track body weight changes over time",
-        "x_axis": { "field": "datum", "label": "Datum" },
-        "y_axis": { "field": "gewicht_kg", "label": "Gewicht (kg)" },
-        "mobile_simplification": "Show trend line only, no individual data points"
+        "x_axis": {
+          "field": "datum",
+          "label": "Date"
+        },
+        "y_axis": {
+          "field": "gewicht_kg",
+          "label": "Weight (kg)"
+        },
+        "mobile_treatment": "Show last 30 days, smaller height"
       }
     ],
     "lists": [
       {
-        "title": "Letzte Workouts",
+        "title": "Recent Workouts",
+        "purpose": "Quick access to recent training sessions and ability to review performance",
         "source_app": "workouts",
-        "purpose": "Quick reference to recent training sessions",
-        "display_fields": ["datum", "typ", "dauer_minuten", "stimmung"],
-        "mobile_display": "Card",
-        "desktop_display": "Table",
-        "sort_by": "datum",
-        "sort_order": "desc",
-        "limit": 5,
-        "row_action": "Show workout details (linked workout_logs)"
+        "display_fields": [
+          "datum",
+          "typ",
+          "dauer_minuten",
+          "stimmung"
+        ],
+        "sort": "datum descending",
+        "mobile_style": "card",
+        "desktop_style": "table",
+        "limit": 5
       },
       {
-        "title": "Heutige Mahlzeiten",
+        "title": "Active Goals",
+        "purpose": "Keep fitness goals visible and track progress",
+        "source_app": "ziele",
+        "filter": "status equals 'aktiv'",
+        "display_fields": [
+          "taeglich_kalorien",
+          "taeglich_protein",
+          "trainingstage_pro_woche"
+        ],
+        "mobile_style": "simple_list",
+        "desktop_style": "cards",
+        "limit": 3
+      },
+      {
+        "title": "Today's Meals",
+        "purpose": "Track nutrition throughout the day",
         "source_app": "ernaehrung",
-        "purpose": "Overview of today's nutrition entries",
-        "display_fields": ["mahlzeit_typ", "beschreibung", "kalorien", "protein"],
-        "mobile_display": "Simple list",
-        "desktop_display": "Cards",
-        "sort_by": "mahlzeit_typ",
-        "limit": 10,
-        "row_action": "View meal details"
+        "filter": "datum equals today",
+        "display_fields": [
+          "mahlzeit_typ",
+          "beschreibung",
+          "kalorien",
+          "protein"
+        ],
+        "mobile_style": "card",
+        "desktop_style": "list",
+        "limit": 10
       }
     ],
     "primary_action": {
-      "label": "Workout hinzufügen",
-      "action": "navigate",
+      "label": "Log Workout",
+      "action_type": "add_record",
       "target_app": "workouts",
-      "mobile_position": "header",
-      "desktop_position": "header"
+      "mobile_position": "bottom_fixed",
+      "desktop_position": "sidebar_top"
     },
     "secondary_actions": [
       {
-        "label": "Mahlzeit loggen",
-        "action": "navigate",
-        "target_app": "ernaehrung"
+        "label": "Add Meal",
+        "action_type": "add_record",
+        "target_app": "ernaehrung",
+        "mobile_position": "inline_nutrition_section",
+        "desktop_position": "sidebar"
       },
       {
-        "label": "Gewicht eintragen",
-        "action": "navigate",
-        "target_app": "koerperdaten"
+        "label": "Log Body Data",
+        "action_type": "add_record",
+        "target_app": "koerperdaten",
+        "mobile_position": "inline_body_section",
+        "desktop_position": "sidebar"
       }
     ]
   },
 
-  "interactions": {
-    "loading_state": "Skeleton loaders for KPI cards and charts, shimmer animation",
-    "empty_state": "Friendly message: 'Noch keine Daten vorhanden. Starte jetzt mit deinem ersten Workout!' with primary action button",
-    "error_handling": "Toast notification at top of screen with error message and 'Erneut versuchen' button",
-    "success_feedback": "Brief toast notification with checkmark icon"
+  "visual_details": {
+    "border_radius": "rounded (12px for cards, 8px for small elements)",
+    "shadow_style": "subtle (soft shadows on cards for depth without heaviness)",
+    "spacing_density": "normal (16px base grid, 24px section spacing)",
+    "animation_style": "subtle_fade (fade-in on load, smooth transitions on interactions)"
   },
 
-  "animations": {
-    "page_load": "stagger",
-    "element_enter_delay_ms": 80,
-    "hover_feedback": "Subtle scale (1.02) and shadow elevation on cards",
-    "tap_feedback": "Brief opacity change (0.7) on touch"
+  "data_intelligence": {
+    "smart_insights": [
+      "Show 'Rest Day?' if no workout logged in 2+ days",
+      "Highlight if protein goal not met today (after 6pm)",
+      "Show positive encouragement if workout consistency improving",
+      "Alert if weight trend shows rapid change (>2kg/week)"
+    ],
+    "empty_states": {
+      "no_workouts": "No workouts logged yet. Start your fitness journey!",
+      "no_nutrition": "Track your first meal to see nutrition insights",
+      "no_body_data": "Log your starting measurements to track progress"
+    }
   }
 }

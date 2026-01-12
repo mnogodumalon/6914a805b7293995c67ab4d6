@@ -17,47 +17,59 @@ allowed-tools:
 
 # Frontend Implementation Skill
 
-You are a React/TypeScript developer. Your job is to **implement exactly what design_spec.json specifies**.
+You are a React/TypeScript developer. Your ONLY job is to **implement exactly what design_spec.json specifies**.
 
-## ⚠️ DO NOT Design - Only Implement
+## ⚠️ CRITICAL: You Do NOT Make Design Decisions
 
-The design decisions are already made in `design_spec.json`. Your job is to:
-1. Read the spec
-2. Implement it exactly
-3. Ensure it works
+All design decisions are ALREADY MADE in `design_spec.json`. You are a translator from spec to code.
 
-**DO NOT:**
-- Change the color scheme
-- Pick different fonts
-- Rearrange the layout
-- Add features not in the spec
+**Your job:**
+1. Read design_spec.json
+2. Implement EXACTLY what it says
+3. Do not deviate
+
+**FORBIDDEN Actions:**
+- ❌ Choosing a different font than the spec
+- ❌ Changing colors from the spec
+- ❌ Rearranging the layout differently than spec
+- ❌ Adding components not in the spec
+- ❌ Using "sensible defaults" instead of spec values
+- ❌ Using Inter, Roboto, or system fonts (unless spec says so)
+
+**If something is unclear in the spec:**
+- Implement EXACTLY what is written
+- Do not "improve" or "interpret" the spec
+- The spec is always correct
 
 ---
 
 ## Process
 
-### Step 1: Read the Spec
+### Step 1: Read the Spec CAREFULLY
 
 ```bash
 cat design_spec.json
 ```
 
-Understand:
-- What theme/colors to use
-- What KPIs to show
-- What charts to create
-- What the primary action is
+Read and note down:
+- `theme.font_family` → Use THIS font, nothing else
+- `theme.font_url` → Load THIS URL in index.html
+- `theme.colors.*` → Copy EXACTLY to CSS variables
+- `layout.mobile` → Implement THIS structure for mobile
+- `layout.desktop` → Implement THIS structure for desktop
+- `components.hero_kpi` → This is the MAIN element
+- `visual_details.*` → Border radius, shadows, spacing
 
 ### Step 2: Read Existing Code
 
 ```bash
-cat src/types/*.ts           # Available types
-cat src/services/livingAppsService.ts  # Available methods
+cat src/types/*.ts
+cat src/services/livingAppsService.ts
 ```
 
 ### Step 3: Implement Dashboard.tsx
 
-Create `src/pages/Dashboard.tsx` following the spec exactly:
+Create `src/pages/Dashboard.tsx` following the spec EXACTLY:
 
 ```typescript
 // 1. Imports (always use 'import type' for types!)
@@ -65,10 +77,11 @@ import { useState, useEffect } from 'react';
 import type { AppType1, AppType2 } from '@/types/app';
 import { LivingAppsService } from '@/services/livingAppsService';
 
-// 2. Implement theme from design_spec.json
-// 3. Implement KPIs from design_spec.json
-// 4. Implement charts from design_spec.json
-// 5. Implement primary action from design_spec.json
+// 2. Use EXACT font from design_spec.json (not Inter!)
+// 3. Use EXACT colors from design_spec.json
+// 4. Use EXACT layout from design_spec.json
+// 5. Implement EXACT KPIs from design_spec.json
+// 6. Implement EXACT chart from design_spec.json
 ```
 
 ### Step 4: Apply Theme to CSS Variables (CRITICAL!)
@@ -274,16 +287,32 @@ const dateForAPI = formData.date + 'T12:00';
 
 ## Implementation Checklist
 
-Before completing:
+Before completing, verify EACH item against design_spec.json:
 
-- [ ] `index.html` has correct `class="dark"` or no class (based on theme.mode)
-- [ ] `src/index.css` CSS variables updated to match design_spec.json colors
-- [ ] Font loaded from design_spec.json font_url in `index.html`
-- [ ] All KPIs from spec implemented
-- [ ] Chart matches spec (type, data source)
-- [ ] Primary action implemented
-- [ ] Animations match spec (stagger, hover)
-- [ ] Mobile responsive
+### Theme Verification (CRITICAL!)
+- [ ] Font in `index.html` is EXACTLY `design_spec.json → theme.font_url` (NOT Inter or Roboto!)
+- [ ] Font-family in CSS matches EXACTLY `design_spec.json → theme.font_family`
+- [ ] `index.html` has correct class (dark/light based on `theme.mode`)
+- [ ] ALL CSS variables in `src/index.css` match `design_spec.json → theme.colors.*`
+- [ ] Colors are complete hsl() functions (not raw values)
+
+### Layout Verification
+- [ ] Mobile layout matches EXACTLY `design_spec.json → layout.mobile`
+- [ ] Desktop layout matches EXACTLY `design_spec.json → layout.desktop`
+- [ ] Hero element is what spec says (`components.hero_kpi`)
+- [ ] Section order matches spec
+
+### Components Verification
+- [ ] KPIs match EXACTLY `design_spec.json → components.hero_kpi` and `secondary_kpis`
+- [ ] Chart type matches EXACTLY `design_spec.json → components.chart.type`
+- [ ] Primary action matches EXACTLY `design_spec.json → components.primary_action`
+
+### Visual Details Verification
+- [ ] Border radius matches `design_spec.json → visual_details.border_radius`
+- [ ] Shadow style matches `design_spec.json → visual_details.shadow_style`
+- [ ] Animation matches `design_spec.json → visual_details.animation_style`
+
+### Technical
 - [ ] `npm run build` passes
 - [ ] No console errors
 
