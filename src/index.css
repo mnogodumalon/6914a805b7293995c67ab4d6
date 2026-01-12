@@ -43,38 +43,37 @@
 
 :root {
   --radius: 0.5rem;
-  --background: hsl(30 25% 97%);
+  --background: hsl(30 25% 98%);
   --foreground: hsl(20 15% 15%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(20 15% 15%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(20 15% 15%);
-  --primary: hsl(12 76% 58%);
+  --primary: hsl(16 85% 58%);
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(30 15% 94%);
+  --secondary: hsl(30 15% 95%);
   --secondary-foreground: hsl(20 15% 15%);
-  --muted: hsl(30 15% 94%);
+  --muted: hsl(30 15% 95%);
   --muted-foreground: hsl(20 10% 45%);
-  --accent: hsl(12 76% 95%);
+  --accent: hsl(16 85% 95%);
   --accent-foreground: hsl(20 15% 15%);
-  --destructive: hsl(0 72% 51%);
+  --destructive: hsl(0 72% 58%);
   --border: hsl(30 15% 90%);
   --input: hsl(30 15% 90%);
-  --ring: hsl(12 76% 58%);
-  --chart-1: hsl(12 76% 58%);
-  --chart-2: hsl(152 55% 42%);
-  --chart-3: hsl(30 80% 55%);
-  --chart-4: hsl(200 70% 50%);
-  --chart-5: hsl(280 60% 55%);
-  --positive: hsl(152 55% 42%);
-  --sidebar: hsl(30 25% 97%);
+  --ring: hsl(16 85% 58%);
+  --chart-1: hsl(16 85% 58%);
+  --chart-2: hsl(152 60% 42%);
+  --chart-3: hsl(30 15% 60%);
+  --chart-4: hsl(16 85% 75%);
+  --chart-5: hsl(152 40% 60%);
+  --sidebar: hsl(30 25% 98%);
   --sidebar-foreground: hsl(20 15% 15%);
-  --sidebar-primary: hsl(12 76% 58%);
+  --sidebar-primary: hsl(16 85% 58%);
   --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(12 76% 95%);
+  --sidebar-accent: hsl(16 85% 95%);
   --sidebar-accent-foreground: hsl(20 15% 15%);
   --sidebar-border: hsl(30 15% 90%);
-  --sidebar-ring: hsl(12 76% 58%);
+  --sidebar-ring: hsl(16 85% 58%);
 }
 
 .dark {
