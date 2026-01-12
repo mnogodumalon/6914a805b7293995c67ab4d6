@@ -128,6 +128,77 @@
         }
       }
     },
+    "workout_logs": {
+      "app_id": "6914a7e8154ee0268140a731",
+      "name": "Workout-Logs",
+      "controls": {
+        "workout": {
+          "identifier": "workout",
+          "label": "Workout",
+          "type": "applookup",
+          "subtype": "select",
+          "fulltype": "applookup/select",
+          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`.",
+          "lookup_app": "https://my.living-apps.de/rest/apps/6914a7e7b773d677cf3838c1"
+        },
+        "uebung": {
+          "identifier": "uebung",
+          "label": "\u00dcbung",
+          "type": "applookup",
+          "subtype": "select",
+          "fulltype": "applookup/select",
+          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`.",
+          "lookup_app": "https://my.living-apps.de/rest/apps/6914a7e259d98c952771c809"
+        },
+        "satz_nummer": {
+          "identifier": "satz_nummer",
+          "label": "Satznummer",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "gewicht": {
+          "identifier": "gewicht",
+          "label": "Gewicht (kg)",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "wiederholungen": {
+          "identifier": "wiederholungen",
+          "label": "Wiederholungen",
+          "type": "number",
+          "subtype": null,
+          "fulltype": "number",
+          "description": "A decimal number value (or `null`).",
+          "precision": null
+        },
+        "rpe": {
+          "identifier": "rpe",
+          "label": "RPE / Gef\u00fchl",
+          "type": "lookup",
+          "subtype": "select",
+          "fulltype": "lookup/select",
+          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "lookup_data": {
+            "rpe_1": "1 - Sehr leicht",
+            "rpe_2": "2",
+            "rpe_3": "3",
+            "rpe_4": "4",
+            "rpe_5": "5 - Mittel",
+            "rpe_6": "6",
+            "rpe_7": "7",
+            "rpe_8": "8",
+            "rpe_9": "9",
+            "rpe_10": "10 - Maximal"
+          }
+        }
+      }
+    },
     "ziele": {
       "app_id": "6914a7ead630b6a1488ff831",
       "name": "Ziele",
@@ -350,87 +421,16 @@
           "description": "A string value that can contain multiple lines of text (or `null`)."
         }
       }
-    },
-    "workout_logs": {
-      "app_id": "6914a7e8154ee0268140a731",
-      "name": "Workout-Logs",
-      "controls": {
-        "workout": {
-          "identifier": "workout",
-          "label": "Workout",
-          "type": "applookup",
-          "subtype": "select",
-          "fulltype": "applookup/select",
-          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`.",
-          "lookup_app": "https://my.living-apps.de/rest/apps/6914a7e7b773d677cf3838c1"
-        },
-        "uebung": {
-          "identifier": "uebung",
-          "label": "\u00dcbung",
-          "type": "applookup",
-          "subtype": "select",
-          "fulltype": "applookup/select",
-          "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`.",
-          "lookup_app": "https://my.living-apps.de/rest/apps/6914a7e259d98c952771c809"
-        },
-        "satz_nummer": {
-          "identifier": "satz_nummer",
-          "label": "Satznummer",
-          "type": "number",
-          "subtype": null,
-          "fulltype": "number",
-          "description": "A decimal number value (or `null`).",
-          "precision": null
-        },
-        "gewicht": {
-          "identifier": "gewicht",
-          "label": "Gewicht (kg)",
-          "type": "number",
-          "subtype": null,
-          "fulltype": "number",
-          "description": "A decimal number value (or `null`).",
-          "precision": null
-        },
-        "wiederholungen": {
-          "identifier": "wiederholungen",
-          "label": "Wiederholungen",
-          "type": "number",
-          "subtype": null,
-          "fulltype": "number",
-          "description": "A decimal number value (or `null`).",
-          "precision": null
-        },
-        "rpe": {
-          "identifier": "rpe",
-          "label": "RPE / Gef\u00fchl",
-          "type": "lookup",
-          "subtype": "select",
-          "fulltype": "lookup/select",
-          "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
-          "lookup_data": {
-            "rpe_1": "1 - Sehr leicht",
-            "rpe_2": "2",
-            "rpe_3": "3",
-            "rpe_4": "4",
-            "rpe_5": "5 - Mittel",
-            "rpe_6": "6",
-            "rpe_7": "7",
-            "rpe_8": "8",
-            "rpe_9": "9",
-            "rpe_10": "10 - Maximal"
-          }
-        }
-      }
     }
   },
   "metadata": {
     "apps_list": [
       "\u00dcbungen",
       "Workouts",
+      "Workout-Logs",
       "Ziele",
       "Ern\u00e4hrung",
-      "K\u00f6rperdaten",
-      "Workout-Logs"
+      "K\u00f6rperdaten"
     ]
   }
 }

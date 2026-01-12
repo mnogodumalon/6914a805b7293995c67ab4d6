@@ -1,6 +1,6 @@
 // AUTOMATICALLY GENERATED SERVICE
 import { APP_IDS } from '@/types/app';
-import type { Uebungen, Workouts, Ziele, Ernaehrung, Koerperdaten, WorkoutLogs } from '@/types/app';
+import type { Uebungen, Workouts, WorkoutLogs, Ziele, Ernaehrung, Koerperdaten } from '@/types/app';
 
 // Base Configuration
 const API_BASE_URL = 'https://my.living-apps.de/rest';
@@ -73,6 +73,27 @@ export class LivingAppsService {
     return callApi('DELETE', `/apps/${APP_IDS.WORKOUTS}/records/${id}`);
   }
 
+  // --- WORKOUT_LOGS ---
+  static async getWorkoutLogs(): Promise<WorkoutLogs[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.WORKOUT_LOGS}/records`);
+    return Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec
+    }));
+  }
+  static async getWorkoutLog(id: string): Promise<WorkoutLogs | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.WORKOUT_LOGS}/records/${id}`);
+    return { record_id: data.id, ...data };
+  }
+  static async createWorkoutLog(fields: WorkoutLogs['fields']) {
+    return callApi('POST', `/apps/${APP_IDS.WORKOUT_LOGS}/records`, { fields });
+  }
+  static async updateWorkoutLog(id: string, fields: Partial<WorkoutLogs['fields']>) {
+    return callApi('PATCH', `/apps/${APP_IDS.WORKOUT_LOGS}/records/${id}`, { fields });
+  }
+  static async deleteWorkoutLog(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.WORKOUT_LOGS}/records/${id}`);
+  }
+
   // --- ZIELE ---
   static async getZiele(): Promise<Ziele[]> {
     const data = await callApi('GET', `/apps/${APP_IDS.ZIELE}/records`);
@@ -134,27 +155,6 @@ export class LivingAppsService {
   }
   static async deleteKoerperdatenEntry(id: string) {
     return callApi('DELETE', `/apps/${APP_IDS.KOERPERDATEN}/records/${id}`);
-  }
-
-  // --- WORKOUT_LOGS ---
-  static async getWorkoutLogs(): Promise<WorkoutLogs[]> {
-    const data = await callApi('GET', `/apps/${APP_IDS.WORKOUT_LOGS}/records`);
-    return Object.entries(data).map(([id, rec]: [string, any]) => ({
-      record_id: id, ...rec
-    }));
-  }
-  static async getWorkoutLog(id: string): Promise<WorkoutLogs | undefined> {
-    const data = await callApi('GET', `/apps/${APP_IDS.WORKOUT_LOGS}/records/${id}`);
-    return { record_id: data.id, ...data };
-  }
-  static async createWorkoutLog(fields: WorkoutLogs['fields']) {
-    return callApi('POST', `/apps/${APP_IDS.WORKOUT_LOGS}/records`, { fields });
-  }
-  static async updateWorkoutLog(id: string, fields: Partial<WorkoutLogs['fields']>) {
-    return callApi('PATCH', `/apps/${APP_IDS.WORKOUT_LOGS}/records/${id}`, { fields });
-  }
-  static async deleteWorkoutLog(id: string) {
-    return callApi('DELETE', `/apps/${APP_IDS.WORKOUT_LOGS}/records/${id}`);
   }
 
 }

@@ -25,6 +25,20 @@ export interface Workouts {
   };
 }
 
+export interface WorkoutLogs {
+  record_id: string;
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    workout?: string; // applookup -> URL zu 'Workouts' Record
+    uebung?: string; // applookup -> URL zu 'Uebungen' Record
+    satz_nummer?: number;
+    gewicht?: number;
+    wiederholungen?: number;
+    rpe?: 'rpe_1' | 'rpe_2' | 'rpe_3' | 'rpe_4' | 'rpe_5' | 'rpe_6' | 'rpe_7' | 'rpe_8' | 'rpe_9' | 'rpe_10';
+  };
+}
+
 export interface Ziele {
   record_id: string;
   createdat: string;
@@ -71,33 +85,19 @@ export interface Koerperdaten {
   };
 }
 
-export interface WorkoutLogs {
-  record_id: string;
-  createdat: string;
-  updatedat: string | null;
-  fields: {
-    workout?: string; // applookup -> URL zu 'Workouts' Record
-    uebung?: string; // applookup -> URL zu 'Uebungen' Record
-    satz_nummer?: number;
-    gewicht?: number;
-    wiederholungen?: number;
-    rpe?: 'rpe_1' | 'rpe_2' | 'rpe_3' | 'rpe_4' | 'rpe_5' | 'rpe_6' | 'rpe_7' | 'rpe_8' | 'rpe_9' | 'rpe_10';
-  };
-}
-
 export const APP_IDS = {
   UEBUNGEN: '6914a7e259d98c952771c809',
   WORKOUTS: '6914a7e7b773d677cf3838c1',
+  WORKOUT_LOGS: '6914a7e8154ee0268140a731',
   ZIELE: '6914a7ead630b6a1488ff831',
   ERNAEHRUNG: '6914a7e8078cdd936a7fe8bf',
   KOERPERDATEN: '6914a7e9764e7bbbd63bbd93',
-  WORKOUT_LOGS: '6914a7e8154ee0268140a731',
 } as const;
 
 // Helper Types for creating new records
 export type CreateUebungen = Uebungen['fields'];
 export type CreateWorkouts = Workouts['fields'];
+export type CreateWorkoutLogs = WorkoutLogs['fields'];
 export type CreateZiele = Ziele['fields'];
 export type CreateErnaehrung = Ernaehrung['fields'];
 export type CreateKoerperdaten = Koerperdaten['fields'];
-export type CreateWorkoutLogs = WorkoutLogs['fields'];

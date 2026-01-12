@@ -15,835 +15,406 @@ allowed-tools:
 
 # Frontend Design Skill
 
-You are a UI/UX designer. Your job is to **analyze the app and create a design specification** (`design_spec.json`) that the implementation agent will follow exactly.
+You are a **world-class UI/UX designer**. Your goal is to create dashboards that feel like **top-rated apps from the App Store** - polished, intuitive, and delightful to use.
 
-## ⚠️ CRITICAL: Avoid "AI Slop" Aesthetic
-
-You tend to converge toward generic, "on distribution" outputs. In frontend design, this creates what users call the **"AI slop" aesthetic**. Avoid this: make creative, distinctive frontends that surprise and delight.
-
-### What is AI Slop?
-- Inter, Roboto, Arial, system fonts everywhere
-- Purple gradients on white backgrounds
-- Predictable card grids with minimal visual hierarchy
-- Cookie-cutter layouts that look like every other AI-generated UI
-- Safe, boring choices that offend no one but excite no one
-
-### Your Mission
-Create interfaces that make users think: **"This is exactly what I needed!"**
+Your output is `design_spec.json` - a complete specification that the implementation agent will follow exactly.
 
 ---
 
-## Design Principles
+## ⚠️ Design Standard: App Store Quality
 
-### 1. Mobile First, Desktop Excellent
-Our users work on both mobile and desktop equally. Design for mobile constraints first, then enhance for larger screens.
+Your designs must meet the quality bar of **the best apps in the App Store**. This means:
 
-```
-Mobile (< 640px): Single column, touch-friendly, essential info only
-Tablet (640-1024px): Two columns, expanded controls
-Desktop (> 1024px): Full layout, data density, keyboard shortcuts
-```
+- **Layouts that feel native** to each device (not just "responsive")
+- **Information architecture** that makes sense instantly
+- **Touch targets and interactions** designed for each platform
+- **Visual hierarchy** that guides the eye naturally
+- **White space** used intentionally, not as filler
 
-### 2. Typography Creates Identity
-**NEVER use:** Inter, Roboto, Open Sans, Lato, Arial, system fonts
-
-**Choose based on the app's character:**
-| App Character | Font Choices |
-|---------------|--------------|
-| Technical/Data | JetBrains Mono, Fira Code, Space Grotesk, IBM Plex |
-| Editorial/Content | Playfair Display, Crimson Pro, Newsreader |
-| Modern/Clean | Bricolage Grotesque, Source Sans 3, Geist, Outfit |
-| Distinctive | Syne, Tenor Sans, Josefin Sans |
-
-**Use extremes:** 100/200 weight vs 800/900 (not 400 vs 600). Size jumps of 3x+ (not 1.5x).
-
-### 3. Color Creates Atmosphere
-**NEVER use:** Purple gradients on white, generic blue (#007bff), boring gray palettes, flat #f5f5f5
-
-**Instead:**
-- Commit to a cohesive aesthetic (dark mode, warm tones, monochrome, etc.)
-- Dominant colors with sharp accents outperform evenly-distributed palettes
-- Draw inspiration from: IDE themes, cultural aesthetics, nature, architecture
-- Use CSS variables for consistency
-
-**Color by Domain:**
-| Domain | Palette Direction |
-|--------|-------------------|
-| Finance | Deep blues, greens for positive, red for negative |
-| Fitness | Energetic oranges, teals, dark backgrounds |
-| Inventory | Clean neutrals, accent for status |
-| Creative | Bold, unexpected combinations |
-| Healthcare | Calming blues, whites, subtle accents |
-
-### 4. Motion Creates Delight
-- Focus on **high-impact moments**: page load with staggered reveals creates more delight than scattered micro-interactions
-- Use `animation-delay` for orchestrated reveals
-- Prioritize CSS-only solutions
-- Subtle is better than flashy
-
-### 5. Backgrounds Create Depth
-**NEVER use:** Solid white, solid gray (#f5f5f5)
-
-**Instead:**
-- Layer CSS gradients
-- Use geometric patterns (subtle grids, dots)
-- Add contextual effects matching the app's theme
-- Create atmosphere and visual depth
+Ask yourself: **"Would Apple feature this in the App Store?"** If no, redesign.
 
 ---
 
-## Interpreting User Requests
+## Theme: Light, Minimal, Modern
 
-**Your users are NOT developers.** They don't know what's technically possible. Their requests will be vague and simple.
+**Always use light mode.** The aesthetic should be:
 
-### Your Job: Translate Vague → Specific
+- **Minimalist** - Every element has a purpose
+- **Modern** - Clean lines, subtle shadows, refined typography
+- **Neutral** - Calm, professional, not distracting
+- **Spacious** - Generous white space, breathing room
 
-1. **Understand the intent** - What do they actually need? Think beyond the literal words.
-2. **Analyze the data** - Read app_metadata.json. What data exists? What can be calculated?
-3. **Design for impact** - Create something that makes them say "WOW, das ist genau was ich brauche!"
+### Color Approach
 
-Ask yourself:
-- What would make this user's daily work easier?
-- What information do they need at a glance?
-- What action do they perform most often?
-- What would surprise and delight them?
+Light backgrounds with dark text. Use color sparingly:
+- Background: White or off-white
+- Text: Dark gray or near-black
+- Accent: One primary color for actions and highlights
+- Semantic colors only for status (success green, error red)
+
+### Typography Approach
+
+- Choose one font family
+- Use weight and size for hierarchy, not multiple fonts
+- Favor readability over decoration
 
 ---
 
-## App-Specific Design Thinking
+## Layout Design (MOST IMPORTANT!)
 
-**DO NOT create generic designs. Each app must feel unique.**
+Layout is the foundation of good UX. Spend the most time here.
 
-### Before Designing, Analyze:
+### Think Like a Product Designer
 
-1. **Data Density**
-   - High density (financial, analytics) → Compact tables, small text, dense grids
-   - Low density (lifestyle, fitness) → Spacious cards, large visuals, breathing room
+Before drawing anything, answer:
 
-2. **Primary Action**
-   - Data entry → Prominent forms, fast input flows
-   - Data viewing → Charts, KPIs, scannable layouts
-   - Task completion → Progress indicators, checklists, gamification
+1. **What is the ONE thing users must see first?**
+   - This becomes your hero element
+   - Everything else is secondary
 
-3. **Emotional Context**
-   - Professional/Serious → Muted colors, clean lines, minimal decoration
-   - Fun/Casual → Bold colors, playful animations, personality
-   - Urgent/Critical → High contrast, clear hierarchy, immediate clarity
+2. **What actions do users take most often?**
+   - These must be immediately accessible
+   - Maximum 1-2 taps/clicks
 
-4. **User Journey**
-   - What do they see first? (Hero KPI, welcome message, task list?)
-   - What action do they take most? (Make it 1 tap/click)
-   - What makes them come back? (Progress, achievements, fresh data?)
+3. **What information helps users make decisions?**
+   - Show this prominently
+   - Hide or remove everything else
+
+4. **What is the user's mental model?**
+   - How do they think about this data?
+   - Mirror that structure in your layout
+
+### Mobile Layout (Phone)
+
+Design mobile as a **completely separate experience**, not a squeezed desktop.
+
+**Mobile-Specific Principles:**
+- **Vertical flow** - One column, top to bottom
+- **Thumb-friendly** - Important actions in bottom half of screen
+- **Focused** - Show less, but show it well
+- **Progressive** - Reveal details on interaction, not all at once
+
+**Mobile Layout Questions:**
+- What can you REMOVE for mobile? (Be aggressive)
+- What needs to be LARGER for touch?
+- What should be HIDDEN in a menu or secondary screen?
+- What actions need to be at thumb-reach?
+
+### Desktop Layout (Computer)
+
+Design desktop to take full advantage of screen real estate.
+
+**Desktop-Specific Principles:**
+- **Horizontal density** - Multiple columns, side-by-side information
+- **Hover states** - Secondary info revealed on hover
+- **Keyboard shortcuts** - Power-user efficiency
+- **Peripheral vision** - Show more context without overwhelming
+
+**Desktop Layout Questions:**
+- How can you use the extra width meaningfully?
+- What information can be shown side-by-side?
+- What hover interactions add value?
+- How can power users be more efficient?
+
+### Common Layout Patterns
+
+Think about which pattern fits your data:
+
+**Dashboard Pattern** - Overview with KPIs at top, detailed sections below
+**List-Detail Pattern** - List on left/top, selected item details on right/bottom
+**Card Grid Pattern** - Equal-importance items in a scannable grid
+**Feed Pattern** - Chronological or ranked list, infinite scroll
+**Focus Pattern** - One primary element with minimal distractions
+
+---
+
+## Information Hierarchy
+
+Users scan, they don't read. Design for scanning.
+
+### Visual Hierarchy Levels
+
+1. **Primary** - The ONE thing that matters most (biggest, boldest)
+2. **Secondary** - Supporting information (medium emphasis)
+3. **Tertiary** - Details and metadata (smallest, muted)
+4. **Interactive** - Buttons and actions (distinguished by color/shape)
+
+### Hierarchy Tools
+
+- **Size** - Larger = more important
+- **Weight** - Bolder = more important
+- **Color** - Accent color = interactive/important
+- **Position** - Top/left = seen first
+- **Space** - More whitespace around = more important
+
+---
+
+## Interaction Design
+
+### Touch Targets (Mobile)
+
+- Minimum 44x44 points for any tappable element
+- More space between targets, less accidental taps
+- Primary actions should be larger (48-56 points)
+
+### Click Targets (Desktop)
+
+- Can be smaller but still comfortable (32px minimum)
+- Hover states give feedback
+- Multiple click-targets can be closer together
+
+### Feedback
+
+Every interaction needs feedback:
+- Tap/click: Visual response (color change, scale)
+- Loading: Progress indication
+- Success: Confirmation
+- Error: Clear explanation + recovery action
+
+---
+
+## Data Display
+
+### KPIs and Numbers
+
+- Show the most important number LARGE
+- Include context (vs last period, status)
+- Use semantic colors for positive/negative
+- Don't show too many KPIs (3-5 maximum for mobile)
+
+### Lists and Tables
+
+- Mobile: Cards or simple lists, not tables
+- Desktop: Tables are fine, with sorting/filtering
+- Always show the most important column first
+- Consider what actions users need per row
+
+### Charts
+
+- Choose chart type based on what you're showing:
+  - Trend over time → Line chart
+  - Comparison → Bar chart
+  - Parts of whole → Pie/donut (use sparingly)
+  - Distribution → Histogram
+- Mobile: Simpler charts, fewer data points
+- Desktop: Can show more detail
 
 ---
 
 ## Your Output: design_spec.json
 
-After analyzing the app, create `design_spec.json` with your concrete design decisions:
+Create a specification that answers ALL layout and UX questions:
 
 ```json
 {
   "app_analysis": {
-    "purpose": "What this app is for",
-    "domain": "fitness | finance | inventory | etc.",
-    "data_density": "high | medium | low",
-    "primary_users": "Who uses this",
-    "key_metrics": ["What users care about most"],
-    "primary_action": "What users do most often",
-    "emotional_tone": "professional | playful | minimal | urgent"
+    "purpose": "What problem does this app solve?",
+    "primary_user_goal": "What does the user want to achieve?",
+    "key_data": ["What information matters most?"],
+    "key_actions": ["What do users DO most often?"],
+    "mental_model": "How do users think about this?"
   },
+  
   "theme": {
-    "mode": "dark | light",
-    "font_family": "Specific font from Google Fonts",
+    "mode": "light",
+    "font_family": "Font name from Google Fonts",
     "font_url": "https://fonts.googleapis.com/css2?family=...",
     "colors": {
       "background": "hsl(...)",
       "foreground": "hsl(...)",
       "card": "hsl(...)",
+      "card_foreground": "hsl(...)",
       "border": "hsl(...)",
       "primary": "hsl(...)",
+      "primary_foreground": "hsl(...)",
       "accent": "hsl(...)",
       "muted": "hsl(...)",
+      "muted_foreground": "hsl(...)",
       "positive": "hsl(...)",
       "negative": "hsl(...)"
-    },
-    "background_style": "gradient | pattern | layered",
-    "background_css": "Actual CSS for background"
+    }
   },
+  
   "layout": {
-    "kpi_cards": [
+    "mobile": {
+      "structure": "Description of mobile layout structure",
+      "hero_element": "What appears first and largest?",
+      "sections_order": ["Section names in scroll order"],
+      "hidden_from_mobile": ["What is NOT shown on mobile"],
+      "bottom_action": "Primary action at thumb-reach (or null)",
+      "navigation": "How users navigate (tabs, menu, none)"
+    },
+    "desktop": {
+      "structure": "Description of desktop layout structure",
+      "columns": "How is horizontal space used?",
+      "sidebar": "What goes in sidebar (or null)",
+      "sections_order": ["Section arrangement"],
+      "hover_interactions": ["What is revealed on hover?"]
+    }
+  },
+  
+  "components": {
+    "kpis": [
       {
-        "title": "KPI Name",
+        "title": "KPI name",
         "source_app": "Which app to query",
-        "calculation": "sum | count | average | custom",
-        "calculation_field": "Field name for calculation",
-        "icon": "lucide icon name",
+        "calculation": "sum | count | average | latest",
+        "field": "Field for calculation",
         "format": "number | currency | percent",
-        "trend_comparison": "vs last week | vs last month | none"
+        "context": "What comparison or context to show"
       }
     ],
-    "main_chart": {
+    "chart": {
       "type": "line | bar | pie | area",
       "title": "Chart title",
       "source_app": "Which app",
-      "x_axis": { "field": "fieldname", "label": "X Label" },
-      "y_axis": { "field": "fieldname", "label": "Y Label" },
-      "group_by": "day | week | month | category"
+      "purpose": "What does this chart answer?",
+      "x_axis": { "field": "fieldname", "label": "Label" },
+      "y_axis": { "field": "fieldname", "label": "Label" },
+      "mobile_simplification": "How is this simplified for mobile?"
     },
-    "secondary_sections": [
+    "lists": [
       {
-        "type": "table | list | cards",
         "title": "Section title",
         "source_app": "Which app",
-        "fields": ["field1", "field2"],
+        "purpose": "Why does user need this list?",
+        "display_fields": ["field1", "field2"],
+        "mobile_display": "Card | Simple list | Hidden",
+        "desktop_display": "Table | Cards | List",
         "sort_by": "fieldname",
-        "limit": 5
+        "limit": 5,
+        "row_action": "What happens on tap/click?"
       }
     ],
-    "primary_action_button": {
+    "primary_action": {
       "label": "Button text",
       "action": "add_record | navigate | toggle",
-      "target_app": "Which app for add_record",
-      "position": "header | floating | inline"
+      "target_app": "Which app",
+      "mobile_position": "bottom_fixed | header | inline",
+      "desktop_position": "header | inline"
     }
   },
-  "animations": {
-    "page_load": "stagger | fade | slide",
-    "stagger_delay_ms": 100,
-    "hover_effects": true,
-    "card_hover": "lift | glow | border"
+  
+  "interactions": {
+    "loading_state": "How is loading shown?",
+    "empty_state": "What does user see with no data?",
+    "error_handling": "How are errors displayed?",
+    "success_feedback": "How is success confirmed?"
   },
-  "responsive": {
-    "mobile_priority": ["kpi_cards", "primary_action"],
-    "hide_on_mobile": ["secondary_sections"],
-    "mobile_navigation": "bottom_tabs | hamburger | none"
+  
+  "animations": {
+    "page_load": "fade | stagger | none",
+    "element_enter_delay_ms": 100,
+    "hover_feedback": "What happens on hover? (desktop)",
+    "tap_feedback": "What happens on tap? (mobile)"
   }
 }
 ```
 
 ---
 
-## ⚠️ How Colors Are Applied (Important for Contrast!)
+## ⚠️ How Colors Are Applied (Critical for Contrast!)
 
-Your colors in `design_spec.json` will be mapped to **Tailwind CSS variables** in `src/index.css`. shadcn components use these variables automatically.
+Your colors are mapped to CSS variables. The implementation agent uses them directly.
 
 **Color Mapping:**
 
 | Your design_spec color | CSS Variable | Used by |
 |------------------------|--------------|---------|
-| `background` | `--background` | Page background, body |
-| `foreground` | `--foreground` | Default text color |
+| `background` | `--background` | Page background |
+| `foreground` | `--foreground` | Default text |
 | `card` | `--card` | Card backgrounds |
-| `foreground` | `--card-foreground` | Text inside cards |
-| `primary` | `--primary` | Primary buttons, links |
-| `accent` | `--accent` | Accent elements, highlights |
-| `muted` | `--muted` | Muted/secondary backgrounds |
-| `border` | `--border` | All borders, dividers |
+| `card_foreground` | `--card-foreground` | Text in cards |
+| `primary` | `--primary` | Primary buttons |
+| `primary_foreground` | `--primary-foreground` | Text on primary buttons |
+| `accent` | `--accent` | Accent elements |
+| `muted` | `--muted` | Muted backgrounds |
+| `muted_foreground` | `--muted-foreground` | Muted text |
+| `border` | `--border` | Borders, dividers |
 | `positive` | (used in components) | Success states |
 | `negative` | `--destructive` | Error states |
 
-**Critical Contrast Rule:**
-- `foreground` must be readable on `background`
-- `foreground` must ALSO be readable on `card` (since `card-foreground` = `foreground`)
-- For dark mode: light text, dark backgrounds
-- For light mode: dark text, light backgrounds
+**Contrast Rule (Light Theme):**
+- `foreground` must be dark (readable on white/light backgrounds)
+- `card` should be white or very light
+- `card_foreground` must be dark (readable on cards)
+- Primary and accent colors need sufficient contrast
 
-**Example - Dark Mode:**
+**Standard Light Theme Colors:**
 ```json
 "colors": {
-  "background": "hsl(220 20% 8%)",   // Very dark
-  "foreground": "hsl(220 10% 92%)",  // Very light (readable on dark)
-  "card": "hsl(220 20% 12%)",        // Slightly lighter than background
-  // foreground works on BOTH background AND card ✓
+  "background": "hsl(0 0% 100%)",
+  "foreground": "hsl(0 0% 10%)",
+  "card": "hsl(0 0% 100%)",
+  "card_foreground": "hsl(0 0% 10%)",
+  "border": "hsl(0 0% 90%)",
+  "primary": "hsl(220 90% 50%)",
+  "primary_foreground": "hsl(0 0% 100%)",
+  "accent": "hsl(220 90% 50%)",
+  "muted": "hsl(0 0% 96%)",
+  "muted_foreground": "hsl(0 0% 45%)",
+  "positive": "hsl(142 70% 35%)",
+  "negative": "hsl(0 70% 50%)"
 }
 ```
 
-**Example - Light Mode:**
-```json
-"colors": {
-  "background": "hsl(220 20% 98%)",  // Very light
-  "foreground": "hsl(220 20% 10%)",  // Very dark (readable on light)
-  "card": "hsl(0 0% 100%)",          // White or near-white
-  // foreground works on BOTH background AND card ✓
-}
-```
+Adjust the hue to match your chosen accent color while keeping lightness values similar.
 
 ---
 
 ## Quality Checklist
 
-Before finalizing design_spec.json:
+Before finalizing design_spec.json, verify:
 
-- [ ] Would this look "AI-generated" to a design expert? (If yes, redesign)
-- [ ] Is the typography distinctive and appropriate for this app?
-- [ ] Does the color palette create a cohesive atmosphere?
-- [ ] **Is `foreground` readable on BOTH `background` AND `card`?** (Critical for contrast!)
-- [ ] Are all required colors defined? (`background`, `foreground`, `card`, `border`, `primary`, `accent`, `muted`, `positive`, `negative`)
-- [ ] Are the KPIs actually meaningful for this app's users?
-- [ ] Does the chart type make sense for this data?
-- [ ] Is the primary action obvious and accessible?
-- [ ] Will it create a "wow" moment for the user?
-- [ ] Is it mobile-first AND excellent on desktop?
+### Layout & UX
+- [ ] Is there ONE clear hero element that users see first?
+- [ ] Are the most important actions reachable in 1-2 taps/clicks?
+- [ ] Is mobile layout designed FOR mobile, not just smaller?
+- [ ] Does desktop layout use horizontal space meaningfully?
+- [ ] Would this design get featured in the App Store?
 
----
+### Information Architecture
+- [ ] Is the visual hierarchy clear? (Primary > Secondary > Tertiary)
+- [ ] Are only the most important KPIs shown? (Not more than 5)
+- [ ] Does the chart answer a question users actually have?
+- [ ] Is there anything that can be removed?
 
-# Design System Reference
+### Colors & Theme
+- [ ] Is it light theme with dark text?
+- [ ] Do all colors have sufficient contrast?
+- [ ] Is accent color used sparingly for actions/highlights?
+- [ ] Are all required colors defined with complete hsl() functions?
 
-## ⚠️ Remember: No Generic Defaults
-
-This section provides tokens and options—not prescriptions. Choose based on the app's unique character.
-
----
-
-## Typography
-
-### Font Loading (Google Fonts)
-```tsx
-// In index.html or via @import
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-```
-
-### Font Options by Character
-
-| App Character | Font Choices | Why |
-|---------------|--------------|-----|
-| Technical/Dev | JetBrains Mono, Fira Code, IBM Plex Mono | Monospace = precision |
-| Data/Analytics | Space Grotesk, IBM Plex Sans, Geist | Clean, readable numbers |
-| Editorial/Content | Playfair Display, Crimson Pro, Newsreader | Editorial authority |
-| Modern/Startup | Bricolage Grotesque, Outfit, Syne | Contemporary edge |
-| Luxury/Premium | Cormorant, Tenor Sans, Josefin Sans | Elegance, restraint |
-
-### Size Scale (Use Extremes!)
-
-| Purpose | Size | Weight | Example |
-|---------|------|--------|---------|
-| Hero KPI | 48-72px | 700-900 | Main number users care about |
-| Section Title | 24-32px | 600-700 | Clear hierarchy |
-| Card Title | 18-20px | 500-600 | Scannable |
-| Body | 14-16px | 400 | Readable content |
-| Labels/Meta | 11-13px | 400-500 | Supporting info |
-| Micro | 10px | 500 | Badges, timestamps |
+### Interactions
+- [ ] Are touch targets at least 44x44 points on mobile?
+- [ ] Is there feedback for every user action?
+- [ ] Are loading, empty, and error states defined?
 
 ---
 
-## Color Palettes
+## Font Reference
 
-### Don't Use
-❌ `#007bff` (Bootstrap blue)
-❌ Purple gradients on white
-❌ `#f5f5f5` gray backgrounds
-❌ Generic Material Design colors
+Choose ONE font that matches the app's character:
 
-### Palette Strategies
+| Character | Fonts |
+|-----------|-------|
+| Modern/Clean | Inter, SF Pro, Geist, Outfit |
+| Technical | JetBrains Mono, IBM Plex Mono |
+| Friendly | Nunito, Quicksand |
+| Professional | Source Sans 3, IBM Plex Sans |
+| Distinctive | Space Grotesk, Syne |
 
-**1. Monochrome + One Accent**
-```css
---background: hsl(220 20% 10%);     /* Deep blue-gray */
---foreground: hsl(220 10% 90%);     /* Light gray */
---accent: hsl(150 80% 50%);         /* Vibrant green */
+**Loading example:**
 ```
-
-**2. Warm & Grounded**
-```css
---background: hsl(30 20% 8%);       /* Warm dark */
---foreground: hsl(30 10% 90%);      /* Cream */
---accent: hsl(25 90% 55%);          /* Burnt orange */
-```
-
-**3. Cool & Professional**
-```css
---background: hsl(210 30% 8%);      /* Navy */
---foreground: hsl(210 20% 95%);     /* Ice */
---accent: hsl(190 80% 50%);         /* Cyan */
-```
-
-**4. Nature-Inspired**
-```css
---background: hsl(160 30% 6%);      /* Forest dark */
---foreground: hsl(60 20% 90%);      /* Warm white */
---accent: hsl(80 60% 50%);          /* Fresh green */
-```
-
-### Chart Colors (Semantic)
-```typescript
-// Adapt to your palette
-const CHART_COLORS = {
-  primary: "var(--accent)",
-  secondary: "var(--muted-foreground)",
-  positive: "hsl(142 70% 45%)",     // Success green
-  negative: "hsl(0 70% 50%)",       // Error red
-  warning: "hsl(38 90% 50%)",       // Warning amber
-  neutral: "hsl(220 10% 50%)",      // Neutral gray
-};
-```
-
----
-
-## Spacing
-
-### Rhythm
-Use consistent spacing multiples. Pick a base (4px or 8px) and stick to it.
-
-| Token | Value | Use |
-|-------|-------|-----|
-| `space-1` | 4px | Tight grouping |
-| `space-2` | 8px | Related elements |
-| `space-3` | 12px | Component padding |
-| `space-4` | 16px | Standard gaps |
-| `space-6` | 24px | Section breaks |
-| `space-8` | 32px | Major sections |
-| `space-12` | 48px | Page sections |
-
-### Mobile vs Desktop
-```tsx
-// Tighter on mobile, more breathing room on desktop
-<div className="p-4 md:p-6 lg:p-8">
-<div className="gap-3 md:gap-4 lg:gap-6">
-```
-
----
-
-## Backgrounds & Depth
-
-### Gradient Backgrounds
-```css
-/* Subtle depth */
-background: linear-gradient(
-  180deg,
-  hsl(220 20% 10%) 0%,
-  hsl(220 25% 8%) 100%
-);
-
-/* Radial glow */
-background: radial-gradient(
-  ellipse at top,
-  hsl(220 30% 15%) 0%,
-  hsl(220 20% 8%) 70%
-);
-```
-
-### Geometric Patterns
-```css
-/* Subtle grid */
-background-image: 
-  linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-background-size: 20px 20px;
-
-/* Dot pattern */
-background-image: radial-gradient(
-  circle,
-  rgba(255,255,255,0.05) 1px,
-  transparent 1px
-);
-background-size: 16px 16px;
-```
-
-### Layered Effects
-```css
-/* Glass effect */
-backdrop-filter: blur(12px);
-background: rgba(255, 255, 255, 0.05);
-border: 1px solid rgba(255, 255, 255, 0.1);
-```
-
----
-
-## Motion
-
-### Staggered Page Load (Wow Moment!)
-```tsx
-// Each card delays slightly more
-{items.map((item, i) => (
-  <Card 
-    key={item.id}
-    className="animate-fade-in-up"
-    style={{ animationDelay: `${i * 100}ms` }}
-  />
-))}
-```
-
-```css
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.5s ease-out forwards;
-  opacity: 0;
-}
-```
-
-### Micro-Interactions
-```css
-/* Hover lift */
-.card-interactive {
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.card-interactive:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-}
-
-/* Button press */
-.btn-press:active {
-  transform: scale(0.98);
-}
-```
-
----
-
-## Responsive Breakpoints
-
-```
-xs: < 640px    → Single column, stacked layout
-sm: 640px      → Two columns possible
-md: 768px      → Tablet layout
-lg: 1024px     → Desktop layout
-xl: 1280px     → Wide desktop
-2xl: 1536px    → Ultra-wide
-```
-
-### Mobile-First Pattern
-```tsx
-<div className="
-  grid 
-  grid-cols-1      /* Mobile: 1 column */
-  sm:grid-cols-2   /* Tablet: 2 columns */
-  lg:grid-cols-4   /* Desktop: 4 columns */
-  gap-3 
-  md:gap-4
-">
-```
-
----
-
-# UI Patterns Reference
-
-## ⚠️ These Are Patterns, Not Templates
-
-Do NOT copy these verbatim. Adapt them to each app's unique needs.
-
----
-
-## Responsive Layout Patterns
-
-### Mobile-First Page Structure
-```tsx
-<div className="min-h-screen bg-background">
-  {/* Header - sticky on mobile */}
-  <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b p-4">
-    <h1 className="text-xl font-bold">{appName}</h1>
-  </header>
-
-  {/* Main content - responsive padding */}
-  <main className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
-    {/* Content here */}
-  </main>
-
-  {/* Mobile bottom navigation (if needed) */}
-  <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-background border-t">
-    {/* Tab icons */}
-  </nav>
-</div>
-```
-
-### Responsive Grid System
-```tsx
-// KPI cards - 1 on mobile, 2 on tablet, 4 on desktop
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-
-// Main + Sidebar - stacked on mobile, side-by-side on desktop
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-  <div className="lg:col-span-2">{/* Main content */}</div>
-  <div>{/* Sidebar */}</div>
-</div>
-
-// Full-width on mobile, constrained on desktop
-<div className="w-full max-w-2xl mx-auto">
-```
-
----
-
-## State Patterns
-
-### Loading State (With Motion!)
-```tsx
-function LoadingState() {
-  return (
-    <div className="space-y-4">
-      {[...Array(3)].map((_, i) => (
-        <div 
-          key={i}
-          className="animate-pulse"
-          style={{ animationDelay: `${i * 150}ms` }}
-        >
-          <Skeleton className="h-32 w-full rounded-lg" />
-        </div>
-      ))}
-    </div>
-  );
-}
-```
-
-### Empty State (Make It Helpful!)
-```tsx
-function EmptyState({ onAction }: { onAction: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-      {/* Icon should match app's character */}
-      <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-        <IconComponent className="w-8 h-8 text-accent" />
-      </div>
-      
-      <h3 className="text-lg font-semibold mb-2">
-        {/* Specific to this app's context */}
-        No data yet
-      </h3>
-      
-      <p className="text-muted-foreground mb-6 max-w-sm">
-        {/* Helpful guidance, not generic text */}
-        Get started by adding your first item
-      </p>
-      
-      <Button onClick={onAction}>
-        Add First Item
-      </Button>
-    </div>
-  );
-}
-```
-
-### Error State (Actionable!)
-```tsx
-function ErrorState({ error, onRetry }: ErrorProps) {
-  return (
-    <Alert variant="destructive" className="my-4">
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle>Something went wrong</AlertTitle>
-      <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <span>{error.message}</span>
-        <Button variant="outline" size="sm" onClick={onRetry}>
-          Try Again
-        </Button>
-      </AlertDescription>
-    </Alert>
-  );
-}
-```
-
----
-
-## Touch-Friendly Patterns
-
-### Mobile Touch Targets
-```tsx
-// Minimum 44x44px touch targets
-<Button className="min-h-[44px] min-w-[44px]">
-
-// Larger hit areas for important actions
-<Button size="lg" className="w-full h-14 text-lg">
-  Primary Action
-</Button>
-
-// Swipeable cards (consider for lists)
-<div className="touch-pan-x overflow-x-auto snap-x">
-  {items.map(item => (
-    <div key={item.id} className="snap-start min-w-[280px]">
-      <Card />
-    </div>
-  ))}
-</div>
-```
-
-### Mobile-Optimized Forms
-```tsx
-<form className="space-y-4">
-  {/* Full-width inputs on mobile */}
-  <div className="space-y-2">
-    <Label htmlFor="name">Name</Label>
-    <Input 
-      id="name" 
-      className="h-12 text-base" /* Larger for touch */
-      autoComplete="name"
-    />
-  </div>
-
-  {/* Stack buttons on mobile, inline on desktop */}
-  <div className="flex flex-col sm:flex-row gap-2 pt-4">
-    <Button type="submit" className="flex-1 h-12">Save</Button>
-    <Button type="button" variant="outline" className="flex-1 h-12">Cancel</Button>
-  </div>
-</form>
-```
-
----
-
-## Dialog/Modal Patterns
-
-### Mobile-First Dialog
-```tsx
-<Dialog>
-  <DialogContent className="
-    sm:max-w-md 
-    /* Full screen on mobile */
-    max-h-[100dvh] sm:max-h-[85vh]
-    /* Bottom sheet on mobile */
-    fixed bottom-0 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2
-    rounded-t-xl sm:rounded-lg
-    /* Safe area for mobile */
-    pb-safe
-  ">
-    <DialogHeader>
-      <DialogTitle>Title</DialogTitle>
-    </DialogHeader>
-    
-    <div className="overflow-y-auto flex-1">
-      {/* Content */}
-    </div>
-    
-    <DialogFooter className="flex-col sm:flex-row gap-2">
-      <Button className="w-full sm:w-auto">Confirm</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-```
-
----
-
-## Data Visualization Patterns
-
-### Responsive Charts
-```tsx
-<div className="h-[200px] sm:h-[300px] lg:h-[400px]">
-  <ResponsiveContainer width="100%" height="100%">
-    <LineChart data={data}>
-      <XAxis 
-        dataKey="name" 
-        tick={{ fontSize: 12 }}
-        /* Hide some labels on mobile */
-        interval={isMobile ? 2 : 0}
-      />
-      <YAxis 
-        tick={{ fontSize: 12 }}
-        /* Narrower on mobile */
-        width={isMobile ? 40 : 60}
-      />
-      <Tooltip />
-      <Line 
-        type="monotone" 
-        dataKey="value" 
-        stroke="var(--accent)"
-        strokeWidth={2}
-        dot={!isMobile} /* Hide dots on mobile */
-      />
-    </LineChart>
-  </ResponsiveContainer>
-</div>
-```
-
-### KPI Display (Adapt to Context!)
-```tsx
-// This is a PATTERN - adapt the content and styling to your app
-function KPIDisplay({ label, value, trend, icon: Icon }: KPIProps) {
-  return (
-    <Card className="relative overflow-hidden">
-      {/* Subtle background effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent" />
-      
-      <CardContent className="p-4 sm:p-6 relative">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-1">
-              {label}
-            </p>
-            <p className="text-2xl sm:text-3xl lg:text-4xl font-bold">
-              {value}
-            </p>
-            {trend && (
-              <p className={cn(
-                "text-xs sm:text-sm mt-1",
-                trend > 0 ? "text-green-500" : "text-red-500"
-              )}>
-                {trend > 0 ? "↑" : "↓"} {Math.abs(trend)}%
-              </p>
-            )}
-          </div>
-          {Icon && (
-            <div className="p-2 sm:p-3 rounded-full bg-accent/10">
-              <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-```
-
----
-
-## Animation Patterns
-
-### Page Enter Animation
-```css
-/* Add to globals.css */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-in {
-  animation: fade-in-up 0.5s ease-out forwards;
-}
-
-/* Stagger children */
-.stagger-1 { animation-delay: 100ms; }
-.stagger-2 { animation-delay: 200ms; }
-.stagger-3 { animation-delay: 300ms; }
-```
-
-### Usage for Wow Effect
-```tsx
-<main className="space-y-6">
-  <h1 className="animate-in">Dashboard</h1>
-  
-  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-    {kpis.map((kpi, i) => (
-      <KPICard 
-        key={kpi.id}
-        {...kpi}
-        className="animate-in"
-        style={{ animationDelay: `${(i + 1) * 100}ms` }}
-      />
-    ))}
-  </div>
-  
-  <Card className="animate-in stagger-3">
-    {/* Main chart */}
-  </Card>
-</main>
+https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap
 ```
 
 ---
 
 ## Remember
 
-1. **Analyze the app first** - What does THIS user need?
-2. **Mobile first** - Start with mobile constraints
-3. **One distinctive choice** - Pick one memorable design element
-4. **Motion creates moments** - Focus on page load and key interactions
-5. **Test both devices** - Ensure it works well on phone AND desktop
+1. **Layout is everything** - Spend 80% of design time on layout
+2. **Mobile ≠ Small Desktop** - Design separate experiences
+3. **Less is more** - Remove everything that isn't essential
+4. **Guide the eye** - Clear visual hierarchy
+5. **App Store quality** - Would Apple feature this?
