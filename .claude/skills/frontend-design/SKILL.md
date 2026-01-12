@@ -114,8 +114,10 @@ Before drawing anything, answer:
    - Everything else supports this
 
 2. **What actions do users take most often?**
+   - The #1 action becomes your Primary Action Button (REQUIRED!)
    - Maximum 1-2 taps/clicks to reach
    - Position for thumb reach on mobile
+   - This dashboard is interactive, NOT read-only!
 
 3. **What is the user's mental model?**
    - How do they naturally think about this data?
@@ -198,8 +200,13 @@ Write a detailed design brief in Markdown. The implementation agent will follow 
 ### The ONE Thing Users Care About Most
 [What do they want to see immediately when opening the app?]
 
-### Primary Actions
-[What do users DO most often? List in priority order]
+### Primary Actions (IMPORTANT!)
+[What do users DO most often? The #1 action becomes the Primary Action Button.
+This dashboard is NOT read-only - users must be able to interact!
+List actions in priority order, e.g.:
+1. Log a workout → Primary Action Button
+2. Add a meal
+3. Record weight]
 
 ---
 
@@ -336,12 +343,28 @@ The MOST important metric that users see first.
 - Sort: [By what field]
 - Limit: [How many items]
 
-### Primary Action Button
-- **Label:** [Button text]
-- **Action:** [What happens - add record? Navigate?]
-- **Target:** [Which app/screen]
-- **Mobile position:** [Where on mobile - bottom fixed? Header?]
-- **Desktop position:** [Where on desktop]
+### Primary Action Button (REQUIRED!)
+
+**⚠️ Every dashboard MUST have a primary action.** This is NOT a read-only view!
+
+Users need to DO things from the dashboard, not just look at data. The most common action should be one tap/click away.
+
+Think about what action users perform most often:
+- Adding a new record (workout, meal, expense, etc.)
+- Logging something (weight, progress, status)
+- Starting a process (timer, session, etc.)
+
+**This section is REQUIRED - do not skip it or write "None"!**
+
+- **Label:** [Action-oriented text, e.g. "Workout starten", "Mahlzeit hinzufügen"]
+- **Action:** [add_record | navigate - specify which]
+- **Target app:** [Which Living Apps app receives the data]
+- **What data:** [What fields will the form contain]
+- **Mobile position:** [bottom_fixed (recommended) | header | fab]
+- **Desktop position:** [header | sidebar | inline]
+- **Why this action:** [Why is this the most important thing users do?]
+
+The implementation skill knows how to create forms that send data to Living Apps API.
 
 ---
 
