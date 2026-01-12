@@ -3,7 +3,7 @@ name: frontend-impl
 description: |
   Activate this skill when:
   - Implementing Dashboard.tsx
-  - Following design_spec.json
+  - Following design_brief.md
   - Writing React/TypeScript code
   - Integrating with Living Apps API
 allowed-tools:
@@ -17,48 +17,48 @@ allowed-tools:
 
 # Frontend Implementation Skill
 
-You are a React/TypeScript developer. Your ONLY job is to **implement exactly what design_spec.json specifies**.
+You are a React/TypeScript developer. Your ONLY job is to **implement exactly what design_brief.md describes**.
 
 ## ⚠️ CRITICAL: You Do NOT Make Design Decisions
 
-All design decisions are ALREADY MADE in `design_spec.json`. You are a translator from spec to code.
+All design decisions are ALREADY MADE in `design_brief.md`. The designer wrote detailed instructions - follow them word for word.
 
 **Your job:**
-1. Read design_spec.json
-2. Implement EXACTLY what it says
-3. Do not deviate
+1. Read design_brief.md COMPLETELY
+2. Implement EXACTLY what it describes
+3. Do not deviate or "improve"
 
 **FORBIDDEN Actions:**
-- ❌ Choosing a different font than the spec
-- ❌ Changing colors from the spec
-- ❌ Rearranging the layout differently than spec
-- ❌ Adding components not in the spec
-- ❌ Using "sensible defaults" instead of spec values
-- ❌ Using Inter, Roboto, or system fonts (unless spec says so)
+- ❌ Choosing a different font than the brief specifies
+- ❌ Changing colors from the brief
+- ❌ Rearranging the layout differently than described
+- ❌ Adding components not mentioned in the brief
+- ❌ Using "sensible defaults" instead of what the brief says
+- ❌ Using Inter, Roboto, or system fonts (unless brief says so)
+- ❌ Interpreting the brief "creatively" - implement literally
 
-**If something is unclear in the spec:**
-- Implement EXACTLY what is written
-- Do not "improve" or "interpret" the spec
-- The spec is always correct
+**The design_brief.md is written instructions from a designer. Follow them exactly.**
 
 ---
 
 ## Process
 
-### Step 1: Read the Spec CAREFULLY
+### Step 1: Read the Design Brief COMPLETELY
 
 ```bash
-cat design_spec.json
+cat design_brief.md
 ```
 
-Read and note down:
-- `theme.font_family` → Use THIS font, nothing else
-- `theme.font_url` → Load THIS URL in index.html
-- `theme.colors.*` → Copy EXACTLY to CSS variables
-- `layout.mobile` → Implement THIS structure for mobile
-- `layout.desktop` → Implement THIS structure for desktop
-- `components.hero_kpi` → This is the MAIN element
-- `visual_details.*` → Border radius, shadows, spacing
+Read the ENTIRE brief carefully. Pay attention to:
+
+- **Section 3: Theme & Colors** → Font name, URL, and all color values
+- **Section 4: Mobile Layout** → Exact structure for phone screens
+- **Section 5: Desktop Layout** → Exact structure for computer screens
+- **Section 6: Components** → Hero KPI, secondary KPIs, charts, lists
+- **Section 7: Visual Details** → Border radius, shadows, animations
+- **Section 8: CSS Variables** → Copy these EXACTLY into src/index.css
+
+The brief explains WHY decisions were made. This helps you understand intent, but your job is to implement what is written, not to interpret.
 
 ### Step 2: Read Existing Code
 
@@ -67,9 +67,49 @@ cat src/types/*.ts
 cat src/services/livingAppsService.ts
 ```
 
-### Step 3: Implement Dashboard.tsx
+### Step 3: Apply CSS Variables FIRST (CRITICAL!)
 
-Create `src/pages/Dashboard.tsx` following the spec EXACTLY:
+Before writing any React code, update the theme. Copy the CSS from **Section 8** of design_brief.md into `src/index.css`.
+
+shadcn/ui components use Tailwind CSS variables. If you don't update them, `<Card>`, `<Button>`, etc. will use **default colors** that don't match the design!
+
+```
+design_brief.md → src/index.css → Tailwind classes → shadcn components
+   (Section 8)      (CSS variables)   (bg-card, etc.)   (Card, Button)
+```
+
+#### Step 3a: Copy CSS Variables
+
+The design_brief.md Section 8 contains ready-to-copy CSS. Copy it EXACTLY:
+
+```css
+:root {
+  /* Copy ALL values from design_brief.md Section 8 */
+  --background: hsl(...);
+  --foreground: hsl(...);
+  /* etc. */
+}
+```
+
+#### Step 3b: Light Mode (Always)
+
+The design brief uses light mode. Make sure `index.html` does NOT have `class="dark"`:
+
+```html
+<html lang="de">  <!-- No "dark" class for light theme -->
+```
+
+### Step 4: Add Font
+
+Copy the font URL from **Section 3** of design_brief.md into `index.html`:
+
+```html
+<link href="[URL from Section 3]" rel="stylesheet">
+```
+
+### Step 5: Implement Dashboard.tsx
+
+Now implement the React component following the brief:
 
 ```typescript
 // 1. Imports (always use 'import type' for types!)
@@ -77,40 +117,18 @@ import { useState, useEffect } from 'react';
 import type { AppType1, AppType2 } from '@/types/app';
 import { LivingAppsService } from '@/services/livingAppsService';
 
-// 2. Use EXACT font from design_spec.json (not Inter!)
-// 3. Use EXACT colors from design_spec.json
-// 4. Use EXACT layout from design_spec.json
-// 5. Implement EXACT KPIs from design_spec.json
-// 6. Implement EXACT chart from design_spec.json
+// 2. Follow Section 4 (Mobile) and Section 5 (Desktop) for layout
+// 3. Follow Section 6 for components (Hero, KPIs, Charts, Lists)
+// 4. Follow Section 7 for visual details (radius, shadows, animations)
 ```
 
-### Step 4: Apply Theme to CSS Variables (CRITICAL!)
+### Step 6: Build and Deploy
 
-shadcn/ui components use **Tailwind CSS variables** for colors. These are defined in `src/index.css`. If you don't update them, components like `<Card>` will use **default colors** that don't match your design!
-
-#### How the CSS Variable System Works
-
-```
-design_spec.json → src/index.css → Tailwind classes → shadcn components
-    (your design)     (CSS variables)   (bg-card, text-foreground)   (Card, Button, etc.)
+```bash
+npm run build
 ```
 
-shadcn components use classes like `bg-card`, `text-foreground`, `border-border`. These classes read from CSS variables like `--card`, `--foreground`, `--border`. If you don't set these variables, the components use defaults that may not match your design.
-
-#### Step 4a: Determine Light or Dark Mode
-
-Look at `design_spec.json → theme.mode`:
-- If `"dark"`: Add `class="dark"` to `<html>` in `index.html`
-- If `"light"`: Remove `class="dark"` (or leave default)
-
-```html
-<!-- index.html -->
-<html lang="de" class="dark">  <!-- Add 'dark' for dark themes! -->
-```
-
-#### Step 4b: Update CSS Variables in `src/index.css`
-
-Map the design_spec colors to the CSS variables. The structure in `src/index.css`:
+Then call `mcp__deploy_tools__deploy_to_github`
 
 ```css
 :root {
@@ -124,7 +142,7 @@ Map the design_spec colors to the CSS variables. The structure in `src/index.css
 
 **Color Mapping Table:**
 
-| design_spec.json path | CSS Variable | Used by |
+| design_brief.md section | CSS Variable | Used by |
 |----------------------|--------------|---------|
 | `theme.colors.background` | `--background` | `bg-background`, body |
 | `theme.colors.foreground` | `--foreground` | `text-foreground`, body text |
@@ -139,7 +157,7 @@ Map the design_spec colors to the CSS variables. The structure in `src/index.css
 
 #### Step 4c: Example - Applying a Dark Theme
 
-If design_spec.json says:
+If design_brief.md says:
 ```json
 {
   "theme": {
@@ -216,13 +234,13 @@ The CSS variables **MUST use complete color functions**, not raw values!
 - Browser ignores invalid colors → falls back to white/transparent
 - Result: Light backgrounds with dark text = invisible!
 
-**Always copy the FULL hsl() or oklch() function from design_spec.json, including the function name!**
+**Always copy the FULL hsl() function from design_brief.md Section 8, including the function name!**
 
 #### Why This Matters
 
 Without this step:
 - `<Card>` uses default background (light/white)
-- Text colors (from design_spec) are for dark backgrounds
+- Text colors (from design_brief) are for dark backgrounds
 - Result: **Light text on light cards = invisible!**
 
 With this step:
@@ -232,7 +250,7 @@ With this step:
 
 ### Step 5: Add Font from Spec
 
-In `index.html`, add the font URL from design_spec.json:
+In `index.html`, add the font URL from design_brief.md Section 3:
 ```html
 <link href="{font_url from spec}" rel="stylesheet">
 ```
@@ -287,30 +305,31 @@ const dateForAPI = formData.date + 'T12:00';
 
 ## Implementation Checklist
 
-Before completing, verify EACH item against design_spec.json:
+Before completing, verify EACH item against design_brief.md:
 
 ### Theme Verification (CRITICAL!)
-- [ ] Font in `index.html` is EXACTLY `design_spec.json → theme.font_url` (NOT Inter or Roboto!)
-- [ ] Font-family in CSS matches EXACTLY `design_spec.json → theme.font_family`
-- [ ] `index.html` has correct class (dark/light based on `theme.mode`)
-- [ ] ALL CSS variables in `src/index.css` match `design_spec.json → theme.colors.*`
+- [ ] Font in `index.html` is EXACTLY from design_brief.md Section 3 (NOT Inter or Roboto!)
+- [ ] Font-family in CSS matches EXACTLY design_brief.md Section 3
+- [ ] `index.html` has NO "dark" class (light theme)
+- [ ] ALL CSS variables in `src/index.css` copied EXACTLY from design_brief.md Section 8
 - [ ] Colors are complete hsl() functions (not raw values)
 
 ### Layout Verification
-- [ ] Mobile layout matches EXACTLY `design_spec.json → layout.mobile`
-- [ ] Desktop layout matches EXACTLY `design_spec.json → layout.desktop`
-- [ ] Hero element is what spec says (`components.hero_kpi`)
-- [ ] Section order matches spec
+- [ ] Mobile layout matches EXACTLY design_brief.md Section 4
+- [ ] Desktop layout matches EXACTLY design_brief.md Section 5
+- [ ] Hero element is what Section 6 describes
+- [ ] Section order matches the brief
 
 ### Components Verification
-- [ ] KPIs match EXACTLY `design_spec.json → components.hero_kpi` and `secondary_kpis`
-- [ ] Chart type matches EXACTLY `design_spec.json → components.chart.type`
-- [ ] Primary action matches EXACTLY `design_spec.json → components.primary_action`
+- [ ] Hero KPI matches EXACTLY design_brief.md Section 6 "Hero KPI"
+- [ ] Secondary KPIs match EXACTLY design_brief.md Section 6
+- [ ] Chart matches EXACTLY design_brief.md Section 6 "Chart"
+- [ ] Primary action matches EXACTLY design_brief.md Section 6
 
 ### Visual Details Verification
-- [ ] Border radius matches `design_spec.json → visual_details.border_radius`
-- [ ] Shadow style matches `design_spec.json → visual_details.shadow_style`
-- [ ] Animation matches `design_spec.json → visual_details.animation_style`
+- [ ] Border radius matches design_brief.md Section 7
+- [ ] Shadow style matches design_brief.md Section 7
+- [ ] Animations match design_brief.md Section 7
 
 ### Technical
 - [ ] `npm run build` passes

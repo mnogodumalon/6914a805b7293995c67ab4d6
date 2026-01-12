@@ -28,16 +28,16 @@ Read `app_metadata.json` to understand:
 - What would be most valuable to show?
 
 ### Step 3: Design (Use frontend-design Skill)
-Create `design_spec.json` with concrete design decisions:
-- What KPIs matter for this user
+Create `design_brief.md` with detailed written design decisions:
+- What KPIs matter for this user and WHY
 - What visualizations make sense for this data
-- What the primary action should be
-- Theme, colors, layout
+- Mobile vs Desktop layout (described separately!)
+- Theme, colors, typography (with ready-to-copy CSS variables)
 
 See `.claude/skills/frontend-design/SKILL.md`
 
 ### Step 4: Implement (Use frontend-impl Skill)
-Create `src/pages/Dashboard.tsx` following design_spec.json exactly.
+Create `src/pages/Dashboard.tsx` following design_brief.md EXACTLY word for word.
 
 See `.claude/skills/frontend-impl/SKILL.md`
 
