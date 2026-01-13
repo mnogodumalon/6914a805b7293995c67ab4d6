@@ -400,9 +400,9 @@ Design mobile as a COMPLETELY SEPARATE experience, not squeezed desktop.
 ### Touch Targets
 [Any specific notes about button sizes, tap areas?]
 
-### Interactive Elements
-[Which elements are tappable to reveal more details?
-Users expect to tap on important data to drill down.]
+### Interactive Elements (if applicable)
+[If any elements should be tappable to reveal more details, note them here.
+Only add drill-down where there's actually more information to show.]
 
 ---
 
@@ -433,9 +433,9 @@ This helps the implementer understand the exact layout structure.]
 ### What Appears on Hover
 [What extra information is revealed when hovering over elements?]
 
-### Clickable/Interactive Areas
-[Which elements open detail views or dialogs when clicked?
-Important data should be clickable for drill-down.]
+### Clickable/Interactive Areas (if applicable)
+[If any elements should open detail views when clicked, note them here.
+Only add where it provides additional useful information.]
 
 ---
 
@@ -620,9 +620,8 @@ Before finalizing design_brief.md:
 - [ ] Would this get featured in the App Store?
 
 ### Interactivity
-- [ ] Is important data marked as clickable/interactive?
-- [ ] Are drill-down interactions specified?
-- [ ] Do users have access to ALL information through the dashboard?
+- [ ] Is the primary action clearly defined?
+- [ ] Are clickable elements marked where drill-down adds value?
 
 ### Information
 - [ ] Is the visual hierarchy clear?
@@ -653,4 +652,3 @@ Before finalizing design_brief.md:
 7. **Mobile ≠ Small Desktop** - Separate experiences
 8. **One memorable detail** - What makes this special?
 9. **App Store quality** - Would Apple feature this?
-10. **Data is interactive** - Users click to drill down, not just look
