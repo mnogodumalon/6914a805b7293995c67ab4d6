@@ -42,39 +42,38 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: hsl(40 30% 96%);
-  --foreground: hsl(222 30% 18%);
+  --radius: 0.5rem;
+  --background: hsl(35 40% 97%);
+  --foreground: hsl(20 15% 15%);
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(222 30% 18%);
+  --card-foreground: hsl(20 15% 15%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(222 30% 18%);
-  --primary: hsl(222 47% 31%);
+  --popover-foreground: hsl(20 15% 15%);
+  --primary: hsl(16 70% 50%);
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(40 20% 93%);
-  --secondary-foreground: hsl(222 30% 18%);
-  --muted: hsl(40 20% 93%);
-  --muted-foreground: hsl(222 15% 50%);
-  --accent: hsl(36 95% 52%);
-  --accent-foreground: hsl(222 30% 18%);
+  --secondary: hsl(35 25% 93%);
+  --secondary-foreground: hsl(20 15% 15%);
+  --muted: hsl(35 25% 93%);
+  --muted-foreground: hsl(20 10% 45%);
+  --accent: hsl(12 80% 62%);
+  --accent-foreground: hsl(20 15% 15%);
   --destructive: hsl(0 72% 51%);
-  --border: hsl(40 20% 88%);
-  --input: hsl(40 20% 88%);
-  --ring: hsl(222 47% 31%);
-  --chart-1: hsl(222 47% 31%);
-  --chart-2: hsl(36 95% 52%);
-  --chart-3: hsl(152 55% 42%);
-  --chart-4: hsl(40 20% 70%);
-  --chart-5: hsl(222 15% 50%);
-  --success: hsl(152 55% 42%);
-  --sidebar: hsl(0 0% 100%);
-  --sidebar-foreground: hsl(222 30% 18%);
-  --sidebar-primary: hsl(222 47% 31%);
+  --border: hsl(30 20% 90%);
+  --input: hsl(30 20% 90%);
+  --ring: hsl(16 70% 50%);
+  --chart-1: hsl(16 70% 50%);
+  --chart-2: hsl(152 55% 42%);
+  --chart-3: hsl(12 80% 62%);
+  --chart-4: hsl(35 60% 60%);
+  --chart-5: hsl(20 15% 30%);
+  --sidebar: hsl(35 40% 97%);
+  --sidebar-foreground: hsl(20 15% 15%);
+  --sidebar-primary: hsl(16 70% 50%);
   --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(40 20% 93%);
-  --sidebar-accent-foreground: hsl(222 30% 18%);
-  --sidebar-border: hsl(40 20% 88%);
-  --sidebar-ring: hsl(222 47% 31%);
+  --sidebar-accent: hsl(35 25% 93%);
+  --sidebar-accent-foreground: hsl(20 15% 15%);
+  --sidebar-border: hsl(30 20% 90%);
+  --sidebar-ring: hsl(16 70% 50%);
 }
 
 .dark {
@@ -117,6 +116,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Outfit', sans-serif;
   }
 }

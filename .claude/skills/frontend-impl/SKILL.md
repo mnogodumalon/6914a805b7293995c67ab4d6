@@ -334,10 +334,9 @@ Before completing, verify EACH item against design_brief.md:
 - [ ] Colors are complete hsl() functions (not raw values)
 
 ### Layout Verification
-- [ ] Mobile layout matches EXACTLY design_brief.md Section 4 (check asymmetry!)
-- [ ] Desktop layout matches EXACTLY design_brief.md Section 5 (check column percentages!)
-- [ ] Hero element is dominant as described (size, position, whitespace)
-- [ ] Layout is NOT a boring equal-grid (verify asymmetry exists!)
+- [ ] Mobile layout matches EXACTLY design_brief.md Section 4
+- [ ] Desktop layout matches EXACTLY design_brief.md Section 5
+- [ ] Hero element stands out as described
 - [ ] Section order matches the brief
 
 ### Components Verification
