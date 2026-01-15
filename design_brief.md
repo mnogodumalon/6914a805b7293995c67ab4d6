@@ -1,181 +1,151 @@
-# Design Brief: Fitness & Ernährungs-Tracker
+# Design Brief: Fitness & Ernaehrung Dashboard
 
 ## 1. App Analysis
 
 ### What This App Does
-A comprehensive fitness and nutrition tracking application that helps users monitor their workouts, log exercises with sets/reps/weight, track daily nutrition intake (calories, protein, carbs, fat), record body measurements over time, and set personal fitness goals. It's designed for people who take their fitness seriously and want data-driven insights into their progress.
+This app tracks training sessions, individual exercise sets, nutrition intake, body measurements, and personal goals. It is a daily fitness companion that helps users stay consistent with workouts and nutrition, and see how their body metrics respond over time.
 
 ### Who Uses This
-Fitness enthusiasts who regularly go to the gym, track their workouts, and care about nutrition. They want to see their progress at a glance, understand trends, and quickly log new data. These users check their app multiple times daily - before workouts, after meals, and when weighing themselves.
+A non-technical fitness enthusiast who wants quick confirmation that today is on track and a simple way to log meals without digging through forms.
 
 ### The ONE Thing Users Care About Most
-**Weekly training consistency** - "Am I hitting my workout goal this week?" This is the fundamental question every fitness user asks. Everything else (nutrition, body metrics) supports this core goal.
+"Bin ich heute im Plan?" Specifically: calories (and protein) consumed today compared to the daily goal.
 
 ### Primary Actions (IMPORTANT!)
-1. **Log Workout** → Primary Action Button - This is what users do most: record that they trained today
-2. Quick-add meal (secondary)
-3. Record body weight (tertiary)
+1. Mahlzeit hinzufuegen -> Primary Action Button
+2. Workout loggen
+3. Koerperdaten eintragen
 
 ---
 
 ## 2. What Makes This Design Distinctive
 
 ### Visual Identity
-A warm, energetic fitness aesthetic built on a soft cream background with **terracotta orange** as the primary accent. This creates a grounded, earthy feel that's motivating without being aggressive - perfect for sustainable fitness habits. The warmth of terracotta evokes energy and movement, while the cream base keeps things calm and readable. Subtle coral tints in secondary elements add depth without competing with the primary accent.
+A warm linen background with deep pine-green actions and copper accents creates a grounded, premium fitness feel. The interface is calm and minimal, but the hero metric uses a bold, circular progress ring that feels like a training gauge, giving the dashboard a signature visual cue.
 
 ### Layout Strategy
-**Asymmetric hero-focused layout.** The weekly training progress dominates the top third of the viewport with a large circular progress ring - this immediately answers "How am I doing this week?" Everything else supports this hero:
-- On mobile: vertical stack with clear visual hierarchy through size variation
-- On desktop: 2/3 + 1/3 split with hero and chart on the left, activity feed on the right
-
-The hero uses **4x the visual weight** of secondary elements through size, color saturation, and whitespace isolation. Secondary KPIs are displayed as compact inline items (not full cards) to avoid visual competition.
+The layout is intentionally asymmetric: a large hero card dominates the left, while a stacked column of smaller KPI cards on the right creates rhythm and visual tension. The hero is emphasized by size, a subtle gradient, and a conic progress ring. Secondary elements are grouped into clear sections (progress, trends, recents) with generous spacing so they support the hero without competing for attention.
 
 ### Unique Element
-**The training progress ring** - A thick 12px stroke circular progress indicator with rounded caps, filled with a gradient from terracotta to coral. The center displays the fraction "3/5" in large bold typography with "Trainings diese Woche" as muted subtext. A subtle drop shadow gives it depth, making it feel almost physical - like a medal you're earning.
+The hero KPI includes a thick conic gradient ring with a centered percentage and a small macro chip row beneath it. This "energy ring" is the signature element that makes the dashboard feel custom-built rather than a generic grid of cards.
 
 ---
 
 ## 3. Theme & Colors
 
 ### Font
-- **Family:** Outfit
-- **URL:** `https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap`
-- **Why this font:** Outfit has a friendly, rounded character that feels approachable for fitness apps while maintaining excellent readability. Its geometric base gives it a modern, clean feel, and the weight range allows for strong typographic hierarchy.
+- **Family:** Space Grotesk
+- **URL:** `https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap`
+- **Why this font:** It feels modern and energetic without being cold, and its sharp geometry matches fitness data while staying highly readable.
 
 ### Color Palette
 All colors as complete hsl() functions:
 
 | Purpose | Color | CSS Variable |
 |---------|-------|--------------|
-| Page background | `hsl(35 40% 97%)` | `--background` |
-| Main text | `hsl(20 15% 15%)` | `--foreground` |
-| Card background | `hsl(0 0% 100%)` | `--card` |
-| Card text | `hsl(20 15% 15%)` | `--card-foreground` |
-| Borders | `hsl(30 20% 90%)` | `--border` |
-| Primary action (terracotta) | `hsl(16 70% 50%)` | `--primary` |
-| Text on primary | `hsl(0 0% 100%)` | `--primary-foreground` |
-| Accent highlight (coral) | `hsl(12 80% 62%)` | `--accent` |
-| Muted background | `hsl(35 25% 93%)` | `--muted` |
-| Muted text | `hsl(20 10% 45%)` | `--muted-foreground` |
-| Success/positive (green) | `hsl(152 55% 42%)` | (component use) |
-| Error/negative | `hsl(0 72% 51%)` | `--destructive` |
+| Page background | `hsl(36 33% 97%)` | `--background` |
+| Main text | `hsl(24 16% 14%)` | `--foreground` |
+| Card background | `hsl(40 40% 99%)` | `--card` |
+| Card text | `hsl(24 16% 14%)` | `--card-foreground` |
+| Borders | `hsl(30 18% 86%)` | `--border` |
+| Primary action | `hsl(164 45% 24%)` | `--primary` |
+| Text on primary | `hsl(40 50% 98%)` | `--primary-foreground` |
+| Accent highlight | `hsl(18 70% 52%)` | `--accent` |
+| Muted background | `hsl(36 20% 92%)` | `--muted` |
+| Muted text | `hsl(24 10% 46%)` | `--muted-foreground` |
+| Success/positive | `hsl(142 45% 40%)` | (component use) |
+| Error/negative | `hsl(0 70% 52%)` | `--destructive` |
 
 ### Why These Colors
-The terracotta-coral palette creates warmth and energy - feelings that motivate fitness activity. The cream background (not pure white) reduces eye strain for an app that users check frequently throughout the day. The earthy tones feel grounded and sustainable, avoiding the aggressive "gym bro" aesthetic of neon colors.
+Warm neutrals keep the interface approachable and calm, while the deep pine primary feels strong and athletic. The copper accent is used sparingly for highlights and the hero ring, creating a memorable, premium detail.
 
 ### Background Treatment
-Subtle warm off-white (`hsl(35 40% 97%)`) - not pure white. This slight cream tint creates warmth and reduces harsh contrast with the terracotta accents. No gradients or textures on the main background to keep focus on content.
+A subtle, layered radial gradient on the page wrapper: warm copper glow in the top-right and a faint pine tint in the bottom-left. This adds depth without looking like a colored background.
 
 ---
 
 ## 4. Mobile Layout (Phone)
 
+Design mobile as a COMPLETELY SEPARATE experience, not squeezed desktop.
+
 ### Layout Approach
-Hero-dominant single column. The progress ring takes ~35% of the first viewport, creating immediate visual impact. Below that, compact inline stats prevent the "grid of identical cards" look. Size variation is dramatic: hero text is 48px, secondary KPIs are 20px.
+The hero dominates the first viewport with a large calorie ring and big numbers. Secondary KPIs appear as a compact vertical stack under the hero. Lists follow in a single-column flow with generous spacing.
 
 ### What Users See (Top to Bottom)
 
 **Header:**
-- Title "Fitness Tracker" left-aligned, semi-bold 600 weight
-- Primary action button "Workout starten" on the right as a filled terracotta button with plus icon
-- Height: 56px with comfortable padding
+- App title "Fitness & Ernaehrung" left
+- Today date (dd.MM.yyyy) right
+- No primary button in header (primary action is bottom-fixed)
 
 **Hero Section (The FIRST thing users see):**
-- Large circular progress ring (180px diameter) centered
-- 12px stroke width, terracotta gradient fill, rounded caps
-- Inside center: Large "3/5" (48px bold) with "Trainings diese Woche" below (14px muted)
-- Below ring: "Ziel: 5x pro Woche" in small muted text
-- Generous whitespace: 24px padding above and below
-- Why this is the hero: Training consistency is THE metric fitness users obsess over. Every workout logged brings satisfaction.
+- Large card with "Kalorien heute" and the big number (48px), plus a conic ring on the right
+- Progress ring fills based on goal percentage, center shows percentage
+- Below the number: "Ziel: X kcal" and a row of 3 macro chips (Protein, Carbs, Fett)
+- This card should take ~55-60% of the first viewport height
 
-**Section 2: Today's Snapshot**
-- Horizontal scroll row of 3 compact stat items (not cards!)
-- Each stat: icon + number + label, inline layout
-- Stats shown: Kalorien heute (from Ernährung), Protein heute (g), Letztes Gewicht (kg from Körperdaten)
-- Background: subtle muted pill shapes, not full card borders
-- This creates contrast with the hero through compactness
+**Section 2: Wochen-Training**
+- A compact stack of 3 mini cards:
+  - Workouts diese Woche
+  - Saetze diese Woche
+  - Letztes Gewicht
 
-**Section 3: Letzte Aktivitäten**
-- Section title "Letzte Aktivitäten" with small "Alle" link
-- List of last 5 combined activities (workouts + meals) sorted by date
-- Each item: Date badge, activity type icon, brief description
-- Compact vertical list, not cards - just subtle bottom borders
-- Shows what was done recently to maintain accountability
+**Section 3: Gewichtstrend**
+- Short line chart card, reduced height (~180px)
 
-**Section 4: Gewichtsverlauf (mini chart)**
-- Small area chart (150px height) showing last 14 days of weight
-- Minimal axis labels, terracotta fill with gradient fade
-- "Gewichtsverlauf" title above
-- Tapping opens detail view (stretch goal - basic display first)
+**Section 4: Letzte Workouts**
+- Simple list cards (max 3 items)
+
+**Section 5: Letzte Mahlzeiten**
+- Simple list cards (max 3 items)
+
+**Section 6: Aktive Ziele**
+- Short list of goal entries (max 2)
+
+**Section 7: Uebungen Atlas**
+- Compact list showing top muscle groups (max 4)
 
 **Bottom Navigation / Action:**
-- Floating action button (FAB) bottom-right: "+" icon in terracotta
-- 56px diameter, subtle shadow
-- Opens quick-add menu (workout, meal, weight)
+- Fixed full-width primary button "Mahlzeit hinzufuegen" with 52px height
 
-### What is HIDDEN on Mobile
-- Detailed workout logs breakdown (accessible via tap)
-- Body measurement details beyond weight
-- Historical charts beyond 14 days
-- Nutrition macro breakdown chart
+### Mobile-Specific Adaptations
+- Lists are limited to 3 items (2 for goals) with a subtle "Mehr anzeigen" hint text (non-clickable)
+- The hero card collapses macro chips into a single row
 
 ### Touch Targets
-- All interactive elements minimum 44px touch target
-- FAB: 56px diameter
-- List items: full width tap area, minimum 48px height
+- Primary button height 52px
+- List items minimum height 44px
 
 ### Interactive Elements (if applicable)
-- Activity list items tap to show detail modal
-- Progress ring tap to see weekly workout list
-- Weight chart tap to see full history
+- Only the primary action is tappable; lists are read-only summaries
 
 ---
 
 ## 5. Desktop Layout
 
 ### Overall Structure
-**2-column asymmetric layout: 65% left (main content) + 35% right (activity feed)**
-
-Left column contains the hero and data visualizations. Right column is a continuous activity stream. This creates clear visual hierarchy while using horizontal space meaningfully.
-
-Eye flow: Hero (top-left) → Stats row → Charts → Activity feed (right column)
+- 12-column grid with strong asymmetry
+- Eye goes: hero (left) -> KPI stack (right) -> weight chart -> recent workouts -> meals/goals
+- Visual interest comes from the oversized hero and a vertical stack of smaller cards on the right
 
 ### Section Layout
-
-**Top area (full width across both columns):**
-- Header bar with "Fitness & Ernährungs-Tracker" title and "Workout starten" button
-- Subtle bottom border, height 64px
-
-**Left column (65%):**
-
-*Hero row:*
-- Progress ring (220px diameter) on the left
-- Next to it: stacked secondary KPIs as compact text blocks (not cards)
-- KPIs: "Trainings: 3/5 diese Woche", "Ø Dauer: 52 min", "Stimmung: Meist gut"
-
-*Charts section (below hero):*
-- Two side-by-side cards at 50% each
-- Left card: "Gewichtsverlauf" line chart (last 30 days)
-- Right card: "Kalorien diese Woche" bar chart (7 days)
-
-*Macro breakdown (below charts):*
-- Single wide card showing today's nutrition: calories, protein, carbs, fat as horizontal progress bars against goals
-
-**Right column (35%):**
-- Sticky header "Letzte Aktivitäten"
-- Scrollable activity feed showing last 10 activities
-- Each activity: timestamp, type badge, description
-- "Mehr laden" button at bottom
+- **Top header:** Title + date on left, primary action button on right
+- **Row 1:**
+  - Hero KPI card spans 7 columns (left)
+  - Right column (5 cols) stacked cards: Workouts diese Woche, Saetze diese Woche, Letztes Gewicht, Uebungen Katalog
+- **Row 2:**
+  - Gewichtstrend chart spans 7 columns (left)
+  - Letzte Workouts list spans 5 columns (right)
+- **Row 3:**
+  - Letzte Mahlzeiten list spans 7 columns (left)
+  - Aktive Ziele list spans 5 columns (right)
 
 ### What Appears on Hover
-- Activity items: subtle background highlight, cursor pointer
-- Chart data points: tooltip with exact value
-- KPI values: subtle underline indicating clickable
+- Cards lift slightly with a softer shadow
+- List rows get a subtle background tint
 
 ### Clickable/Interactive Areas (if applicable)
-- Progress ring → opens weekly workouts detail
-- Activity items → opens full record detail in modal
-- Chart segments → shows detailed view for that time period
+- Only the primary action button opens a dialog form
 
 ---
 
@@ -184,103 +154,120 @@ Eye flow: Hero (top-left) → Stats row → Charts → Activity feed (right colu
 ### Hero KPI
 The MOST important metric that users see first.
 
-- **Title:** Trainings diese Woche
-- **Data source:** Workouts app (filtered for current week, excluding rest_day=true)
-- **Calculation:** Count of workouts this week / goal from Ziele (trainingstage_pro_woche)
-- **Display:** Circular progress ring with fraction in center. Ring fills proportionally (3/5 = 60% filled). Large 48px bold number, 14px muted subtitle.
-- **Context shown:** Goal progress (e.g., "3 von 5 Trainings"), small text showing streak or consistency
-- **Why this is the hero:** Weekly training consistency is the #1 metric fitness users track. It answers "Am I on track?" instantly.
+- **Title:** Kalorien heute
+- **Data source:** Ernaehrung + Ziele
+- **Calculation:** Sum of today's Ernaehrung.kalorien compared to daily goal from the latest Ziele record with status "aktiv" (fallback to latest record if none active)
+- **Display:** Large number (48px), conic progress ring on the right with centered percentage, and a macro chip row (Protein/Carbs/Fett)
+- **Context shown:** "Ziel: X kcal" and protein progress "Protein: Y / Ziel"
+- **Why this is the hero:** It answers the user's daily question immediately: are they on track with nutrition today?
 
 ### Secondary KPIs
 
-**Kalorien heute**
-- Source: Ernährung (filtered for today's date)
-- Calculation: Sum of kalorien field for today
-- Format: number with "kcal" suffix
-- Display: Compact inline stat with flame icon
+**Workouts diese Woche**
+- Source: Workouts
+- Calculation: Count of workouts in the current week (exclude rest_day=true)
+- Format: number
+- Display: Small card with subtext "Ziel: X Tage" from Ziele.trainingstage_pro_woche
 
-**Protein heute**
-- Source: Ernährung (filtered for today's date)
-- Calculation: Sum of protein field for today
-- Format: number with "g" suffix
-- Display: Compact inline stat with protein icon
+**Saetze diese Woche**
+- Source: Workout-Logs + Workouts
+- Calculation: Count of workout_logs whose related workout date is in the current week
+- Format: number
+- Display: Small card
 
-**Aktuelles Gewicht**
-- Source: Körperdaten (latest entry by datum)
-- Calculation: Latest gewicht_kg value
-- Format: number with "kg" suffix, one decimal
-- Display: Compact inline stat with scale icon
+**Letztes Gewicht**
+- Source: Koerperdaten
+- Calculation: Latest gewicht_kg by datum; show delta vs previous entry
+- Format: number with "kg"
+- Display: Small card with delta text
 
-**Durchschnittliche Dauer**
-- Source: Workouts (this week, excluding rest days)
-- Calculation: Average of dauer_minuten
-- Format: number with "min" suffix
-- Display: Text only, shown near hero on desktop
+**Uebungen Katalog**
+- Source: Uebungen
+- Calculation: Count of exercises + top muscle group by frequency
+- Format: number
+- Display: Small card with secondary line "Top: [Muskelgruppe]"
 
-### Chart (if applicable)
+### Chart
+- **Type:** Line chart (weight trend) because it best shows gradual changes over time
+- **Title:** Gewichtstrend
+- **What question it answers:** Is body weight trending up, down, or stable?
+- **Data source:** Koerperdaten
+- **X-axis:** datum (formatted dd.MM)
+- **Y-axis:** gewicht_kg
+- **Mobile simplification:** Fewer ticks, shorter height
 
-**Gewichtsverlauf**
-- **Type:** Area chart - shows trend smoothly, the filled area emphasizes direction of change
-- **Title:** Gewichtsverlauf
-- **What question it answers:** "Is my weight trending in the right direction?"
-- **Data source:** Körperdaten app
-- **X-axis:** datum field, formatted as "DD.MM", last 14 days on mobile, 30 days on desktop
-- **Y-axis:** gewicht_kg, auto-scaled with 2kg padding
-- **Mobile simplification:** 14 days only, smaller height (150px), minimal labels
+### Lists/Tables
 
-**Kalorien diese Woche (Desktop only)**
-- **Type:** Bar chart - good for comparing discrete daily values
-- **Title:** Kalorien diese Woche
-- **What question it answers:** "How consistent is my eating this week?"
-- **Data source:** Ernährung app, grouped by datum
-- **X-axis:** Day of week (Mo, Di, Mi, Do, Fr, Sa, So)
-- **Y-axis:** Sum of kalorien per day
-- **Mobile simplification:** Not shown on mobile
+**Letzte Workouts**
+- Purpose: Quick recall of recent sessions and exercise focus
+- Source: Workouts + Workout-Logs + Uebungen
+- Fields shown: date, training type, duration (min), total sets, top 2 exercise names
+- Mobile style: simple list cards
+- Desktop style: compact list inside card
+- Sort: by datum desc (fallback createdat)
+- Limit: 5 desktop, 3 mobile
 
-### Lists/Tables (if applicable)
+**Letzte Mahlzeiten**
+- Purpose: Verify nutrition logging and calorie intake
+- Source: Ernaehrung
+- Fields shown: date, meal type, calories, protein
+- Mobile style: simple list cards
+- Desktop style: compact list inside card
+- Sort: by datum desc
+- Limit: 5 desktop, 3 mobile
 
-**Letzte Aktivitäten**
-- Purpose: Shows recent activity to maintain accountability and quick reference
-- Source: Combined from Workouts (typ, datum, dauer_minuten) + Ernährung (mahlzeit_typ, datum, kalorien)
-- Fields shown: Date (relative, e.g., "Heute", "Gestern"), Activity type badge, Brief description
-- Mobile style: Simple list with subtle dividers
-- Desktop style: Card-based list in right column
-- Sort: By datum descending (newest first)
-- Limit: 5 on mobile, 10 on desktop
+**Aktive Ziele**
+- Purpose: Keep goals visible and actionable
+- Source: Ziele
+- Fields shown: status, taeglich_kalorien, taeglich_protein, trainingstage_pro_woche, schlaf_ziel_stunden, notizen (truncated)
+- Mobile style: compact list
+- Desktop style: list in card
+- Sort: aktiv first, then newest
+- Limit: 3 desktop, 2 mobile
+
+**Uebungen Atlas**
+- Purpose: Show exercise balance across muscle groups
+- Source: Uebungen
+- Fields shown: muscle group name + count (top 4)
+- Mobile style: compact list with tiny bars
+- Desktop style: same list
+- Sort: count desc
+- Limit: 4
+
+**Empty + Error States**
+- Empty lists/cards use the dashed Empty component with a short, helpful sentence (no extra buttons)
+- Global error state uses a destructive alert with a single "Neu laden" retry button
 
 ### Primary Action Button (REQUIRED!)
 
-- **Label:** Workout starten
+- **Label:** Mahlzeit hinzufuegen
 - **Action:** add_record
-- **Target app:** Workouts
-- **What data:** Dialog with fields:
-  - datum (date picker, default today)
-  - typ (select from lookup: Push, Pull, Beine, etc.)
-  - dauer_minuten (number input)
-  - stimmung (select: Schlecht, Okay, Gut, Brutal)
-  - rest_day (checkbox for rest days)
-- **Mobile position:** Header (compact button) + FAB bottom-right for quick access
-- **Desktop position:** Header right side
-- **Why this action:** Logging workouts is THE most frequent action. Users want to record immediately after training while details are fresh.
+- **Target app:** Ernaehrung
+- **What data:** datum, mahlzeit_typ, beschreibung, kalorien, protein, carbs, fett
+- **Mobile position:** bottom_fixed
+- **Desktop position:** header
+- **Why this action:** Nutrition logging happens multiple times a day and drives the hero KPI
 
 ---
 
 ## 7. Visual Details
 
 ### Border Radius
-Rounded (8px) - friendly but not childish. Cards use 12px for slight emphasis.
+rounded (10px)
 
 ### Shadows
-Subtle - cards have `shadow-sm` (0 1px 2px rgba(0,0,0,0.05)). On hover, elevate to `shadow-md`. The FAB has more pronounced shadow for depth.
+subtle, soft shadow for cards; slightly stronger on hover
 
 ### Spacing
-Normal to spacious - 16px base unit. Cards have 20px padding. Sections separated by 32px. The hero has extra breathing room (40px vertical padding).
+spacious (24px between sections, 16px inside cards)
 
 ### Animations
-- **Page load:** Stagger fade-in, hero first then secondary elements 100ms apart
-- **Hover effects:** Cards lift slightly (translateY -2px), subtle shadow increase, 150ms transition
-- **Tap feedback:** Scale down to 0.98 on active, immediate return
-- **Progress ring:** Animate fill from 0 to current value over 800ms on load with ease-out
+- **Page load:** staggered fade-up for cards (150ms stagger)
+- **Hover effects:** card lifts + shadow increases
+- **Tap feedback:** primary button scales to 0.98
+
+### Feedback
+- Success actions show a small toast in the top-right with the primary color accent
 
 ---
 
@@ -290,30 +277,24 @@ The implementer MUST copy these values exactly into `src/index.css`:
 
 ```css
 :root {
-  --background: hsl(35 40% 97%);
-  --foreground: hsl(20 15% 15%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(20 15% 15%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(20 15% 15%);
-  --primary: hsl(16 70% 50%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(35 25% 93%);
-  --secondary-foreground: hsl(20 15% 15%);
-  --muted: hsl(35 25% 93%);
-  --muted-foreground: hsl(20 10% 45%);
-  --accent: hsl(12 80% 62%);
-  --accent-foreground: hsl(20 15% 15%);
-  --destructive: hsl(0 72% 51%);
-  --border: hsl(30 20% 90%);
-  --input: hsl(30 20% 90%);
-  --ring: hsl(16 70% 50%);
-  --radius: 0.5rem;
-  --chart-1: hsl(16 70% 50%);
-  --chart-2: hsl(152 55% 42%);
-  --chart-3: hsl(12 80% 62%);
-  --chart-4: hsl(35 60% 60%);
-  --chart-5: hsl(20 15% 30%);
+  --background: hsl(36 33% 97%);
+  --foreground: hsl(24 16% 14%);
+  --card: hsl(40 40% 99%);
+  --card-foreground: hsl(24 16% 14%);
+  --popover: hsl(40 40% 99%);
+  --popover-foreground: hsl(24 16% 14%);
+  --primary: hsl(164 45% 24%);
+  --primary-foreground: hsl(40 50% 98%);
+  --secondary: hsl(36 24% 94%);
+  --secondary-foreground: hsl(24 16% 18%);
+  --muted: hsl(36 20% 92%);
+  --muted-foreground: hsl(24 10% 46%);
+  --accent: hsl(18 70% 52%);
+  --accent-foreground: hsl(40 50% 98%);
+  --destructive: hsl(0 70% 52%);
+  --border: hsl(30 18% 86%);
+  --input: hsl(30 18% 86%);
+  --ring: hsl(18 70% 52%);
 }
 ```
 
@@ -322,13 +303,9 @@ The implementer MUST copy these values exactly into `src/index.css`:
 ## 9. Implementation Checklist
 
 The implementer should verify:
-- [ ] Font loaded from URL above (Outfit, NOT Inter/Roboto)
+- [ ] Font loaded from URL above
 - [ ] All CSS variables copied exactly
 - [ ] Mobile layout matches Section 4
 - [ ] Desktop layout matches Section 5
-- [ ] Hero element is prominent as described (large progress ring)
-- [ ] Colors create the mood described in Section 2 (warm terracotta)
-- [ ] Primary action "Workout starten" works with dialog
-- [ ] Activity list combines workouts and meals
-- [ ] Charts display correctly (Gewichtsverlauf, Kalorien)
-- [ ] All states handled: loading, empty, error
+- [ ] Hero element is prominent as described
+- [ ] Colors create the mood described in Section 2
