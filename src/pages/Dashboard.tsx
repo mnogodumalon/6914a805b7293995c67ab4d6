@@ -1,657 +1,569 @@
-import { useEffect, useState } from 'react';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, subDays, subMonths, isAfter, isBefore, parseISO } from 'date-fns';
+import { useState, useEffect, useMemo } from 'react';
 import type { Workouts, Ernaehrung, Koerperdaten, Ziele, WorkoutLogs, Uebungen } from '@/types/app';
 import { LivingAppsService, extractRecordId } from '@/services/livingAppsService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, AreaChart, Area, XAxis, YAxis, CartesianGrid, Cell, ResponsiveContainer } from 'recharts';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { format, parseISO, startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
+import { de } from 'date-fns/locale';
+import { AlertCircle, Plus, Dumbbell } from 'lucide-react';
 
-export default function Dashboard() {
+function Dashboard() {
   const [workouts, setWorkouts] = useState<Workouts[]>([]);
   const [ernaehrung, setErnaehrung] = useState<Ernaehrung[]>([]);
   const [koerperdaten, setKoerperdaten] = useState<Koerperdaten[]>([]);
   const [ziele, setZiele] = useState<Ziele[]>([]);
-  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLogs[]>([]);
-  const [uebungen, setUebungen] = useState<Uebungen[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    loadData();
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [w, e, k, z] = await Promise.all([
+          LivingAppsService.getWorkouts(),
+          LivingAppsService.getErnaehrung(),
+          LivingAppsService.getKoerperdaten(),
+          LivingAppsService.getZiele(),
+        ]);
+        setWorkouts(w);
+        setErnaehrung(e);
+        setKoerperdaten(k);
+        setZiele(z);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
   }, []);
 
-  async function loadData() {
-    try {
-      const [workoutsData, ernaehrungData, koerperdatenData, zieleData, logsData, uebungenData] = await Promise.all([
-        LivingAppsService.getWorkouts(),
-        LivingAppsService.getErnaehrung(),
-        LivingAppsService.getKoerperdaten(),
-        LivingAppsService.getZiele(),
-        LivingAppsService.getWorkoutLogs(),
-        LivingAppsService.getUebungen(),
-      ]);
-      setWorkouts(workoutsData);
-      setErnaehrung(ernaehrungData);
-      setKoerperdaten(koerperdatenData);
-      setZiele(zieleData);
-      setWorkoutLogs(logsData);
-      setUebungen(uebungenData);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Get active goal
+  const activeGoal = useMemo(() => {
+    return ziele.find((z) => z.fields.status === 'aktiv') || null;
+  }, [ziele]);
 
-  // Helper functions
-  const today = new Date();
-  const todayStr = format(today, 'yyyy-MM-dd');
-  const currentMonthStart = startOfMonth(today);
-  const currentMonthEnd = endOfMonth(today);
-  const previousMonthStart = startOfMonth(subMonths(today, 1));
-  const previousMonthEnd = endOfMonth(subMonths(today, 1));
-  const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 });
-  const currentWeekEnd = endOfWeek(today, { weekStartsOn: 1 });
+  // Calculate weekly training streak
+  const weeklyStats = useMemo(() => {
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1, locale: de });
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1, locale: de });
 
-  const activeGoal = ziele.find(z => z.fields.status === 'aktiv');
-
-  // KPI Calculations
-  const currentMonthWorkouts = workouts.filter(w => {
-    if (!w.fields.datum || w.fields.rest_day) return false;
-    const date = parseISO(w.fields.datum);
-    return isAfter(date, currentMonthStart) && isBefore(date, currentMonthEnd);
-  });
-
-  const previousMonthWorkouts = workouts.filter(w => {
-    if (!w.fields.datum || w.fields.rest_day) return false;
-    const date = parseISO(w.fields.datum);
-    return isAfter(date, previousMonthStart) && isBefore(date, previousMonthEnd);
-  });
-
-  const totalWorkoutsThisMonth = currentMonthWorkouts.length;
-  const totalWorkoutsLastMonth = previousMonthWorkouts.length;
-  const workoutsTrend = totalWorkoutsLastMonth > 0
-    ? ((totalWorkoutsThisMonth - totalWorkoutsLastMonth) / totalWorkoutsLastMonth * 100).toFixed(0)
-    : '0';
-
-  const avgWorkoutDuration = currentMonthWorkouts.length > 0
-    ? Math.round(currentMonthWorkouts.reduce((sum, w) => sum + (w.fields.dauer_minuten || 0), 0) / currentMonthWorkouts.length)
-    : 0;
-
-  const previousMonthAvgDuration = previousMonthWorkouts.length > 0
-    ? Math.round(previousMonthWorkouts.reduce((sum, w) => sum + (w.fields.dauer_minuten || 0), 0) / previousMonthWorkouts.length)
-    : 0;
-
-  const durationTrend = previousMonthAvgDuration > 0
-    ? ((avgWorkoutDuration - previousMonthAvgDuration) / previousMonthAvgDuration * 100).toFixed(0)
-    : '0';
-
-  const todayNutrition = ernaehrung.filter(e => e.fields.datum === todayStr);
-  const caloriesToday = todayNutrition.reduce((sum, e) => sum + (e.fields.kalorien || 0), 0);
-  const proteinToday = todayNutrition.reduce((sum, e) => sum + (e.fields.protein || 0), 0);
-
-  const calorieGoal = activeGoal?.fields.taeglich_kalorien || 2000;
-  const proteinGoal = activeGoal?.fields.taeglich_protein || 150;
-  const calorieProgress = Math.min((caloriesToday / calorieGoal) * 100, 100);
-  const proteinProgress = Math.min((proteinToday / proteinGoal) * 100, 100);
-
-  const sortedBodyData = [...koerperdaten].sort((a, b) => {
-    const dateA = a.fields.datum ? parseISO(a.fields.datum) : new Date(0);
-    const dateB = b.fields.datum ? parseISO(b.fields.datum) : new Date(0);
-    return dateB.getTime() - dateA.getTime();
-  });
-
-  const currentWeight = sortedBodyData[0]?.fields.gewicht_kg || 0;
-  const weight30DaysAgo = sortedBodyData.find(k => {
-    if (!k.fields.datum) return false;
-    const date = parseISO(k.fields.datum);
-    return isBefore(date, subDays(today, 30));
-  })?.fields.gewicht_kg || currentWeight;
-
-  const weightChange = currentWeight - weight30DaysAgo;
-  const weightTrend = weightChange.toFixed(1);
-
-  const weeklyWorkouts = workouts.filter(w => {
-    if (!w.fields.datum || w.fields.rest_day) return false;
-    const date = parseISO(w.fields.datum);
-    return isAfter(date, currentWeekStart) && isBefore(date, currentWeekEnd);
-  });
-
-  const weeklyGoal = activeGoal?.fields.trainingstage_pro_woche || 4;
-  const weeklyProgress = Math.min((weeklyWorkouts.length / weeklyGoal) * 100, 100);
-
-  // Chart data: Workout Frequency (last 30 days)
-  const last30Days = Array.from({ length: 30 }, (_, i) => {
-    const date = subDays(today, 29 - i);
-    return format(date, 'yyyy-MM-dd');
-  });
-
-  const workoutFrequencyData = last30Days.map(date => {
-    const dayWorkouts = workouts.filter(w => w.fields.datum === date && !w.fields.rest_day);
-    return {
-      date: format(parseISO(date), 'dd.MM'),
-      count: dayWorkouts.length,
-    };
-  });
-
-  // Chart data: Workout Duration Trend (last 30 days)
-  const workoutDurationData = workouts
-    .filter(w => {
+    const thisWeekWorkouts = workouts.filter((w) => {
       if (!w.fields.datum || w.fields.rest_day) return false;
-      const date = parseISO(w.fields.datum);
-      return isAfter(date, subDays(today, 30));
-    })
-    .sort((a, b) => {
-      const dateA = a.fields.datum ? parseISO(a.fields.datum) : new Date(0);
-      const dateB = b.fields.datum ? parseISO(b.fields.datum) : new Date(0);
-      return dateA.getTime() - dateB.getTime();
-    })
-    .map(w => ({
-      date: format(parseISO(w.fields.datum!), 'dd.MM'),
-      duration: w.fields.dauer_minuten || 0,
-    }));
+      const workoutDate = parseISO(w.fields.datum);
+      return isWithinInterval(workoutDate, { start: weekStart, end: weekEnd });
+    });
 
-  const avgDuration = workoutDurationData.length > 0
-    ? workoutDurationData.reduce((sum, d) => sum + d.duration, 0) / workoutDurationData.length
-    : 0;
+    const goal = activeGoal?.fields.trainingstage_pro_woche || 5;
+    const completed = thisWeekWorkouts.length;
+    const percentage = (completed / goal) * 100;
 
-  // Chart data: Workout Type Distribution (last 30 days)
-  const workoutTypeMap: Record<string, number> = {};
-  const typeLabels: Record<string, string> = {
-    push: 'Push',
-    pull: 'Pull',
-    beine: 'Beine',
-    ganzkoerper: 'Ganzkörper',
-    oberkoerper: 'Oberkörper',
-    unterkoerper: 'Unterkörper',
-    cardio: 'Cardio',
-    sonstiges: 'Sonstiges',
+    return { completed, goal, percentage };
+  }, [workouts, activeGoal]);
+
+  // Calculate today's nutrition
+  const todayNutrition = useMemo(() => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todayMeals = ernaehrung.filter((e) => e.fields.datum === today);
+
+    const kalorien = todayMeals.reduce((sum, m) => sum + (m.fields.kalorien || 0), 0);
+    const protein = todayMeals.reduce((sum, m) => sum + (m.fields.protein || 0), 0);
+
+    const kalorienGoal = activeGoal?.fields.taeglich_kalorien || 2000;
+    const proteinGoal = activeGoal?.fields.taeglich_protein || 150;
+
+    return { kalorien, protein, kalorienGoal, proteinGoal };
+  }, [ernaehrung, activeGoal]);
+
+  // Get latest body weight
+  const latestWeight = useMemo(() => {
+    const sorted = [...koerperdaten].sort((a, b) => {
+      const dateA = a.fields.datum || '';
+      const dateB = b.fields.datum || '';
+      return dateB.localeCompare(dateA);
+    });
+    return sorted[0]?.fields.gewicht_kg || null;
+  }, [koerperdaten]);
+
+  // Chart data: Training minutes this week
+  const chartData = useMemo(() => {
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1, locale: de });
+    const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+    return days.map((day, index) => {
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate() + index);
+      const dateStr = format(date, 'yyyy-MM-dd');
+
+      const dayWorkouts = workouts.filter(
+        (w) => w.fields.datum === dateStr && !w.fields.rest_day
+      );
+      const minutes = dayWorkouts.reduce((sum, w) => sum + (w.fields.dauer_minuten || 0), 0);
+
+      return { day, minutes };
+    });
+  }, [workouts]);
+
+  // Recent workouts
+  const recentWorkouts = useMemo(() => {
+    return [...workouts]
+      .sort((a, b) => {
+        const dateA = a.fields.datum || '';
+        const dateB = b.fields.datum || '';
+        return dateB.localeCompare(dateA);
+      })
+      .slice(0, 7);
+  }, [workouts]);
+
+  // Mood emoji mapping
+  const getMoodEmoji = (mood?: string) => {
+    switch (mood) {
+      case 'schlecht':
+        return '😞';
+      case 'okay':
+        return '😐';
+      case 'gut':
+        return '😊';
+      case 'brutal':
+        return '🔥';
+      default:
+        return '';
+    }
   };
 
-  workouts
-    .filter(w => {
-      if (!w.fields.datum || w.fields.rest_day) return false;
-      const date = parseISO(w.fields.datum);
-      return isAfter(date, subDays(today, 30));
-    })
-    .forEach(w => {
-      const typ = w.fields.typ || 'sonstiges';
-      workoutTypeMap[typ] = (workoutTypeMap[typ] || 0) + 1;
-    });
-
-  const workoutTypeData = Object.entries(workoutTypeMap).map(([key, value]) => ({
-    name: typeLabels[key] || key,
-    value,
-  }));
-
-  const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
-
-  // Chart data: Weekly Nutrition (last 7 days)
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const date = subDays(today, 6 - i);
-    return format(date, 'yyyy-MM-dd');
-  });
-
-  const nutritionWeeklyData = last7Days.map(date => {
-    const dayNutrition = ernaehrung.filter(e => e.fields.datum === date);
-    const totalCalories = dayNutrition.reduce((sum, e) => sum + (e.fields.kalorien || 0), 0);
-    return {
-      date: format(parseISO(date), 'dd.MM'),
-      calories: totalCalories,
-      goal: calorieGoal,
+  // Workout type labels
+  const getWorkoutTypeLabel = (typ?: string) => {
+    const labels: Record<string, string> = {
+      push: 'Push',
+      pull: 'Pull',
+      beine: 'Beine',
+      ganzkoerper: 'Ganzkörper',
+      oberkoerper: 'Oberkörper',
+      unterkoerper: 'Unterkörper',
+      cardio: 'Cardio',
+      sonstiges: 'Sonstiges',
     };
-  });
-
-  // Chart data: Today's Macros
-  const totalCarbs = todayNutrition.reduce((sum, e) => sum + (e.fields.carbs || 0), 0);
-  const totalFett = todayNutrition.reduce((sum, e) => sum + (e.fields.fett || 0), 0);
-
-  const macrosData = [
-    { name: 'Protein', value: Math.round(proteinToday) },
-    { name: 'Carbs', value: Math.round(totalCarbs) },
-    { name: 'Fett', value: Math.round(totalFett) },
-  ];
-
-  // Chart data: Weight Progress (last 90 days)
-  const weightProgressData = koerperdaten
-    .filter(k => {
-      if (!k.fields.datum) return false;
-      const date = parseISO(k.fields.datum);
-      return isAfter(date, subDays(today, 90));
-    })
-    .sort((a, b) => {
-      const dateA = a.fields.datum ? parseISO(a.fields.datum) : new Date(0);
-      const dateB = b.fields.datum ? parseISO(b.fields.datum) : new Date(0);
-      return dateA.getTime() - dateB.getTime();
-    })
-    .map(k => ({
-      date: format(parseISO(k.fields.datum!), 'dd.MM'),
-      weight: k.fields.gewicht_kg || 0,
-    }));
-
-  // Chart data: Body Measurements (last 90 days)
-  const bodyMeasurementsData = koerperdaten
-    .filter(k => {
-      if (!k.fields.datum) return false;
-      const date = parseISO(k.fields.datum);
-      return isAfter(date, subDays(today, 90));
-    })
-    .sort((a, b) => {
-      const dateA = a.fields.datum ? parseISO(a.fields.datum) : new Date(0);
-      const dateB = b.fields.datum ? parseISO(b.fields.datum) : new Date(0);
-      return dateA.getTime() - dateB.getTime();
-    })
-    .map(k => ({
-      date: format(parseISO(k.fields.datum!), 'dd.MM'),
-      brust: k.fields.brustumfang || 0,
-      taille: k.fields.taillenumfang || 0,
-      arm: k.fields.armumfang || 0,
-    }));
-
-  // Chart data: Workout Mood Distribution (last 30 days)
-  const moodMap: Record<string, number> = {};
-  const moodLabels: Record<string, string> = {
-    schlecht: 'Schlecht',
-    okay: 'Okay',
-    gut: 'Gut',
-    brutal: 'Brutal',
-  };
-
-  workouts
-    .filter(w => {
-      if (!w.fields.datum || w.fields.rest_day) return false;
-      const date = parseISO(w.fields.datum);
-      return isAfter(date, subDays(today, 30));
-    })
-    .forEach(w => {
-      const stimmung = w.fields.stimmung || 'okay';
-      moodMap[stimmung] = (moodMap[stimmung] || 0) + 1;
-    });
-
-  const moodData = Object.entries(moodMap).map(([key, value]) => ({
-    name: moodLabels[key] || key,
-    value,
-  }));
-
-  // Chart data: Exercise Progress (top 3 exercises by frequency, last 60 days)
-  const exerciseFrequency: Record<string, number> = {};
-  workoutLogs.forEach(log => {
-    const exerciseId = extractRecordId(log.fields.uebung);
-    if (exerciseId) {
-      exerciseFrequency[exerciseId] = (exerciseFrequency[exerciseId] || 0) + 1;
-    }
-  });
-
-  const topExerciseIds = Object.entries(exerciseFrequency)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3)
-    .map(([id]) => id);
-
-  const exerciseProgressMap: Record<string, Array<{ date: string; weight: number }>> = {};
-
-  workoutLogs
-    .filter(log => {
-      const exerciseId = extractRecordId(log.fields.uebung);
-      if (!exerciseId || !topExerciseIds.includes(exerciseId)) return false;
-      const workoutId = extractRecordId(log.fields.workout);
-      if (!workoutId) return false;
-      const workout = workouts.find(w => w.record_id === workoutId);
-      if (!workout?.fields.datum) return false;
-      const date = parseISO(workout.fields.datum);
-      return isAfter(date, subDays(today, 60));
-    })
-    .forEach(log => {
-      const exerciseId = extractRecordId(log.fields.uebung);
-      const workoutId = extractRecordId(log.fields.workout);
-      if (!exerciseId || !workoutId) return;
-      const workout = workouts.find(w => w.record_id === workoutId);
-      if (!workout?.fields.datum) return;
-
-      if (!exerciseProgressMap[exerciseId]) {
-        exerciseProgressMap[exerciseId] = [];
-      }
-
-      exerciseProgressMap[exerciseId].push({
-        date: workout.fields.datum,
-        weight: log.fields.gewicht || 0,
-      });
-    });
-
-  const exerciseProgressData: Array<{ date: string; [key: string]: number | string }> = [];
-  const allDates = new Set<string>();
-
-  Object.values(exerciseProgressMap).forEach(logs => {
-    logs.forEach(log => allDates.add(log.date));
-  });
-
-  Array.from(allDates)
-    .sort()
-    .forEach(date => {
-      const dataPoint: { date: string; [key: string]: number | string } = {
-        date: format(parseISO(date), 'dd.MM'),
-      };
-
-      topExerciseIds.forEach(exerciseId => {
-        const exercise = uebungen.find(u => u.record_id === exerciseId);
-        const exerciseName = exercise?.fields.name || exerciseId.slice(0, 8);
-        const logsForDate = exerciseProgressMap[exerciseId]?.filter(l => l.date === date) || [];
-        const maxWeight = Math.max(...logsForDate.map(l => l.weight), 0);
-        dataPoint[exerciseName] = maxWeight;
-      });
-
-      exerciseProgressData.push(dataPoint);
-    });
-
-  const exerciseNames = topExerciseIds.map(id => {
-    const exercise = uebungen.find(u => u.record_id === id);
-    return exercise?.fields.name || id.slice(0, 8);
-  });
-
-  const chartConfig = {
-    workouts: { label: 'Workouts', color: 'hsl(var(--chart-1))' },
-    duration: { label: 'Minuten', color: 'hsl(var(--chart-2))' },
-    calories: { label: 'Kalorien', color: 'hsl(var(--chart-3))' },
-    goal: { label: 'Ziel', color: 'hsl(var(--chart-5))' },
-    weight: { label: 'Gewicht (kg)', color: 'hsl(var(--chart-1))' },
-    protein: { label: 'Protein (g)', color: 'hsl(var(--chart-2))' },
-    carbs: { label: 'Carbs (g)', color: 'hsl(var(--chart-3))' },
-    fett: { label: 'Fett (g)', color: 'hsl(var(--chart-4))' },
+    return labels[typ || ''] || typ || '-';
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8">
-            <Skeleton className="h-10 w-96" />
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingState />;
+  }
+
+  if (error) {
+    return <ErrorState error={error} onRetry={() => window.location.reload()} />;
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight">Fitness & Ernährungs-Tracker</h1>
-          <p className="text-muted-foreground mt-2">Deine persönliche Übersicht über Training, Ernährung und Fortschritt</p>
-        </div>
+    <div className="min-h-screen pb-24 md:pb-8">
+      {/* Header */}
+      <header className="h-16 flex items-center justify-between px-6 mb-8">
+        <h1 className="text-xl font-semibold">Fitness Tracker</h1>
+        <AddWorkoutDialog onSuccess={() => window.location.reload()} />
+      </header>
 
-        {/* KPI Grid */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Total Workouts */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-muted-foreground">Workouts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{totalWorkoutsThisMonth}</div>
-              <p className="text-muted-foreground text-xs mt-1">
-                {Number(workoutsTrend) >= 0 ? '+' : ''}{workoutsTrend}% vs. letzter Monat
-              </p>
-            </CardContent>
-          </Card>
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Desktop: Two-column layout */}
+        <div className="grid grid-cols-1 md:grid-cols-[65%_35%] gap-8">
+          {/* Left Column */}
+          <div className="space-y-8">
+            {/* Hero: Weekly Training Streak */}
+            <Card className="shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-10 md:p-12 relative overflow-hidden">
+                {/* Radial gradient backdrop */}
+                <div
+                  className="absolute inset-0 opacity-40 pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(circle at center, hsl(14 65% 85%), transparent 70%)',
+                  }}
+                />
 
-          {/* Avg Duration */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-muted-foreground">Avg Duration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{avgWorkoutDuration} <span className="text-xl text-muted-foreground">min</span></div>
-              <p className="text-muted-foreground text-xs mt-1">
-                {Number(durationTrend) >= 0 ? '+' : ''}{durationTrend}% vs. letzter Monat
-              </p>
-            </CardContent>
-          </Card>
+                <div className="relative z-10 text-center">
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Diese Woche</p>
+                  <div
+                    className="text-[56px] md:text-[72px] font-extrabold leading-none mb-2"
+                    style={{ letterSpacing: '-0.02em', fontWeight: 800 }}
+                  >
+                    {weeklyStats.completed}
+                  </div>
+                  <p className="text-base md:text-lg font-medium text-muted-foreground mb-6">
+                    von {weeklyStats.goal} Trainings
+                  </p>
 
-          {/* Calories Today */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-muted-foreground">Calories Today</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{Math.round(caloriesToday)} <span className="text-xl text-muted-foreground">kcal</span></div>
-              <Progress value={calorieProgress} className="mt-2" />
-              <p className="text-muted-foreground text-xs mt-1">{Math.round(calorieProgress)}% von {calorieGoal} kcal Ziel</p>
-            </CardContent>
-          </Card>
-
-          {/* Protein Today */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-muted-foreground">Protein Today</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{Math.round(proteinToday)} <span className="text-xl text-muted-foreground">g</span></div>
-              <Progress value={proteinProgress} className="mt-2" />
-              <p className="text-muted-foreground text-xs mt-1">{Math.round(proteinProgress)}% von {proteinGoal} g Ziel</p>
-            </CardContent>
-          </Card>
-
-          {/* Current Weight */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-muted-foreground">Weight</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{currentWeight.toFixed(1)} <span className="text-xl text-muted-foreground">kg</span></div>
-              <p className="text-muted-foreground text-xs mt-1">
-                {Number(weightTrend) >= 0 ? '+' : ''}{weightTrend} kg (30 Tage)
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Weekly Goal */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-muted-foreground">Weekly Goal</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{weeklyWorkouts.length}/{weeklyGoal}</div>
-              <Progress value={weeklyProgress} className="mt-2" />
-              <p className="text-muted-foreground text-xs mt-1">{Math.round(weeklyProgress)}% dieser Woche</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Charts Grid */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Workout Frequency Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Workout Frequency</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig} className="h-[300px]">
-                <BarChart data={workoutFrequencyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill="hsl(var(--chart-1))" name="Workouts" />
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          {/* Weekly Nutrition Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Weekly Nutrition Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig} className="h-[300px]">
-                <AreaChart data={nutritionWeeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area type="monotone" dataKey="calories" fill="hsl(var(--chart-3))" stroke="hsl(var(--chart-3))" name="Kalorien" />
-                  <Line type="monotone" dataKey="goal" stroke="hsl(var(--chart-5))" strokeDasharray="5 5" name="Ziel" dot={false} />
-                </AreaChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          {/* Weight Progress Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Weight Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig} className="h-[300px]">
-                <LineChart data={weightProgressData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line type="monotone" dataKey="weight" stroke="hsl(var(--chart-1))" name="Gewicht (kg)" strokeWidth={2} />
-                </LineChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          {/* Workout Duration Trend */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Workout Duration Trend</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig} className="h-[300px]">
-                <LineChart data={workoutDurationData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line type="monotone" dataKey="duration" stroke="hsl(var(--chart-2))" name="Minuten" strokeWidth={2} />
-                </LineChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          {/* Workout Type Distribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Training Type Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig} className="h-[300px]">
-                <PieChart>
-                  <Pie data={workoutTypeData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                    {workoutTypeData.map((_entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <ChartLegend content={<ChartLegendContent />} />
-                </PieChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          {/* Today's Macros */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Today's Macros</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig} className="h-[300px]">
-                <BarChart data={macrosData} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis type="category" dataKey="name" />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="value" fill="hsl(var(--chart-2))" name="Gramm" />
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          {/* Exercise Progress Chart */}
-          {exerciseProgressData.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Top Exercise Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer config={chartConfig} className="h-[300px]">
-                  <LineChart data={exerciseProgressData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    {exerciseNames.map((name, index) => (
-                      <Line
-                        key={name}
-                        type="monotone"
-                        dataKey={name}
-                        stroke={COLORS[index % COLORS.length]}
-                        name={name}
-                        strokeWidth={2}
-                      />
-                    ))}
-                    <ChartLegend content={<ChartLegendContent />} />
-                  </LineChart>
-                </ChartContainer>
+                  {/* Progress bar */}
+                  <div className="w-full max-w-md mx-auto h-2 md:h-2.5 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(weeklyStats.percentage, 100)}%` }}
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          )}
 
-          {/* Mood Distribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Workout Mood</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig} className="h-[300px]">
-                <PieChart>
-                  <Pie data={moodData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                    {moodData.map((_entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <ChartLegend content={<ChartLegendContent />} />
-                </PieChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Body Measurements Chart - Full Width */}
-        {bodyMeasurementsData.length > 0 && (
-          <div className="mt-6">
-            <Card>
+            {/* Chart: Training Minutes This Week */}
+            <Card className="shadow-sm">
               <CardHeader>
-                <CardTitle>Body Measurements</CardTitle>
+                <CardTitle className="text-base md:text-lg font-semibold">
+                  Trainingsminuten diese Woche
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ChartContainer config={chartConfig} className="h-[300px]">
-                  <LineChart data={bodyMeasurementsData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="brust" stroke="hsl(var(--chart-1))" name="Brust (cm)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="taille" stroke="hsl(var(--chart-2))" name="Taille (cm)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="arm" stroke="hsl(var(--chart-3))" name="Arm (cm)" strokeWidth={2} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                  </LineChart>
-                </ChartContainer>
+                <div className="h-60 md:h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                      <XAxis
+                        dataKey="day"
+                        tick={{ fontSize: 12, fill: 'hsl(25 15% 50%)' }}
+                        stroke="hsl(30 20% 88%)"
+                      />
+                      <YAxis
+                        tick={{ fontSize: 12, fill: 'hsl(25 15% 50%)' }}
+                        stroke="hsl(30 20% 88%)"
+                        label={{ value: 'Minuten', angle: -90, position: 'insideLeft', fontSize: 12 }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(0 0% 100%)',
+                          border: '1px solid hsl(30 20% 88%)',
+                          borderRadius: '8px',
+                        }}
+                      />
+                      <Bar dataKey="minutes" fill="hsl(14 65% 55%)" radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Workouts */}
+            <Card className="shadow-sm hidden md:block">
+              <CardHeader>
+                <CardTitle className="text-base md:text-lg font-semibold">
+                  Letzte Workouts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {recentWorkouts.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">Noch keine Workouts vorhanden</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Datum</th>
+                          <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Typ</th>
+                          <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Dauer</th>
+                          <th className="text-left py-2 px-3 text-sm font-medium text-muted-foreground">Stimmung</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recentWorkouts.map((workout) => (
+                          <tr
+                            key={workout.record_id}
+                            className="border-b border-border hover:bg-muted transition-colors cursor-pointer"
+                          >
+                            <td className="py-3 px-3 text-sm">
+                              {workout.fields.datum
+                                ? format(parseISO(workout.fields.datum), 'dd.MM.yyyy')
+                                : '-'}
+                            </td>
+                            <td className="py-3 px-3 text-sm">{getWorkoutTypeLabel(workout.fields.typ)}</td>
+                            <td className="py-3 px-3 text-sm">
+                              {workout.fields.dauer_minuten ? `${workout.fields.dauer_minuten} min` : '-'}
+                            </td>
+                            <td className="py-3 px-3 text-2xl">{getMoodEmoji(workout.fields.stimmung)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
-        )}
+
+          {/* Right Column (Desktop) / Below (Mobile) */}
+          <div className="space-y-4">
+            {/* Quick Stats */}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Heute</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">Kalorien</p>
+                  <p className="text-xl md:text-2xl font-bold">
+                    {Math.round(todayNutrition.kalorien)} <span className="text-sm font-normal text-muted-foreground">/ {todayNutrition.kalorienGoal} kcal</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Protein</p>
+                  <p className="text-xl md:text-2xl font-bold">
+                    {Math.round(todayNutrition.protein)} <span className="text-sm font-normal text-muted-foreground">/ {todayNutrition.proteinGoal} g</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Aktuelles Gewicht</p>
+                  <p className="text-xl md:text-2xl font-bold">
+                    {latestWeight ? `${latestWeight.toFixed(1)} kg` : '-'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Active Goal */}
+            {activeGoal && (
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Aktives Ziel</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Trainingstage/Woche</span>
+                    <span className="font-semibold">{activeGoal.fields.trainingstage_pro_woche || '-'}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Kalorien/Tag</span>
+                    <span className="font-semibold">{activeGoal.fields.taeglich_kalorien || '-'} kcal</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Protein/Tag</span>
+                    <span className="font-semibold">{activeGoal.fields.taeglich_protein || '-'} g</span>
+                  </div>
+                  {activeGoal.fields.notizen && (
+                    <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+                      {activeGoal.fields.notizen}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Recent Workouts (Mobile Cards) */}
+            <div className="md:hidden space-y-3">
+              <h2 className="text-base font-semibold px-1">Letzte Workouts</h2>
+              {recentWorkouts.length === 0 ? (
+                <Card className="shadow-sm">
+                  <CardContent className="py-8 text-center text-muted-foreground text-sm">
+                    Noch keine Workouts vorhanden
+                  </CardContent>
+                </Card>
+              ) : (
+                recentWorkouts.slice(0, 3).map((workout) => (
+                  <Card key={workout.record_id} className="shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium">
+                            {workout.fields.datum
+                              ? format(parseISO(workout.fields.datum), 'dd.MM.yyyy')
+                              : '-'}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {getWorkoutTypeLabel(workout.fields.typ)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">
+                            {workout.fields.dauer_minuten ? `${workout.fields.dauer_minuten} min` : '-'}
+                          </p>
+                          <p className="text-2xl">{getMoodEmoji(workout.fields.stimmung)}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Fixed Bottom Button (Mobile) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t border-border">
+        <AddWorkoutDialog onSuccess={() => window.location.reload()} trigger={
+          <Button className="w-full h-14 text-base shadow-lg" size="lg">
+            <Plus className="w-5 h-5 mr-2" />
+            Workout starten
+          </Button>
+        } />
       </div>
     </div>
   );
 }
+
+function AddWorkoutDialog({ onSuccess, trigger }: { onSuccess: () => void; trigger?: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    datum: format(new Date(), 'yyyy-MM-dd'),
+    typ: 'ganzkoerper',
+    dauer_minuten: '',
+    stimmung: 'gut',
+    rest_day: false,
+  });
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      await LivingAppsService.createWorkout({
+        datum: formData.datum,
+        typ: formData.typ as any,
+        dauer_minuten: formData.dauer_minuten ? Number(formData.dauer_minuten) : undefined,
+        stimmung: formData.stimmung as any,
+        rest_day: formData.rest_day,
+      });
+      setOpen(false);
+      onSuccess();
+    } catch (err) {
+      console.error('Failed to create workout:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button className="shadow-md hover:scale-105 transition-transform">
+            <Plus className="w-4 h-4 mr-2" />
+            Workout starten
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Dumbbell className="w-5 h-5" />
+            Neues Workout
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div>
+            <Label htmlFor="datum">Datum</Label>
+            <Input
+              id="datum"
+              type="date"
+              value={formData.datum}
+              onChange={(e) => setFormData({ ...formData, datum: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="typ">Trainingstyp</Label>
+            <Select value={formData.typ} onValueChange={(v) => setFormData({ ...formData, typ: v })}>
+              <SelectTrigger id="typ">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="push">Push</SelectItem>
+                <SelectItem value="pull">Pull</SelectItem>
+                <SelectItem value="beine">Beine</SelectItem>
+                <SelectItem value="ganzkoerper">Ganzkörper</SelectItem>
+                <SelectItem value="oberkoerper">Oberkörper</SelectItem>
+                <SelectItem value="unterkoerper">Unterkörper</SelectItem>
+                <SelectItem value="cardio">Cardio</SelectItem>
+                <SelectItem value="sonstiges">Sonstiges</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="dauer">Dauer (Minuten)</Label>
+            <Input
+              id="dauer"
+              type="number"
+              placeholder="z.B. 60"
+              value={formData.dauer_minuten}
+              onChange={(e) => setFormData({ ...formData, dauer_minuten: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="stimmung">Stimmung</Label>
+            <Select value={formData.stimmung} onValueChange={(v) => setFormData({ ...formData, stimmung: v })}>
+              <SelectTrigger id="stimmung">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="schlecht">😞 Schlecht</SelectItem>
+                <SelectItem value="okay">😐 Okay</SelectItem>
+                <SelectItem value="gut">😊 Gut</SelectItem>
+                <SelectItem value="brutal">🔥 Brutal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="rest_day"
+              checked={formData.rest_day}
+              onChange={(e) => setFormData({ ...formData, rest_day: e.target.checked })}
+              className="rounded"
+            />
+            <Label htmlFor="rest_day" className="cursor-pointer">Ruhetag</Label>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">
+              Abbrechen
+            </Button>
+            <Button type="submit" disabled={submitting} className="flex-1">
+              {submitting ? 'Speichern...' : 'Speichern'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="min-h-screen p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-64 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ErrorState({ error, onRetry }: { error: Error; onRetry: () => void }) {
+  return (
+    <div className="min-h-screen p-6 flex items-center justify-center">
+      <Alert variant="destructive" className="max-w-md">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Fehler beim Laden</AlertTitle>
+        <AlertDescription className="mt-2">
+          {error.message}
+          <Button variant="outline" onClick={onRetry} className="mt-4 w-full">
+            Erneut versuchen
+          </Button>
+        </AlertDescription>
+      </Alert>
+    </div>
+  );
+}
+
+export default Dashboard;
