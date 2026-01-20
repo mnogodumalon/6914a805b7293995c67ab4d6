@@ -1,1196 +1,846 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-import {
-  format,
-  isSameWeek,
-  parseISO,
-} from "date-fns"
-import { de } from "date-fns/locale"
-import {
-  Activity,
-  ArrowDownRight,
-  ArrowUpRight,
-  CalendarDays,
-  ClipboardList,
-  Dumbbell,
-  Flame,
-  Salad,
-  Scale,
-  Target,
-} from "lucide-react"
-import {
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts"
-import { Toaster, toast } from "sonner"
+import { useState, useEffect } from 'react'
+import type { Workouts, WorkoutLogs, Uebungen, Ziele, Ernaehrung, Koerperdaten } from '@/types/app'
+import { LivingAppsService, extractRecordId } from '@/services/livingAppsService'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { format, subDays, startOfWeek, endOfWeek, isWithinInterval, parseISO, startOfDay } from 'date-fns'
+import { de } from 'date-fns/locale'
+import { Activity, TrendingUp, TrendingDown, Utensils, Weight, Target } from 'lucide-react'
 
-import type {
-  Ernaehrung,
-  Koerperdaten,
-  Uebungen,
-  WorkoutLogs,
-  Workouts,
-  Ziele,
-} from "@/types/app"
-import {
-  LivingAppsService,
-  extractRecordId,
-} from "@/services/livingAppsService"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
-
-const MEAL_TYPE_LABELS: Record<string, string> = {
-  fruehstueck: "Fruehstueck",
-  snack: "Snack",
-  mittagessen: "Mittagessen",
-  abendessen: "Abendessen",
-  pre_workout: "Pre-Workout",
-  post_workout: "Post-Workout",
-  sonstiges: "Sonstiges",
+// Theme colors from design spec
+const COLORS = {
+  primary: 'hsl(217, 91%, 60%)',
+  accent: 'hsl(142, 71%, 45%)',
+  purple: 'hsl(271, 76%, 53%)',
+  orange: 'hsl(25, 95%, 53%)',
 }
 
-const WORKOUT_TYPE_LABELS: Record<string, string> = {
-  push: "Push",
-  pull: "Pull",
-  beine: "Beine",
-  ganzkoerper: "Ganzkoerper",
-  oberkoerper: "Oberkoerper",
-  unterkoerper: "Unterkoerper",
-  cardio: "Cardio",
-  sonstiges: "Sonstiges",
-}
+const CHART_COLORS = [COLORS.primary, COLORS.accent, COLORS.purple, COLORS.orange]
 
-const MUSCLE_GROUP_LABELS: Record<string, string> = {
-  brust: "Brust",
-  ruecken: "Ruecken",
-  beine: "Beine",
-  schultern: "Schultern",
-  bizeps: "Bizeps",
-  trizeps: "Trizeps",
-  bauch: "Bauch",
-  ganzkoerper: "Ganzkoerper",
-}
-
-const GOAL_STATUS_LABELS: Record<string, string> = {
-  aktiv: "Aktiv",
-  erreicht: "Erreicht",
-  verworfen: "Verworfen",
-}
-
-type DashboardData = {
-  uebungen: Uebungen[]
+interface DashboardState {
   workouts: Workouts[]
   workoutLogs: WorkoutLogs[]
+  uebungen: Uebungen[]
   ziele: Ziele[]
   ernaehrung: Ernaehrung[]
   koerperdaten: Koerperdaten[]
+  loading: boolean
 }
 
-type MealFormState = {
-  datum: string
-  mahlzeit_typ: Ernaehrung["fields"]["mahlzeit_typ"] | "none"
-  beschreibung: string
-  kalorien: string
-  protein: string
-  carbs: string
-  fett: string
-}
-
-function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(false)
-
-  useEffect(() => {
-    const media = window.matchMedia(query)
-    const update = () => setMatches(media.matches)
-    update()
-    media.addEventListener("change", update)
-    return () => media.removeEventListener("change", update)
-  }, [query])
-
-  return matches
-}
-
-function formatNumber(value: number | null | undefined, options?: Intl.NumberFormatOptions) {
-  if (value == null) return "-"
-  return new Intl.NumberFormat("de-DE", options).format(value)
-}
-
-function parseDate(value: string | null | undefined) {
-  if (!value) return null
-  const parsed = parseISO(value)
-  return Number.isNaN(parsed.getTime()) ? null : parsed
-}
-
-function getRecordDateValue(datum?: string | null, createdAt?: string | null) {
-  return datum ?? createdAt ?? null
-}
-
-function getMealDefault(todayKey: string): MealFormState {
-  return {
-    datum: todayKey,
-    mahlzeit_typ: "none",
-    beschreibung: "",
-    kalorien: "",
-    protein: "",
-    carbs: "",
-    fett: "",
-  }
-}
-
-function EmptyState({
-  title,
-  description,
-}: {
-  title: string
-  description: string
-}) {
-  return (
-    <Empty className="border border-dashed">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <ClipboardList className="size-5" />
-        </EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
-        <EmptyDescription>{description}</EmptyDescription>
-      </EmptyHeader>
-      <EmptyContent />
-    </Empty>
-  )
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-7 w-48" />
-          <Skeleton className="h-4 w-24" />
-        </div>
-        <Skeleton className="hidden h-10 w-44 md:block" />
-      </div>
-      <div className="grid gap-6 lg:grid-cols-12">
-        <Card className="gap-4 py-4 lg:col-span-7">
-          <CardHeader className="px-4">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-10 w-40" />
-          </CardHeader>
-          <CardContent className="px-4">
-            <Skeleton className="h-44 w-full" />
-          </CardContent>
-        </Card>
-        <div className="grid gap-4 lg:col-span-5">
-          <Skeleton className="h-28 w-full rounded-xl" />
-          <Skeleton className="h-28 w-full rounded-xl" />
-          <Skeleton className="h-28 w-full rounded-xl" />
-          <Skeleton className="h-28 w-full rounded-xl" />
-        </div>
-      </div>
-      <div className="grid gap-6 lg:grid-cols-12">
-        <Skeleton className="h-72 w-full rounded-xl lg:col-span-7" />
-        <Skeleton className="h-72 w-full rounded-xl lg:col-span-5" />
-      </div>
-      <div className="grid gap-6 lg:grid-cols-12">
-        <Skeleton className="h-72 w-full rounded-xl lg:col-span-7" />
-        <Skeleton className="h-72 w-full rounded-xl lg:col-span-5" />
-      </div>
-    </div>
-  )
-}
+type DateRangeType = 'last_7_days' | 'last_30_days' | 'last_90_days' | 'all_time'
+type WorkoutTypeFilter = 'all' | 'push' | 'pull' | 'beine' | 'ganzkoerper' | 'oberkoerper' | 'unterkoerper' | 'cardio'
 
 export default function Dashboard() {
-  const [data, setData] = useState<DashboardData>({
-    uebungen: [],
+  const [state, setState] = useState<DashboardState>({
     workouts: [],
     workoutLogs: [],
+    uebungen: [],
     ziele: [],
     ernaehrung: [],
     koerperdaten: [],
+    loading: true,
   })
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-  const [mealDialogOpen, setMealDialogOpen] = useState(false)
-  const [mealSubmitting, setMealSubmitting] = useState(false)
-  const [mealError, setMealError] = useState<string | null>(null)
-  const isMobile = useMediaQuery("(max-width: 767px)")
 
-  const todayKey = format(new Date(), "yyyy-MM-dd")
-  const todayLabel = format(new Date(), "dd.MM.yyyy", { locale: de })
+  const [dateRange, setDateRange] = useState<DateRangeType>('last_30_days')
+  const [workoutTypeFilter, setWorkoutTypeFilter] = useState<WorkoutTypeFilter>('all')
 
-  const [mealForm, setMealForm] = useState<MealFormState>(() =>
-    getMealDefault(todayKey)
-  )
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setState(prev => ({ ...prev, loading: true }))
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const [uebungen, workouts, workoutLogs, ziele, ernaehrung, koerperdaten] =
-        await Promise.all([
-          LivingAppsService.getUebungen(),
+        const [workouts, workoutLogs, uebungen, ziele, ernaehrung, koerperdaten] = await Promise.all([
           LivingAppsService.getWorkouts(),
           LivingAppsService.getWorkoutLogs(),
+          LivingAppsService.getUebungen(),
           LivingAppsService.getZiele(),
           LivingAppsService.getErnaehrung(),
           LivingAppsService.getKoerperdaten(),
         ])
-      setData({
-        uebungen,
-        workouts,
-        workoutLogs,
-        ziele,
-        ernaehrung,
-        koerperdaten,
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Unbekannter Fehler"))
-    } finally {
-      setLoading(false)
+
+        setState({
+          workouts,
+          workoutLogs,
+          uebungen,
+          ziele,
+          ernaehrung,
+          koerperdaten,
+          loading: false,
+        })
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+        setState(prev => ({ ...prev, loading: false }))
+      }
     }
+
+    fetchData()
   }, [])
 
-  useEffect(() => {
-    loadData()
-  }, [loadData])
+  // Helper: Get date range
+  const getDateRange = () => {
+    const now = new Date()
+    switch (dateRange) {
+      case 'last_7_days':
+        return { start: subDays(now, 7), end: now }
+      case 'last_30_days':
+        return { start: subDays(now, 30), end: now }
+      case 'last_90_days':
+        return { start: subDays(now, 90), end: now }
+      case 'all_time':
+        return { start: new Date(2000, 0, 1), end: now }
+    }
+  }
 
-  const goalsSorted = useMemo(() => {
-    const goals = [...data.ziele]
-    return goals.sort((a, b) => {
-      const statusRank = (status?: Ziele["fields"]["status"]) => {
-        if (status === "aktiv") return 0
-        if (status === "erreicht") return 1
-        return 2
+  const { start: rangeStart, end: rangeEnd } = getDateRange()
+
+  // Filter workouts by date range and type
+  const filteredWorkouts = state.workouts.filter(w => {
+    if (!w.fields.datum) return false
+    const date = parseISO(w.fields.datum)
+    const inRange = isWithinInterval(date, { start: rangeStart, end: rangeEnd })
+    const matchesType = workoutTypeFilter === 'all' || w.fields.typ === workoutTypeFilter
+    return inRange && matchesType
+  })
+
+  // KPI 1: Workouts This Week
+  const weekStart = startOfWeek(new Date(), { locale: de })
+  const weekEnd = endOfWeek(new Date(), { locale: de })
+  const workoutsThisWeek = state.workouts.filter(w => {
+    if (!w.fields.datum || w.fields.rest_day === true) return false
+    const date = parseISO(w.fields.datum)
+    return isWithinInterval(date, { start: weekStart, end: weekEnd })
+  }).length
+
+  // KPI 2: Weekly Training Goal Progress
+  const activeGoal = state.ziele.find(z => z.fields.status === 'aktiv')
+  const weeklyGoal = activeGoal?.fields.trainingstage_pro_woche ?? 0
+  const goalProgress = weeklyGoal > 0 ? Math.round((workoutsThisWeek / weeklyGoal) * 100) : 0
+
+  // KPI 3: Average Daily Calories (last 7 days)
+  const last7Days = subDays(new Date(), 7)
+  const recentNutrition = state.ernaehrung.filter(e => {
+    if (!e.fields.datum) return false
+    const date = parseISO(e.fields.datum)
+    return isWithinInterval(date, { start: last7Days, end: new Date() })
+  })
+
+  const totalCalories = recentNutrition.reduce((sum, e) => sum + (e.fields.kalorien ?? 0), 0)
+  const avgCalories = recentNutrition.length > 0 ? Math.round(totalCalories / 7) : 0
+
+  // KPI 4: Average Daily Protein (last 7 days)
+  const totalProtein = recentNutrition.reduce((sum, e) => sum + (e.fields.protein ?? 0), 0)
+  const avgProtein = recentNutrition.length > 0 ? Math.round(totalProtein / 7) : 0
+
+  // KPI 5: Current Weight
+  const sortedBodyData = [...state.koerperdaten]
+    .filter(k => k.fields.datum && k.fields.gewicht_kg)
+    .sort((a, b) => {
+      const dateA = parseISO(a.fields.datum!)
+      const dateB = parseISO(b.fields.datum!)
+      return dateB.getTime() - dateA.getTime()
+    })
+
+  const currentWeight = sortedBodyData[0]?.fields.gewicht_kg ?? null
+
+  // KPI 6: Weight Change (30 days)
+  const thirtyDaysAgo = subDays(new Date(), 30)
+  const weightThirtyDaysAgo = sortedBodyData.find(k => {
+    if (!k.fields.datum) return false
+    const date = parseISO(k.fields.datum)
+    return date <= thirtyDaysAgo
+  })?.fields.gewicht_kg ?? null
+
+  const weightChange = currentWeight && weightThirtyDaysAgo
+    ? Number((currentWeight - weightThirtyDaysAgo).toFixed(1))
+    : null
+
+  // KPI 7: Total Volume This Week
+  const workoutIdsThisWeek = state.workouts
+    .filter(w => {
+      if (!w.fields.datum || w.fields.rest_day === true) return false
+      const date = parseISO(w.fields.datum)
+      return isWithinInterval(date, { start: weekStart, end: weekEnd })
+    })
+    .map(w => w.record_id)
+
+  const totalVolumeThisWeek = state.workoutLogs
+    .filter(log => {
+      const workoutId = extractRecordId(log.fields.workout)
+      return workoutId && workoutIdsThisWeek.includes(workoutId)
+    })
+    .reduce((sum, log) => {
+      const weight = log.fields.gewicht ?? 0
+      const reps = log.fields.wiederholungen ?? 0
+      return sum + (weight * reps)
+    }, 0)
+
+  // Chart Data: Weight Progress (30 days)
+  const weightData = [...state.koerperdaten]
+    .filter(k => {
+      if (!k.fields.datum || !k.fields.gewicht_kg) return false
+      const date = parseISO(k.fields.datum)
+      return isWithinInterval(date, { start: rangeStart, end: rangeEnd })
+    })
+    .sort((a, b) => parseISO(a.fields.datum!).getTime() - parseISO(b.fields.datum!).getTime())
+    .map(k => ({
+      date: k.fields.datum!,
+      gewicht: k.fields.gewicht_kg!,
+    }))
+
+  // Chart Data: Training Volume by Week
+  const volumeByWeek = state.workoutLogs
+    .map(log => {
+      const workoutId = extractRecordId(log.fields.workout)
+      if (!workoutId) return null
+
+      const workout = state.workouts.find(w => w.record_id === workoutId)
+      if (!workout?.fields.datum) return null
+
+      const matchesType = workoutTypeFilter === 'all' || workout.fields.typ === workoutTypeFilter
+      if (!matchesType) return null
+
+      const date = parseISO(workout.fields.datum)
+      if (!isWithinInterval(date, { start: rangeStart, end: rangeEnd })) return null
+
+      const volume = (log.fields.gewicht ?? 0) * (log.fields.wiederholungen ?? 0)
+      const weekKey = format(startOfWeek(date, { locale: de }), 'yyyy-MM-dd')
+
+      return { weekKey, volume }
+    })
+    .filter((item): item is { weekKey: string; volume: number } => item !== null)
+    .reduce((acc, { weekKey, volume }) => {
+      acc[weekKey] = (acc[weekKey] ?? 0) + volume
+      return acc
+    }, {} as Record<string, number>)
+
+  const volumeData = Object.entries(volumeByWeek)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([week, volume]) => ({
+      week: format(parseISO(week), 'dd.MM', { locale: de }),
+      volume: Math.round(volume),
+    }))
+
+  // Chart Data: Nutrition (last 14 days)
+  const last14Days = subDays(new Date(), 14)
+  const nutritionData = state.ernaehrung
+    .filter(e => {
+      if (!e.fields.datum) return false
+      const date = parseISO(e.fields.datum)
+      return isWithinInterval(date, { start: last14Days, end: new Date() })
+    })
+    .reduce((acc, e) => {
+      const date = e.fields.datum!
+      if (!acc[date]) {
+        acc[date] = { date, kalorien: 0, protein: 0 }
       }
-      const rankDiff = statusRank(a.fields.status) - statusRank(b.fields.status)
-      if (rankDiff !== 0) return rankDiff
-      const dateA = parseDate(getRecordDateValue(a.createdat, a.updatedat))
-      const dateB = parseDate(getRecordDateValue(b.createdat, b.updatedat))
-      return (dateB?.getTime() ?? 0) - (dateA?.getTime() ?? 0)
+      acc[date].kalorien += e.fields.kalorien ?? 0
+      acc[date].protein += e.fields.protein ?? 0
+      return acc
+    }, {} as Record<string, { date: string; kalorien: number; protein: number }>)
+
+  const nutritionChartData = Object.values(nutritionData)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map(d => ({
+      date: d.date,
+      kalorien: Math.round(d.kalorien),
+      protein: Math.round(d.protein),
+    }))
+
+  // Chart Data: Training by Type
+  const workoutsByType = filteredWorkouts
+    .filter(w => !w.fields.rest_day)
+    .reduce((acc, w) => {
+      const type = w.fields.typ ?? 'sonstiges'
+      acc[type] = (acc[type] ?? 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+  const workoutTypeData = Object.entries(workoutsByType)
+    .map(([typ, count]) => ({
+      typ: typ.charAt(0).toUpperCase() + typ.slice(1),
+      count,
+    }))
+    .sort((a, b) => b.count - a.count)
+
+  // Chart Data: Muscle Group Distribution
+  const muscleGroupCounts = state.workoutLogs
+    .map(log => {
+      const uebungId = extractRecordId(log.fields.uebung)
+      if (!uebungId) return null
+
+      const uebung = state.uebungen.find(u => u.record_id === uebungId)
+      return uebung?.fields.muskelgruppe ?? null
     })
-  }, [data.ziele])
+    .filter((mg): mg is NonNullable<typeof mg> => mg !== null)
+    .reduce((acc, mg) => {
+      if (mg) {
+        acc[mg] = (acc[mg] ?? 0) + 1
+      }
+      return acc
+    }, {} as Record<string, number>)
 
-  const activeGoal = goalsSorted.find((goal) => goal.fields.status === "aktiv")
-  const goalRecord = activeGoal ?? goalsSorted[0] ?? null
+  const muscleGroupData = Object.entries(muscleGroupCounts)
+    .map(([muskelgruppe, count]) => ({
+      name: muskelgruppe.charAt(0).toUpperCase() + muskelgruppe.slice(1),
+      value: count,
+    }))
+    .sort((a, b) => b.value - a.value)
 
-  const todayMeals = useMemo(() => {
-    return data.ernaehrung.filter((meal) => meal.fields.datum === todayKey)
-  }, [data.ernaehrung, todayKey])
-
-  const todayTotals = useMemo(() => {
-    return todayMeals.reduce(
-      (acc, meal) => {
-        acc.kalorien += meal.fields.kalorien ?? 0
-        acc.protein += meal.fields.protein ?? 0
-        acc.carbs += meal.fields.carbs ?? 0
-        acc.fett += meal.fields.fett ?? 0
-        return acc
-      },
-      { kalorien: 0, protein: 0, carbs: 0, fett: 0 }
-    )
-  }, [todayMeals])
-
-  const calorieGoal = goalRecord?.fields.taeglich_kalorien ?? null
-  const proteinGoal = goalRecord?.fields.taeglich_protein ?? null
-  const trainingGoal = goalRecord?.fields.trainingstage_pro_woche ?? null
-
-  const calorieProgress = calorieGoal ? todayTotals.kalorien / calorieGoal : 0
-  const calorieProgressClamped = Math.min(Math.max(calorieProgress, 0), 1)
-
-  const workoutsThisWeek = useMemo(() => {
-    return data.workouts.filter((workout) => {
-      const dateValue = getRecordDateValue(workout.fields.datum, workout.createdat)
-      const parsed = parseDate(dateValue)
-      if (!parsed) return false
-      if (workout.fields.rest_day) return false
-      return isSameWeek(parsed, new Date(), { weekStartsOn: 1 })
+  // Chart Data: Body Measurements
+  const measurementsData = [...state.koerperdaten]
+    .filter(k => {
+      if (!k.fields.datum) return false
+      const date = parseISO(k.fields.datum)
+      return isWithinInterval(date, { start: rangeStart, end: rangeEnd })
     })
-  }, [data.workouts])
+    .sort((a, b) => parseISO(a.fields.datum!).getTime() - parseISO(b.fields.datum!).getTime())
+    .map(k => ({
+      date: k.fields.datum!,
+      brustumfang: k.fields.brustumfang ?? null,
+      armumfang: k.fields.armumfang ?? null,
+      taillenumfang: k.fields.taillenumfang ?? null,
+    }))
+    .filter(m => m.brustumfang || m.armumfang || m.taillenumfang)
 
-  const workoutsById = useMemo(() => {
-    const map = new Map<string, Workouts>()
-    data.workouts.forEach((workout) => {
-      map.set(workout.record_id, workout)
+  // Latest Body Fat Percentage
+  const latestBodyFat = sortedBodyData[0]?.fields.kfa_geschaetzt ?? null
+
+  // Recent Workouts Table Data
+  const recentWorkouts = [...state.workouts]
+    .filter(w => w.fields.datum)
+    .sort((a, b) => {
+      const dateA = parseISO(a.fields.datum!)
+      const dateB = parseISO(b.fields.datum!)
+      return dateB.getTime() - dateA.getTime()
     })
-    return map
-  }, [data.workouts])
+    .slice(0, 10)
 
-  const logsByWorkoutId = useMemo(() => {
-    const map = new Map<string, WorkoutLogs[]>()
-    data.workoutLogs.forEach((log) => {
-      const workoutId = extractRecordId(log.fields.workout)
-      if (!workoutId) return
-      if (!map.has(workoutId)) map.set(workoutId, [])
-      map.get(workoutId)?.push(log)
-    })
-    return map
-  }, [data.workoutLogs])
-
-  const setsThisWeek = useMemo(() => {
-    return data.workoutLogs.filter((log) => {
-      const workoutId = extractRecordId(log.fields.workout)
-      if (!workoutId) return false
-      const workout = workoutsById.get(workoutId)
-      if (!workout) return false
-      const dateValue = getRecordDateValue(workout.fields.datum, workout.createdat)
-      const parsed = parseDate(dateValue)
-      if (!parsed) return false
-      return isSameWeek(parsed, new Date(), { weekStartsOn: 1 })
-    }).length
-  }, [data.workoutLogs, workoutsById])
-
-  const exerciseById = useMemo(() => {
-    const map = new Map<string, Uebungen>()
-    data.uebungen.forEach((exercise) => {
-      map.set(exercise.record_id, exercise)
-    })
-    return map
-  }, [data.uebungen])
-
-  const weightEntries = useMemo(() => {
-    return data.koerperdaten
-      .filter((entry) => entry.fields.gewicht_kg != null)
-      .map((entry) => {
-        const dateValue = getRecordDateValue(entry.fields.datum, entry.createdat)
-        return {
-          entry,
-          dateValue,
-          date: parseDate(dateValue),
-        }
-      })
-      .filter((entry) => entry.date)
-      .sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0))
-  }, [data.koerperdaten])
-
-  const latestWeight = weightEntries[0]?.entry ?? null
-  const previousWeight = weightEntries[1]?.entry ?? null
-  const weightDelta =
-    latestWeight?.fields.gewicht_kg != null &&
-    previousWeight?.fields.gewicht_kg != null
-      ? latestWeight.fields.gewicht_kg - previousWeight.fields.gewicht_kg
-      : null
-
-  const weightChartData = useMemo(() => {
-    return weightEntries
-      .slice()
-      .reverse()
-      .map((entry) => {
-        const dateLabel = entry.date
-          ? format(entry.date, "dd.MM", { locale: de })
-          : "-"
-        return {
-          date: dateLabel,
-          weight: entry.entry.fields.gewicht_kg ?? 0,
-        }
-      })
-  }, [weightEntries])
-
-  const uebungenStats = useMemo(() => {
-    const counts = new Map<string, number>()
-    data.uebungen.forEach((exercise) => {
-      const group = exercise.fields.muskelgruppe
-      if (!group) return
-      counts.set(group, (counts.get(group) ?? 0) + 1)
-    })
-    const sorted = Array.from(counts.entries())
-      .map(([group, count]) => ({
-        group,
-        label: MUSCLE_GROUP_LABELS[group] ?? "Unbekannt",
-        count,
-      }))
-      .sort((a, b) => b.count - a.count)
-    return sorted
-  }, [data.uebungen])
-
-  const topMuscleGroup = uebungenStats[0]?.label ?? "-"
-  const maxMuscleCount = uebungenStats[0]?.count ?? 1
-
-  const workoutList = useMemo(() => {
-    return [...data.workouts]
-      .sort((a, b) => {
-        const dateA = parseDate(getRecordDateValue(a.fields.datum, a.createdat))
-        const dateB = parseDate(getRecordDateValue(b.fields.datum, b.createdat))
-        return (dateB?.getTime() ?? 0) - (dateA?.getTime() ?? 0)
-      })
-      .map((workout) => {
-        const dateValue = getRecordDateValue(workout.fields.datum, workout.createdat)
-        const dateLabel = dateValue
-          ? format(parseISO(dateValue), "dd.MM.yyyy", { locale: de })
-          : "-"
-        const logs = logsByWorkoutId.get(workout.record_id) ?? []
-        const exerciseCounts = new Map<string, number>()
-        logs.forEach((log) => {
-          const exerciseId = extractRecordId(log.fields.uebung)
-          if (!exerciseId) return
-          exerciseCounts.set(exerciseId, (exerciseCounts.get(exerciseId) ?? 0) + 1)
-        })
-        const topExercises = Array.from(exerciseCounts.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 2)
-          .map(([exerciseId]) =>
-            exerciseById.get(exerciseId)?.fields.name ?? "Unbekannt"
-          )
-        return {
-          id: workout.record_id,
-          dateLabel,
-          typeLabel:
-            WORKOUT_TYPE_LABELS[workout.fields.typ ?? "sonstiges"] ?? "Sonstiges",
-          duration: workout.fields.dauer_minuten ?? null,
-          sets: logs.length,
-          topExercises,
-        }
-      })
-  }, [data.workouts, exerciseById, logsByWorkoutId])
-
-  const mealList = useMemo(() => {
-    return [...data.ernaehrung]
-      .sort((a, b) => {
-        const dateA = parseDate(getRecordDateValue(a.fields.datum, a.createdat))
-        const dateB = parseDate(getRecordDateValue(b.fields.datum, b.createdat))
-        return (dateB?.getTime() ?? 0) - (dateA?.getTime() ?? 0)
-      })
-      .map((meal) => {
-        const dateLabel = meal.fields.datum
-          ? format(parseISO(meal.fields.datum), "dd.MM.yyyy", { locale: de })
-          : "-"
-        const mealType = meal.fields.mahlzeit_typ
-        return {
-          id: meal.record_id,
-          dateLabel,
-          typeLabel: mealType ? MEAL_TYPE_LABELS[mealType] ?? "Sonstiges" : "-",
-          kalorien: meal.fields.kalorien ?? null,
-          protein: meal.fields.protein ?? null,
-        }
-      })
-  }, [data.ernaehrung])
-
-  const workoutLimit = isMobile ? 3 : 5
-  const mealLimit = isMobile ? 3 : 5
-  const goalsLimit = isMobile ? 2 : 3
-
-  const workoutSlice = workoutList.slice(0, workoutLimit)
-  const mealSlice = mealList.slice(0, mealLimit)
-  const goalsSlice = goalsSorted.slice(0, goalsLimit)
-  const muscleSlice = uebungenStats.slice(0, 4)
-
-  const backgroundStyle = {
-    backgroundImage:
-      "radial-gradient(800px circle at 85% -10%, hsla(18, 70%, 52%, 0.16), transparent 60%), radial-gradient(700px circle at -10% 110%, hsla(164, 45%, 24%, 0.12), transparent 65%)",
+  // Lookup labels
+  const stimmungLabels: Record<string, string> = {
+    schlecht: 'Schlecht',
+    okay: 'Okay',
+    gut: 'Gut',
+    brutal: 'Brutal',
   }
 
-  const handleMealSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    setMealError(null)
-    setMealSubmitting(true)
-
-    const parseOptionalNumber = (value: string) => {
-      if (!value.trim()) return undefined
-      const parsed = Number(value)
-      return Number.isFinite(parsed) ? parsed : undefined
-    }
-
-    const payload: Ernaehrung["fields"] = {
-      datum: mealForm.datum,
-      mahlzeit_typ: mealForm.mahlzeit_typ === "none" ? undefined : mealForm.mahlzeit_typ,
-      beschreibung: mealForm.beschreibung.trim() || undefined,
-      kalorien: parseOptionalNumber(mealForm.kalorien),
-      protein: parseOptionalNumber(mealForm.protein),
-      carbs: parseOptionalNumber(mealForm.carbs),
-      fett: parseOptionalNumber(mealForm.fett),
-    }
-
-    try {
-      await LivingAppsService.createErnaehrungEntry(payload)
-      toast.success("Mahlzeit gespeichert")
-      setMealDialogOpen(false)
-      setMealForm(getMealDefault(todayKey))
-      await loadData()
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Speichern fehlgeschlagen"
-      setMealError(message)
-      toast.error("Speichern fehlgeschlagen")
-    } finally {
-      setMealSubmitting(false)
-    }
+  const statusLabels: Record<string, string> = {
+    aktiv: 'Aktiv',
+    erreicht: 'Erreicht',
+    verworfen: 'Verworfen',
   }
 
-  if (loading) {
+  if (state.loading) {
     return (
-      <div className="min-h-screen px-4 pb-24 pt-6 md:px-8 md:pb-12 md:pt-10" style={backgroundStyle}>
-        <DashboardSkeleton />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen px-4 pb-24 pt-6 md:px-8 md:pb-12 md:pt-10" style={backgroundStyle}>
-        <Alert variant="destructive" className="max-w-3xl">
-          <AlertTitle>Fehler beim Laden</AlertTitle>
-          <AlertDescription className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <span>{error.message}</span>
-            <Button variant="outline" onClick={loadData}>
-              Neu laden
-            </Button>
-          </AlertDescription>
-        </Alert>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Activity className="h-12 w-12 animate-pulse mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Lade Dashboard...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={backgroundStyle}>
-      <Toaster position="top-right" richColors />
-      <Dialog open={mealDialogOpen} onOpenChange={setMealDialogOpen}>
-        <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-6 md:px-8 md:pb-12 md:pt-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                Fitness & Ernaehrung
-              </h1>
-              <span className="hidden text-sm text-muted-foreground md:inline">
-                {todayLabel}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground md:hidden">
-                {todayLabel}
-              </span>
-              <DialogTrigger asChild>
-                <Button className="hidden items-center gap-2 transition-transform active:scale-[0.98] md:inline-flex">
-                  <Salad className="size-4" />
-                  Mahlzeit hinzufuegen
-                </Button>
-              </DialogTrigger>
-            </div>
-          </div>
+    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Fitness & Ernährungs-Tracker</h1>
+        <p className="text-muted-foreground">Dein Fortschritt auf einen Blick</p>
+      </div>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-12">
-            <Card
-              className="relative min-h-[52vh] gap-4 overflow-hidden py-4 shadow-sm transition-shadow hover:shadow-md md:min-h-[320px] lg:col-span-7 animate-in fade-in slide-in-from-bottom-2 duration-700"
-              style={{ animationDelay: "0ms" }}
-            >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsla(18,70%,52%,0.14),transparent_55%)]" />
-              <CardHeader className="relative px-4">
-                <CardTitle className="text-sm text-muted-foreground">
-                  Kalorien heute
-                </CardTitle>
-                <div className="flex flex-wrap items-baseline gap-2">
-                  <span className="text-4xl font-semibold">
-                    {formatNumber(todayTotals.kalorien)}
-                  </span>
-                  <span className="text-sm text-muted-foreground">kcal</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Ziel: {formatNumber(calorieGoal)} kcal
-                </p>
-              </CardHeader>
-              <CardContent className="relative px-4">
-                <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-wrap gap-2">
-                      <span className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
-                        Protein: {formatNumber(todayTotals.protein)}g
-                        {proteinGoal ? ` / ${formatNumber(proteinGoal)}g` : ""}
-                      </span>
-                      <span className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
-                        Carbs: {formatNumber(todayTotals.carbs)}g
-                      </span>
-                      <span className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">
-                        Fett: {formatNumber(todayTotals.fett)}g
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Flame className="size-4 text-muted-foreground" />
-                      {goalRecord?.fields.status
-                        ? `Status: ${GOAL_STATUS_LABELS[goalRecord.fields.status]}`
-                        : "Kein aktives Ziel"}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-start md:justify-end">
-                    <div className="relative h-32 w-32">
-                      <div
-                        className="absolute inset-0 rounded-full"
-                        style={{
-                          background: `conic-gradient(var(--accent) 0deg ${
-                            calorieProgressClamped * 360
-                          }deg, var(--muted) ${
-                            calorieProgressClamped * 360
-                          }deg 360deg)`,
-                        }}
-                      />
-                      <div className="absolute inset-3 flex flex-col items-center justify-center rounded-full bg-card">
-                        <span className="text-2xl font-semibold">
-                          {Math.round(calorieProgressClamped * 100)}%
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          erreicht
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="grid gap-4 lg:col-span-5">
-              <Card
-                className="gap-4 py-4 shadow-sm transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-700"
-                style={{ animationDelay: "150ms" }}
-              >
-                <CardHeader className="flex flex-row items-center justify-between px-4 pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">
-                    Workouts diese Woche
-                  </CardTitle>
-                  <Dumbbell className="size-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="px-4">
-                  <div className="text-2xl font-semibold">
-                    {formatNumber(workoutsThisWeek.length)}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Ziel: {formatNumber(trainingGoal)} Tage
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card
-                className="gap-4 py-4 shadow-sm transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-700"
-                style={{ animationDelay: "300ms" }}
-              >
-                <CardHeader className="flex flex-row items-center justify-between px-4 pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">
-                    Saetze diese Woche
-                  </CardTitle>
-                  <Activity className="size-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="px-4">
-                  <div className="text-2xl font-semibold">
-                    {formatNumber(setsThisWeek)}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Workout-Logs</p>
-                </CardContent>
-              </Card>
-
-              <Card
-                className="gap-4 py-4 shadow-sm transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-700"
-                style={{ animationDelay: "450ms" }}
-              >
-                <CardHeader className="flex flex-row items-center justify-between px-4 pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">
-                    Letztes Gewicht
-                  </CardTitle>
-                  <Scale className="size-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="px-4">
-                  <div className="text-2xl font-semibold">
-                    {latestWeight?.fields.gewicht_kg != null
-                      ? `${formatNumber(latestWeight.fields.gewicht_kg, {
-                          maximumFractionDigits: 1,
-                        })} kg`
-                      : "-"}
-                  </div>
-                  <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                    {weightDelta == null ? (
-                      "Keine Vorwerte"
-                    ) : weightDelta >= 0 ? (
-                      <>
-                        <ArrowUpRight className="size-3" />
-                        +{formatNumber(weightDelta, { maximumFractionDigits: 1 })} kg
-                      </>
-                    ) : (
-                      <>
-                        <ArrowDownRight className="size-3" />
-                        {formatNumber(weightDelta, { maximumFractionDigits: 1 })} kg
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card
-                className="gap-4 py-4 shadow-sm transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-700"
-                style={{ animationDelay: "600ms" }}
-              >
-                <CardHeader className="flex flex-row items-center justify-between px-4 pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">
-                    Uebungen Katalog
-                  </CardTitle>
-                  <Target className="size-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="px-4">
-                  <div className="text-2xl font-semibold">
-                    {formatNumber(data.uebungen.length)}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Top: {topMuscleGroup}</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-6 lg:grid-cols-12">
-            <Card
-              className="gap-4 py-4 shadow-sm transition-shadow hover:shadow-md lg:col-span-7 animate-in fade-in slide-in-from-bottom-2 duration-700"
-              style={{ animationDelay: "0ms" }}
-            >
-              <CardHeader className="flex flex-row items-center justify-between px-4">
-                <div>
-                  <CardTitle className="text-base">Gewichtstrend</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Verlauf der letzten Eintraege
-                  </p>
-                </div>
-                <CalendarDays className="size-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent className="px-4">
-                {weightChartData.length === 0 ? (
-                  <EmptyState
-                    title="Noch keine Koerperdaten"
-                    description="Fuer einen Trend brauchst du mindestens einen Eintrag."
-                  />
-                ) : (
-                  <div className="h-[220px] md:h-[260px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={weightChartData}>
-                        <XAxis
-                          dataKey="date"
-                          tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
-                          axisLine={false}
-                          tickLine={false}
-                          width={36}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "var(--card)",
-                            border: "1px solid var(--border)",
-                            borderRadius: "10px",
-                          }}
-                          labelStyle={{ color: "var(--muted-foreground)" }}
-                          cursor={{ stroke: "var(--border)", strokeDasharray: "4 4" }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="weight"
-                          stroke="var(--primary)"
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card
-              className="gap-4 py-4 shadow-sm transition-shadow hover:shadow-md lg:col-span-5 animate-in fade-in slide-in-from-bottom-2 duration-700"
-              style={{ animationDelay: "150ms" }}
-            >
-              <CardHeader className="flex flex-row items-center justify-between px-4">
-                <div>
-                  <CardTitle className="text-base">Letzte Workouts</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Fokus und Saetze pro Session
-                  </p>
-                </div>
-                <Dumbbell className="size-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent className="px-4">
-                {workoutSlice.length === 0 ? (
-                  <EmptyState
-                    title="Noch keine Workouts"
-                    description="Sobald du ein Workout loggst, erscheint es hier."
-                  />
-                ) : (
-                  <div className="space-y-3">
-                    {workoutSlice.map((workout) => (
-                      <div
-                        key={workout.id}
-                        className="min-h-[44px] rounded-lg border border-border px-3 py-3 transition-colors hover:bg-muted/60"
-                      >
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium">{workout.typeLabel}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {workout.dateLabel}
-                          </span>
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                          <span>{formatNumber(workout.duration)} min</span>
-                          <span>•</span>
-                          <span>{formatNumber(workout.sets)} Saetze</span>
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                          {workout.topExercises.length === 0 ? (
-                            <span className="text-muted-foreground">
-                              Keine Uebungen verknuepft
-                            </span>
-                          ) : (
-                            workout.topExercises.map((name) => (
-                              <span
-                                key={name}
-                                className="rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground"
-                              >
-                                {name}
-                              </span>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {data.workouts.length > workoutLimit && (
-                      <p className="text-xs text-muted-foreground md:hidden">
-                        Mehr anzeigen
-                      </p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-6 grid gap-6 lg:grid-cols-12">
-            <Card
-              className="gap-4 py-4 shadow-sm transition-shadow hover:shadow-md lg:col-span-7 animate-in fade-in slide-in-from-bottom-2 duration-700"
-              style={{ animationDelay: "0ms" }}
-            >
-              <CardHeader className="flex flex-row items-center justify-between px-4">
-                <div>
-                  <CardTitle className="text-base">Letzte Mahlzeiten</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Kalorien und Protein im Blick
-                  </p>
-                </div>
-                <Salad className="size-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent className="px-4">
-                {mealSlice.length === 0 ? (
-                  <EmptyState
-                    title="Noch keine Mahlzeiten"
-                    description="Fange mit der ersten Mahlzeit an, um dein Tagesziel zu sehen."
-                  />
-                ) : (
-                  <div className="space-y-3">
-                    {mealSlice.map((meal) => (
-                      <div
-                        key={meal.id}
-                        className="min-h-[44px] rounded-lg border border-border px-3 py-3 transition-colors hover:bg-muted/60"
-                      >
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium">{meal.typeLabel}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {meal.dateLabel}
-                          </span>
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                          <span>{formatNumber(meal.kalorien)} kcal</span>
-                          <span>•</span>
-                          <span>{formatNumber(meal.protein)} g Protein</span>
-                        </div>
-                      </div>
-                    ))}
-                    {data.ernaehrung.length > mealLimit && (
-                      <p className="text-xs text-muted-foreground md:hidden">
-                        Mehr anzeigen
-                      </p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="grid gap-6 lg:col-span-5">
-              <Card
-                className="gap-4 py-4 shadow-sm transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-700"
-                style={{ animationDelay: "150ms" }}
-              >
-                <CardHeader className="flex flex-row items-center justify-between px-4">
-                  <div>
-                    <CardTitle className="text-base">Aktive Ziele</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Tagesziele und Status
-                    </p>
-                  </div>
-                  <Target className="size-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="px-4">
-                  {goalsSlice.length === 0 ? (
-                    <EmptyState
-                      title="Noch keine Ziele"
-                      description="Lege Ziele an, um Fortschritte zu sehen."
-                    />
-                  ) : (
-                    <div className="space-y-3">
-                      {goalsSlice.map((goal) => (
-                        <div
-                          key={goal.record_id}
-                          className="min-h-[44px] rounded-lg border border-border px-3 py-3"
-                        >
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="font-medium">Ziel</span>
-                            {goal.fields.status ? (
-                              <Badge variant="secondary">
-                                {GOAL_STATUS_LABELS[goal.fields.status]}
-                              </Badge>
-                            ) : null}
-                          </div>
-                          <div className="mt-2 grid gap-1 text-xs text-muted-foreground">
-                            <span>
-                              Kalorien: {formatNumber(goal.fields.taeglich_kalorien)}
-                            </span>
-                            <span>
-                              Protein: {formatNumber(goal.fields.taeglich_protein)} g
-                            </span>
-                            <span>
-                              Trainingstage: {formatNumber(goal.fields.trainingstage_pro_woche)}
-                            </span>
-                            <span>
-                              Schlafziel: {formatNumber(goal.fields.schlaf_ziel_stunden)} h
-                            </span>
-                            {goal.fields.notizen ? (
-                              <span className="text-muted-foreground">
-                                Notiz: {goal.fields.notizen.slice(0, 60)}
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
-                      ))}
-                      {data.ziele.length > goalsLimit && (
-                        <p className="text-xs text-muted-foreground md:hidden">
-                          Mehr anzeigen
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card
-                className="gap-4 py-4 shadow-sm transition-shadow hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-700"
-                style={{ animationDelay: "300ms" }}
-              >
-                <CardHeader className="flex flex-row items-center justify-between px-4">
-                  <div>
-                    <CardTitle className="text-base">Uebungen Atlas</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Muskelgruppen im Fokus
-                    </p>
-                  </div>
-                  <ClipboardList className="size-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="px-4">
-                  {muscleSlice.length === 0 ? (
-                    <EmptyState
-                      title="Noch keine Uebungen"
-                      description="Erstelle Uebungen, um die Verteilung zu sehen."
-                    />
-                  ) : (
-                    <div className="space-y-3">
-                      {muscleSlice.map((group) => (
-                        <div key={group.group} className="space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span>{group.label}</span>
-                            <span className="text-muted-foreground">
-                              {formatNumber(group.count)}
-                            </span>
-                          </div>
-                          <div className="h-2 w-full rounded-full bg-muted">
-                            <div
-                              className="h-2 rounded-full bg-accent"
-                              style={{ width: `${(group.count / maxMuscleCount) * 100}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <DialogTrigger asChild>
-            <Button className="fixed bottom-4 left-4 right-4 flex h-[52px] items-center justify-center gap-2 md:hidden transition-transform active:scale-[0.98]">
-              <Salad className="size-4" />
-              Mahlzeit hinzufuegen
-            </Button>
-          </DialogTrigger>
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <div className="flex-1">
+          <label className="text-sm font-medium mb-2 block">Zeitraum</label>
+          <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRangeType)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="last_7_days">Letzte 7 Tage</SelectItem>
+              <SelectItem value="last_30_days">Letzte 30 Tage</SelectItem>
+              <SelectItem value="last_90_days">Letzte 90 Tage</SelectItem>
+              <SelectItem value="all_time">Gesamte Zeit</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Mahlzeit hinzufuegen</DialogTitle>
-          </DialogHeader>
-          <form className="space-y-4" onSubmit={handleMealSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="meal-date">Datum</Label>
-              <Input
-                id="meal-date"
-                type="date"
-                value={mealForm.datum}
-                onChange={(event) =>
-                  setMealForm((prev) => ({
-                    ...prev,
-                    datum: event.target.value,
-                  }))
-                }
-              />
+        <div className="flex-1">
+          <label className="text-sm font-medium mb-2 block">Trainingstyp</label>
+          <Select value={workoutTypeFilter} onValueChange={(v) => setWorkoutTypeFilter(v as WorkoutTypeFilter)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle</SelectItem>
+              <SelectItem value="push">Push</SelectItem>
+              <SelectItem value="pull">Pull</SelectItem>
+              <SelectItem value="beine">Beine</SelectItem>
+              <SelectItem value="ganzkoerper">Ganzkörper</SelectItem>
+              <SelectItem value="oberkoerper">Oberkörper</SelectItem>
+              <SelectItem value="unterkoerper">Unterkörper</SelectItem>
+              <SelectItem value="cardio">Cardio</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Übersicht - Stat Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Workouts diese Woche</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{workoutsThisWeek}</div>
+            <p className="text-xs text-muted-foreground">
+              {goalProgress}% vom Wochenziel ({weeklyGoal} Trainings)
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Durchschn. Kalorien (7 Tage)</CardTitle>
+            <Utensils className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{avgCalories}</div>
+            <p className="text-xs text-muted-foreground">
+              Ziel: {activeGoal?.fields.taeglich_kalorien ?? '-'} kcal
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Durchschn. Protein (7 Tage)</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{avgProtein}g</div>
+            <p className="text-xs text-muted-foreground">
+              Ziel: {activeGoal?.fields.taeglich_protein ?? '-'}g
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Aktuelles Gewicht</CardTitle>
+            <Weight className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {currentWeight ? `${currentWeight.toFixed(1)}kg` : '-'}
             </div>
-            <div className="space-y-2">
-              <Label>Mahlzeitentyp</Label>
-              <Select
-                value={mealForm.mahlzeit_typ ?? "none"}
-                onValueChange={(value) =>
-                  setMealForm((prev) => ({
-                    ...prev,
-                    mahlzeit_typ: value as MealFormState["mahlzeit_typ"],
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Auswaehlen" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Keine Auswahl</SelectItem>
-                  {Object.entries(MEAL_TYPE_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
+            {weightChange !== null && (
+              <p className="text-xs flex items-center gap-1">
+                {weightChange > 0 ? (
+                  <>
+                    <TrendingUp className="h-3 w-3 text-orange-500" />
+                    <span className="text-orange-500">+{weightChange}kg</span>
+                  </>
+                ) : weightChange < 0 ? (
+                  <>
+                    <TrendingDown className="h-3 w-3 text-green-500" />
+                    <span className="text-green-500">{weightChange}kg</span>
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">Keine Änderung</span>
+                )}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Fortschritt Section */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Fortschritt</h2>
+
+        <div className="grid gap-4 md:grid-cols-2 mb-4">
+          {/* Weight Progress Chart */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Gewichtsverlauf</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {weightData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={weightData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(date) => format(parseISO(date), 'dd.MM', { locale: de })}
+                    />
+                    <YAxis domain={['dataMin - 1', 'dataMax + 1']} />
+                    <Tooltip
+                      labelFormatter={(date) => format(parseISO(date), 'dd.MM.yyyy', { locale: de })}
+                      formatter={(value: number) => [`${value.toFixed(1)} kg`, 'Gewicht']}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="gewicht"
+                      stroke={COLORS.primary}
+                      strokeWidth={2}
+                      dot={{ fill: COLORS.primary }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Keine Gewichtsdaten verfügbar</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Training Volume Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Trainingsvolumen (Wochen)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {volumeData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={volumeData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="week" />
+                    <YAxis />
+                    <Tooltip formatter={(value: number) => [`${value.toLocaleString()} kg`, 'Volumen']} />
+                    <Bar dataKey="volume" fill={COLORS.accent} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Keine Volumendaten verfügbar</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Nutrition Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Ernährung (14 Tage)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {nutritionChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={nutritionChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(date) => format(parseISO(date), 'dd.MM', { locale: de })}
+                    />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip
+                      labelFormatter={(date) => format(parseISO(date), 'dd.MM.yyyy', { locale: de })}
+                    />
+                    <Legend />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="kalorien"
+                      stroke={COLORS.primary}
+                      name="Kalorien"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="protein"
+                      stroke={COLORS.accent}
+                      name="Protein (g)"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Keine Ernährungsdaten verfügbar</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Training Section */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Training</h2>
+
+        <div className="grid gap-4 md:grid-cols-2 mb-4">
+          {/* Training by Type */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Training nach Typ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {workoutTypeData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={workoutTypeData} layout="horizontal">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="typ" type="category" width={100} />
+                    <Tooltip />
+                    <Bar dataKey="count" fill={COLORS.primary} name="Anzahl" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Keine Trainingsdaten verfügbar</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Muscle Group Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Muskelgruppen-Verteilung</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {muscleGroupData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={muscleGroupData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {muscleGroupData.map((_item, index) => (
+                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Keine Übungsdaten verfügbar</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Workouts Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Letzte Workouts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {recentWorkouts.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Datum</TableHead>
+                    <TableHead>Typ</TableHead>
+                    <TableHead>Dauer</TableHead>
+                    <TableHead>Stimmung</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentWorkouts.map((workout) => (
+                    <TableRow key={workout.record_id}>
+                      <TableCell>
+                        {workout.fields.datum
+                          ? format(parseISO(workout.fields.datum), 'dd.MM.yyyy', { locale: de })
+                          : '-'
+                        }
+                      </TableCell>
+                      <TableCell>
+                        {workout.fields.typ
+                          ? workout.fields.typ.charAt(0).toUpperCase() + workout.fields.typ.slice(1)
+                          : '-'
+                        }
+                      </TableCell>
+                      <TableCell>
+                        {workout.fields.dauer_minuten ? `${workout.fields.dauer_minuten} min` : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {workout.fields.stimmung ? (
+                          <Badge variant={
+                            workout.fields.stimmung === 'brutal' ? 'default' :
+                            workout.fields.stimmung === 'gut' ? 'secondary' :
+                            'outline'
+                          }>
+                            {stimmungLabels[workout.fields.stimmung]}
+                          </Badge>
+                        ) : '-'}
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="meal-desc">Beschreibung</Label>
-              <Textarea
-                id="meal-desc"
-                value={mealForm.beschreibung}
-                onChange={(event) =>
-                  setMealForm((prev) => ({
-                    ...prev,
-                    beschreibung: event.target.value,
-                  }))
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">Keine Workouts verfügbar</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Körperdaten Section */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Körperdaten</h2>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {/* Body Measurements Chart */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Körpermaße</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {measurementsData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={measurementsData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(date) => format(parseISO(date), 'dd.MM', { locale: de })}
+                    />
+                    <YAxis />
+                    <Tooltip
+                      labelFormatter={(date) => format(parseISO(date as string), 'dd.MM.yyyy', { locale: de })}
+                      formatter={(value) => {
+                        const numValue = Number(value)
+                        return !isNaN(numValue) ? `${numValue} cm` : '-'
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="brustumfang"
+                      stroke={CHART_COLORS[0]}
+                      name="Brust"
+                      strokeWidth={2}
+                      connectNulls
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="armumfang"
+                      stroke={CHART_COLORS[1]}
+                      name="Arm"
+                      strokeWidth={2}
+                      connectNulls
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="taillenumfang"
+                      stroke={CHART_COLORS[2]}
+                      name="Taille"
+                      strokeWidth={2}
+                      connectNulls
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">Keine Körpermaßdaten verfügbar</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Body Fat Percentage */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Körperfettanteil</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold mb-2">
+                {latestBodyFat ? `${latestBodyFat.toFixed(1)}%` : '-'}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {sortedBodyData[0]?.fields.datum
+                  ? `Stand: ${format(parseISO(sortedBodyData[0].fields.datum), 'dd.MM.yyyy', { locale: de })}`
+                  : 'Keine Daten'
                 }
-                placeholder="Optional"
-              />
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Ziele Section */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Ziele</h2>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Aktive Ziele</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {state.ziele.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Kalorien/Tag</TableHead>
+                    <TableHead>Protein/Tag</TableHead>
+                    <TableHead>Trainingstage/Woche</TableHead>
+                    <TableHead>Schlafziel</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {state.ziele.map((ziel) => (
+                    <TableRow key={ziel.record_id}>
+                      <TableCell>
+                        {ziel.fields.taeglich_kalorien ? `${ziel.fields.taeglich_kalorien} kcal` : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {ziel.fields.taeglich_protein ? `${ziel.fields.taeglich_protein}g` : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {ziel.fields.trainingstage_pro_woche ?? '-'}
+                      </TableCell>
+                      <TableCell>
+                        {ziel.fields.schlaf_ziel_stunden ? `${ziel.fields.schlaf_ziel_stunden}h` : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {ziel.fields.status ? (
+                          <Badge variant={
+                            ziel.fields.status === 'aktiv' ? 'default' :
+                            ziel.fields.status === 'erreicht' ? 'secondary' :
+                            'outline'
+                          }>
+                            {statusLabels[ziel.fields.status]}
+                          </Badge>
+                        ) : '-'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">Keine Ziele definiert</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Additional Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Weitere Statistiken</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <p className="text-sm text-muted-foreground">Gesamtvolumen diese Woche</p>
+              <p className="text-2xl font-bold">{totalVolumeThisWeek.toLocaleString()} kg</p>
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="meal-calories">Kalorien (kcal)</Label>
-                <Input
-                  id="meal-calories"
-                  type="number"
-                  inputMode="decimal"
-                  value={mealForm.kalorien}
-                  onChange={(event) =>
-                    setMealForm((prev) => ({
-                      ...prev,
-                      kalorien: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="meal-protein">Protein (g)</Label>
-                <Input
-                  id="meal-protein"
-                  type="number"
-                  inputMode="decimal"
-                  value={mealForm.protein}
-                  onChange={(event) =>
-                    setMealForm((prev) => ({
-                      ...prev,
-                      protein: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="meal-carbs">Carbs (g)</Label>
-                <Input
-                  id="meal-carbs"
-                  type="number"
-                  inputMode="decimal"
-                  value={mealForm.carbs}
-                  onChange={(event) =>
-                    setMealForm((prev) => ({
-                      ...prev,
-                      carbs: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="meal-fat">Fett (g)</Label>
-                <Input
-                  id="meal-fat"
-                  type="number"
-                  inputMode="decimal"
-                  value={mealForm.fett}
-                  onChange={(event) =>
-                    setMealForm((prev) => ({
-                      ...prev,
-                      fett: event.target.value,
-                    }))
-                  }
-                />
-              </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Erfasste Übungen</p>
+              <p className="text-2xl font-bold">{state.uebungen.length}</p>
             </div>
-            {mealError ? (
-              <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-                {mealError}
-              </div>
-            ) : null}
-            <div className="flex justify-end">
-              <Button type="submit" disabled={mealSubmitting}>
-                {mealSubmitting ? "Speichern..." : "Mahlzeit speichern"}
-              </Button>
+            <div>
+              <p className="text-sm text-muted-foreground">Erfasste Workouts</p>
+              <p className="text-2xl font-bold">{state.workouts.length}</p>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
