@@ -1,200 +1,318 @@
 {
-  "appgroup_name": "Fitness & Ernährungs-Tracker",
-  "user_intent": "A fitness tracker user wants to see their training progress, nutrition adherence, body composition changes, and goal achievement at a glance. They need to answer: Am I making progress? Am I consistent? Am I hitting my goals?",
+  "appName": "Fitness & Ernährungs-Tracker Dashboard",
+  "description": "A comprehensive fitness and nutrition dashboard showing workout progress, nutrition tracking, body measurements, and goal achievement metrics for personal fitness tracking.",
+
   "kpis": [
     {
-      "name": "Workouts This Week",
-      "description": "Number of completed workouts in the current week",
-      "rationale": "Consistency is key for fitness results. Users want to know if they're hitting their weekly training frequency goals.",
-      "data_source": "workouts app",
-      "calculation": "Count workouts where datum is in current week and rest_day is false"
+      "id": "total_workouts",
+      "label": "Workouts",
+      "description": "Total number of workout sessions this month. Key metric to track training consistency.",
+      "dataSource": "workouts",
+      "calculation": "Count workout records where datum is in current month and rest_day is false",
+      "visualType": "stat_card",
+      "icon": "dumbbell",
+      "trend": "compare to previous month"
     },
     {
-      "name": "Weekly Training Goal Progress",
-      "description": "Percentage of weekly training goal achieved",
-      "rationale": "Shows how close the user is to their stated goal (trainingstage_pro_woche from ziele app)",
-      "data_source": "workouts + ziele apps",
-      "calculation": "(workouts_this_week / trainingstage_pro_woche) * 100"
+      "id": "avg_workout_duration",
+      "label": "Avg Duration",
+      "description": "Average workout duration in minutes. Shows training intensity and time commitment.",
+      "dataSource": "workouts",
+      "calculation": "Average of dauer_minuten for current month (excluding rest days)",
+      "visualType": "stat_card",
+      "icon": "clock",
+      "unit": "min",
+      "trend": "compare to previous month"
     },
     {
-      "name": "Average Daily Calories",
-      "description": "Average calories consumed per day over last 7 days",
-      "rationale": "Nutrition drives results. Users need to know if they're meeting their calorie targets for cutting/bulking.",
-      "data_source": "ernaehrung app",
-      "calculation": "Sum kalorien for last 7 days, divide by 7"
+      "id": "calories_today",
+      "label": "Calories Today",
+      "description": "Total calories consumed today vs daily goal. Critical for nutrition tracking.",
+      "dataSource": "ernaehrung + ziele",
+      "calculation": "Sum kalorien where datum = today, compare to taeglich_kalorien from active goal",
+      "visualType": "stat_card_with_progress",
+      "icon": "flame",
+      "unit": "kcal",
+      "showProgress": true
     },
     {
-      "name": "Average Daily Protein",
-      "description": "Average protein intake per day over last 7 days",
-      "rationale": "Protein is critical for muscle building and recovery. Users want to ensure adequate intake.",
-      "data_source": "ernaehrung app",
-      "calculation": "Sum protein for last 7 days, divide by 7"
+      "id": "protein_today",
+      "label": "Protein Today",
+      "description": "Total protein consumed today vs daily goal. Essential for muscle building.",
+      "dataSource": "ernaehrung + ziele",
+      "calculation": "Sum protein where datum = today, compare to taeglich_protein from active goal",
+      "visualType": "stat_card_with_progress",
+      "icon": "egg",
+      "unit": "g",
+      "showProgress": true
     },
     {
-      "name": "Current Weight",
-      "description": "Most recent body weight measurement",
-      "rationale": "Weight is the most tracked metric in fitness. Users check this daily/weekly to see progress.",
-      "data_source": "koerperdaten app",
-      "calculation": "Latest gewicht_kg value by datum"
+      "id": "current_weight",
+      "label": "Weight",
+      "description": "Most recent body weight measurement. Primary body composition metric.",
+      "dataSource": "koerperdaten",
+      "calculation": "Latest gewicht_kg sorted by datum DESC",
+      "visualType": "stat_card",
+      "icon": "scale",
+      "unit": "kg",
+      "trend": "compare to 30 days ago"
     },
     {
-      "name": "Weight Change",
-      "description": "Change in weight over last 30 days",
-      "rationale": "Absolute weight matters less than the trend. Users want to see if they're gaining or losing as intended.",
-      "data_source": "koerperdaten app",
-      "calculation": "Current weight minus weight from 30 days ago"
-    },
-    {
-      "name": "Total Volume This Week",
-      "description": "Total weight lifted (sets × reps × weight) this week",
-      "rationale": "Progressive overload is key to strength gains. Total volume shows if the user is increasing workload over time.",
-      "data_source": "workout_logs app",
-      "calculation": "Sum (gewicht * wiederholungen) for all sets in workouts from current week"
+      "id": "weekly_workout_goal",
+      "label": "Weekly Goal",
+      "description": "Workouts completed this week vs weekly goal. Shows adherence to training plan.",
+      "dataSource": "workouts + ziele",
+      "calculation": "Count workouts this week vs trainingstage_pro_woche from active goal",
+      "visualType": "stat_card_with_progress",
+      "icon": "target",
+      "showProgress": true
     }
   ],
-  "sections": [
+
+  "charts": [
     {
-      "title": "Übersicht",
-      "description": "High-level KPIs showing current week performance and goal progress",
-      "visualizations": [
-        {
-          "type": "stat_card",
-          "title": "Workouts diese Woche",
-          "data_points": ["workouts.datum", "workouts.rest_day"],
-          "rationale": "Quick glance at weekly training frequency. Shows a number with progress toward goal."
-        },
-        {
-          "type": "stat_card",
-          "title": "Durchschn. Kalorien (7 Tage)",
-          "data_points": ["ernaehrung.kalorien", "ernaehrung.datum"],
-          "rationale": "Shows if nutrition is on track. Includes comparison to goal from ziele app."
-        },
-        {
-          "type": "stat_card",
-          "title": "Durchschn. Protein (7 Tage)",
-          "data_points": ["ernaehrung.protein", "ernaehrung.datum"],
-          "rationale": "Critical macro for muscle building. Shows adherence to protein goal."
-        },
-        {
-          "type": "stat_card",
-          "title": "Aktuelles Gewicht",
-          "data_points": ["koerperdaten.gewicht_kg", "koerperdaten.datum"],
-          "rationale": "Most important metric for body composition tracking. Shows trend arrow (up/down)."
-        }
-      ]
+      "id": "workout_frequency_chart",
+      "title": "Workout Frequency",
+      "chartType": "bar",
+      "description": "Shows workout frequency over the last 30 days. Helps identify training patterns and consistency.",
+      "dataSource": "workouts",
+      "xAxis": "datum (grouped by day)",
+      "yAxis": "count of workouts",
+      "timeRange": "last 30 days",
+      "filters": "exclude rest_day = true",
+      "colorBy": "typ",
+      "responsive": {
+        "mobile": "Show last 14 days, smaller bars, rotate x-axis labels",
+        "desktop": "Show full 30 days with color-coded workout types"
+      }
     },
     {
-      "title": "Fortschritt",
-      "description": "Charts showing trends over time for weight, training volume, and nutrition",
-      "visualizations": [
-        {
-          "type": "line_chart",
-          "title": "Gewichtsverlauf (30 Tage)",
-          "data_points": ["koerperdaten.gewicht_kg", "koerperdaten.datum"],
-          "rationale": "Line chart is perfect for showing weight trends over time. Users can see if they're moving in the right direction."
-        },
-        {
-          "type": "line_chart",
-          "title": "Trainingsvolumen (Wochen)",
-          "data_points": ["workout_logs.gewicht", "workout_logs.wiederholungen", "workouts.datum"],
-          "rationale": "Shows progressive overload over time. Aggregated by week to smooth out daily variations."
-        },
-        {
-          "type": "line_chart",
-          "title": "Ernährung (14 Tage)",
-          "data_points": ["ernaehrung.kalorien", "ernaehrung.protein", "ernaehrung.datum"],
-          "rationale": "Dual-axis chart showing calories and protein intake. Includes goal lines for comparison."
-        }
-      ]
+      "id": "workout_duration_trend",
+      "title": "Workout Duration Trend",
+      "chartType": "line",
+      "description": "Tracks workout duration over time to see if training sessions are getting longer or shorter.",
+      "dataSource": "workouts",
+      "xAxis": "datum",
+      "yAxis": "dauer_minuten",
+      "timeRange": "last 30 days",
+      "showAverage": true,
+      "responsive": {
+        "mobile": "Simplified line, no grid",
+        "desktop": "Full line chart with grid and average line"
+      }
     },
     {
-      "title": "Training",
-      "description": "Breakdown of training patterns and muscle group distribution",
-      "visualizations": [
-        {
-          "type": "bar_chart",
-          "title": "Training nach Typ (30 Tage)",
-          "data_points": ["workouts.typ", "workouts.datum"],
-          "rationale": "Bar chart shows frequency of each workout type (Push, Pull, Legs, etc). Helps identify imbalances."
-        },
-        {
-          "type": "pie_chart",
-          "title": "Muskelgruppen-Verteilung",
-          "data_points": ["uebungen.muskelgruppe", "workout_logs.uebung"],
-          "rationale": "Shows which muscle groups are trained most. Pie chart makes imbalances immediately obvious."
-        },
-        {
-          "type": "table",
-          "title": "Letzte Workouts",
-          "data_points": ["workouts.datum", "workouts.typ", "workouts.dauer_minuten", "workouts.stimmung"],
-          "rationale": "Detailed log of recent sessions. Users can see workout quality (stimmung) and duration patterns."
-        }
-      ]
+      "id": "workout_type_distribution",
+      "title": "Training Type Distribution",
+      "chartType": "pie",
+      "description": "Shows distribution of workout types (Push, Pull, Legs, etc.) to ensure balanced training.",
+      "dataSource": "workouts",
+      "metric": "count by typ",
+      "timeRange": "last 30 days",
+      "responsive": {
+        "mobile": "Compact pie with legend below",
+        "desktop": "Larger pie with legend on right"
+      }
     },
     {
-      "title": "Körperdaten",
-      "description": "Body measurement tracking and progress visualization",
-      "visualizations": [
-        {
-          "type": "line_chart",
-          "title": "Körpermaße (30 Tage)",
-          "data_points": ["koerperdaten.brustumfang", "koerperdaten.armumfang", "koerperdaten.taillenumfang", "koerperdaten.datum"],
-          "rationale": "Multi-line chart showing changes in key measurements. More meaningful than weight alone for tracking muscle gain."
-        },
-        {
-          "type": "stat_card",
-          "title": "Körperfettanteil",
-          "data_points": ["koerperdaten.kfa_geschaetzt", "koerperdaten.datum"],
-          "rationale": "Shows latest body fat percentage with trend. Important for assessing body composition changes."
-        }
-      ]
+      "id": "nutrition_weekly_chart",
+      "title": "Weekly Nutrition Overview",
+      "chartType": "area",
+      "description": "Stacked area chart showing daily calorie intake over the past 7 days.",
+      "dataSource": "ernaehrung",
+      "xAxis": "datum (last 7 days)",
+      "yAxis": "kalorien (sum per day)",
+      "showGoalLine": true,
+      "goalLineSource": "ziele.taeglich_kalorien",
+      "responsive": {
+        "mobile": "Simplified area, no grid",
+        "desktop": "Full area with goal line and grid"
+      }
     },
     {
-      "title": "Ziele",
-      "description": "Goal tracking and achievement status",
-      "visualizations": [
-        {
-          "type": "table",
-          "title": "Aktive Ziele",
-          "data_points": ["ziele.taeglich_kalorien", "ziele.taeglich_protein", "ziele.trainingstage_pro_woche", "ziele.status"],
-          "rationale": "Shows current goals with status. Users can see all targets in one place and track which are achieved."
-        }
-      ]
+      "id": "macros_today_chart",
+      "title": "Today's Macros",
+      "chartType": "bar",
+      "description": "Shows macronutrient breakdown for today (Protein, Carbs, Fat in grams).",
+      "dataSource": "ernaehrung",
+      "xAxis": "macro type (Protein, Carbs, Fett)",
+      "yAxis": "grams",
+      "filter": "datum = today",
+      "horizontal": true,
+      "responsive": {
+        "mobile": "Horizontal bars, compact",
+        "desktop": "Horizontal bars with values displayed"
+      }
+    },
+    {
+      "id": "weight_progress_chart",
+      "title": "Weight Progress",
+      "chartType": "line",
+      "description": "Body weight trend over time. Critical for tracking bulk/cut progress.",
+      "dataSource": "koerperdaten",
+      "xAxis": "datum",
+      "yAxis": "gewicht_kg",
+      "timeRange": "last 90 days",
+      "showTrendLine": true,
+      "responsive": {
+        "mobile": "Simplified line, last 30 days",
+        "desktop": "Full 90-day line with trend line"
+      }
+    },
+    {
+      "id": "body_measurements_chart",
+      "title": "Body Measurements",
+      "chartType": "line",
+      "description": "Track multiple body measurements over time (chest, waist, arms, etc.).",
+      "dataSource": "koerperdaten",
+      "xAxis": "datum",
+      "yAxis": "measurements (brustumfang, taillenumfang, armumfang)",
+      "multiLine": true,
+      "timeRange": "last 90 days",
+      "responsive": {
+        "mobile": "Show only 2 key measurements, last 30 days",
+        "desktop": "Show all measurements with legend"
+      }
+    },
+    {
+      "id": "exercise_progress_chart",
+      "title": "Top Exercise Progress",
+      "chartType": "line",
+      "description": "Shows weight progression for top 3 most frequent exercises over time.",
+      "dataSource": "workout_logs",
+      "xAxis": "workout.datum (via applookup)",
+      "yAxis": "gewicht",
+      "groupBy": "uebung (via applookup, show top 3 by frequency)",
+      "timeRange": "last 60 days",
+      "responsive": {
+        "mobile": "Show top 1 exercise only",
+        "desktop": "Show top 3 exercises with separate lines"
+      }
+    },
+    {
+      "id": "mood_distribution",
+      "title": "Workout Mood",
+      "chartType": "pie",
+      "description": "Distribution of workout mood/feeling. Shows training quality and recovery.",
+      "dataSource": "workouts",
+      "metric": "count by stimmung",
+      "timeRange": "last 30 days",
+      "responsive": {
+        "mobile": "Compact pie",
+        "desktop": "Larger pie with percentages"
+      }
     }
   ],
+
   "layout": {
-    "desktop": "Header with date range filter and appgroup title. Top section: 4 stat cards in a 2x2 grid for quick KPI overview. Main content: 2-column grid layout. Left column: Weight progress chart (full width), Training volume chart (full width). Right column: Nutrition chart, Training type breakdown. Bottom section: Full-width sections for muscle group distribution, body measurements, recent workouts table, and goals table.",
-    "mobile": "Single column stacked layout. Priority order: (1) Header with filters, (2) 4 stat cards stacked vertically for immediate status check, (3) Weight chart (most important trend), (4) Nutrition chart, (5) Training volume chart, (6) Training breakdown charts, (7) Body measurements, (8) Recent workouts table (scrollable), (9) Goals table. All charts responsive with reduced height on mobile."
-  },
-  "theme": {
-    "primary_color": "hsl(217, 91%, 60%)",
-    "accent_color": "hsl(142, 71%, 45%)",
-    "chart_colors": ["hsl(217, 91%, 60%)", "hsl(142, 71%, 45%)", "hsl(271, 76%, 53%)", "hsl(25, 95%, 53%)"],
-    "description": "Primary blue conveys trust and stability (important for health tracking). Accent green represents growth, health, and progress. Chart colors are vibrant but professional, providing good contrast for data visualization. The palette is energetic without being aggressive, suitable for daily use during workouts or meal planning."
-  },
-  "filters": [
-    {
-      "type": "date_range",
-      "label": "Zeitraum",
-      "default": "last_30_days",
-      "options": ["last_7_days", "last_30_days", "last_90_days", "all_time"],
-      "rationale": "Users want to analyze different timeframes: weekly check-ins (7 days), monthly progress (30 days), quarterly transformations (90 days), or full journey (all time). This filter affects all charts and calculations."
+    "mobile": {
+      "description": "Vertical stack: KPIs in 2-column grid at top, then charts stacked vertically. Prioritize most important metrics first.",
+      "sections": [
+        {
+          "type": "kpi_grid",
+          "columns": 2,
+          "kpis": ["total_workouts", "calories_today", "protein_today", "current_weight", "avg_workout_duration", "weekly_workout_goal"]
+        },
+        {
+          "type": "chart_stack",
+          "charts": [
+            "workout_frequency_chart",
+            "nutrition_weekly_chart",
+            "macros_today_chart",
+            "weight_progress_chart",
+            "workout_type_distribution",
+            "mood_distribution"
+          ]
+        }
+      ]
     },
-    {
-      "type": "select",
-      "label": "Trainingstyp",
-      "options": ["all", "push", "pull", "beine", "ganzkoerper", "oberkoerper", "unterkoerper", "cardio"],
-      "rationale": "Allows users to filter workout and volume data by specific training types. Helps answer 'How is my Pull day progression?' or 'Am I doing enough leg work?'"
+    "desktop": {
+      "description": "Dashboard grid: KPIs in 3-column grid at top, then 2-column chart grid below for optimal data density.",
+      "sections": [
+        {
+          "type": "kpi_grid",
+          "columns": 3,
+          "kpis": ["total_workouts", "avg_workout_duration", "calories_today", "protein_today", "current_weight", "weekly_workout_goal"]
+        },
+        {
+          "type": "chart_grid",
+          "columns": 2,
+          "rows": [
+            {
+              "charts": ["workout_frequency_chart", "nutrition_weekly_chart"]
+            },
+            {
+              "charts": ["weight_progress_chart", "workout_duration_trend"]
+            },
+            {
+              "charts": ["workout_type_distribution", "macros_today_chart"]
+            },
+            {
+              "charts": ["exercise_progress_chart", "mood_distribution"]
+            },
+            {
+              "charts": ["body_measurements_chart"],
+              "span": "full"
+            }
+          ]
+        }
+      ]
     }
-  ],
-  "responsive_breakpoints": {
-    "mobile": "< 768px - single column, stacked cards, compact charts",
-    "tablet": "768px - 1024px - 2-column grid for stats, full-width charts",
-    "desktop": ">= 1024px - full grid layout with 2-3 columns, larger charts"
   },
-  "accessibility": {
-    "color_contrast": "All text meets WCAG AA standards (4.5:1 minimum)",
-    "chart_labels": "Clear axis labels, legends, and tooltips for all charts",
-    "keyboard_navigation": "All filters and interactive elements keyboard accessible"
+
+  "theme": {
+    "primaryColor": "#3b82f6",
+    "secondaryColor": "#8b5cf6",
+    "accentColor": "#10b981",
+    "warningColor": "#f59e0b",
+    "dangerColor": "#ef4444",
+    "reasoning": "Fitness apps need energetic, motivating colors. Blue represents discipline and consistency, purple adds premium feel, green for success/growth. Warning/danger for nutrition tracking (over/under goals).",
+    "cssVariables": {
+      "--background": "0 0% 100%",
+      "--foreground": "222.2 84% 4.9%",
+      "--card": "0 0% 100%",
+      "--card-foreground": "222.2 84% 4.9%",
+      "--popover": "0 0% 100%",
+      "--popover-foreground": "222.2 84% 4.9%",
+      "--primary": "221.2 83.2% 53.3%",
+      "--primary-foreground": "210 40% 98%",
+      "--secondary": "262 52% 60%",
+      "--secondary-foreground": "210 40% 98%",
+      "--muted": "210 40% 96.1%",
+      "--muted-foreground": "215.4 16.3% 46.9%",
+      "--accent": "142.1 76.2% 36.3%",
+      "--accent-foreground": "210 40% 98%",
+      "--destructive": "0 84.2% 60.2%",
+      "--destructive-foreground": "210 40% 98%",
+      "--border": "214.3 31.8% 91.4%",
+      "--input": "214.3 31.8% 91.4%",
+      "--ring": "221.2 83.2% 53.3%",
+      "--radius": "0.5rem",
+      "--chart-1": "221.2 83.2% 53.3%",
+      "--chart-2": "262 52% 60%",
+      "--chart-3": "142.1 76.2% 36.3%",
+      "--chart-4": "38.4 91.7% 50%",
+      "--chart-5": "340.6 82.3% 52.2%"
+    }
+  },
+
+  "typography": {
+    "headingFont": "system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "bodyFont": "system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "reasoning": "System fonts load instantly, look native on every platform, and are highly readable for data-heavy dashboards. No need for custom fonts that slow down load times."
+  },
+
+  "filters": {
+    "dateRange": {
+      "enabled": true,
+      "description": "Allow users to filter data by date range (Last 7 days, 30 days, 90 days, All time)",
+      "defaultValue": "30 days"
+    }
+  },
+
+  "dataLoadingStrategy": {
+    "priority": "KPIs load first (most important), then charts load progressively",
+    "caching": "Cache API responses for 5 minutes to reduce API calls",
+    "errorHandling": "Show empty state with friendly message if no data, error state if API fails"
   }
 }
