@@ -12,7 +12,14 @@
           "type": "string",
           "subtype": "text",
           "fulltype": "string/text",
-          "description": "A string value not longer than 4000 characters (or `null`)."
+          "description": "A string value not longer than 4000 characters (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true
         },
         "muskelgruppe": {
           "identifier": "muskelgruppe",
@@ -21,6 +28,13 @@
           "subtype": "select",
           "fulltype": "lookup/select",
           "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_data": {
             "brust": "Brust",
             "ruecken": "R\u00fccken",
@@ -39,6 +53,13 @@
           "subtype": "select",
           "fulltype": "lookup/select",
           "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_data": {
             "langhantel": "Langhantel",
             "kurzhantel": "Kurzhantel",
@@ -57,6 +78,13 @@
           "subtype": "select",
           "fulltype": "lookup/select",
           "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_data": {
             "anfaenger": "Anf\u00e4nger",
             "fortgeschritten": "Fortgeschritten",
@@ -75,7 +103,14 @@
           "type": "date",
           "subtype": "date",
           "fulltype": "date/date",
-          "description": "A calendar date consisting of year, month and day. (Or `null`/`None`)\n\nThe field value will be a string in the format `<YYYY>-<MM>-<DD>` or `null`.\n\nFor example: `1642-12-25`."
+          "description": "A calendar date consisting of year, month and day. (Or `null`/`None`)\n\nThe field value will be a string in the format `<YYYY>-<MM>-<DD>` or `null`.\n\nFor example: `1642-12-25`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true
         },
         "typ": {
           "identifier": "typ",
@@ -84,6 +119,13 @@
           "subtype": "select",
           "fulltype": "lookup/select",
           "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_data": {
             "push": "Push",
             "pull": "Pull",
@@ -102,6 +144,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "stimmung": {
@@ -111,6 +160,13 @@
           "subtype": "select",
           "fulltype": "lookup/select",
           "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_data": {
             "schlecht": "Schlecht",
             "okay": "Okay",
@@ -124,7 +180,14 @@
           "type": "bool",
           "subtype": null,
           "fulltype": "bool",
-          "description": "A boolean value, i.e. `true` or `false` (or `null`)."
+          "description": "A boolean value, i.e. `true` or `false` (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true
         }
       }
     },
@@ -139,6 +202,13 @@
           "subtype": "select",
           "fulltype": "applookup/select",
           "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_app": "https://my.living-apps.de/rest/apps/6914a7e7b773d677cf3838c1"
         },
         "uebung": {
@@ -148,6 +218,13 @@
           "subtype": "select",
           "fulltype": "applookup/select",
           "description": "A reference to another LivingApp record from a target lookup app (or `null`).\n\nThe field value will be a valid record URL in the form `https://<hostname>/rest/apps/<app-id>/records/<record-id>` or `null`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_app": "https://my.living-apps.de/rest/apps/6914a7e259d98c952771c809"
         },
         "satz_nummer": {
@@ -157,6 +234,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "gewicht": {
@@ -166,6 +250,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "wiederholungen": {
@@ -175,6 +266,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "rpe": {
@@ -184,6 +282,13 @@
           "subtype": "select",
           "fulltype": "lookup/select",
           "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "required": null,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_data": {
             "rpe_1": "1 - Sehr leicht",
             "rpe_2": "2",
@@ -210,6 +315,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "taeglich_protein": {
@@ -219,6 +331,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "trainingstage_pro_woche": {
@@ -228,6 +347,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "schlaf_ziel_stunden": {
@@ -237,6 +363,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "status": {
@@ -246,6 +379,13 @@
           "subtype": "select",
           "fulltype": "lookup/select",
           "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_data": {
             "aktiv": "Aktiv",
             "erreicht": "Erreicht",
@@ -258,7 +398,14 @@
           "type": "string",
           "subtype": "textarea",
           "fulltype": "string/textarea",
-          "description": "A string value that can contain multiple lines of text (or `null`)."
+          "description": "A string value that can contain multiple lines of text (or `null`).",
+          "required": null,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true
         }
       }
     },
@@ -272,7 +419,14 @@
           "type": "date",
           "subtype": "date",
           "fulltype": "date/date",
-          "description": "A calendar date consisting of year, month and day. (Or `null`/`None`)\n\nThe field value will be a string in the format `<YYYY>-<MM>-<DD>` or `null`.\n\nFor example: `1642-12-25`."
+          "description": "A calendar date consisting of year, month and day. (Or `null`/`None`)\n\nThe field value will be a string in the format `<YYYY>-<MM>-<DD>` or `null`.\n\nFor example: `1642-12-25`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true
         },
         "mahlzeit_typ": {
           "identifier": "mahlzeit_typ",
@@ -281,6 +435,13 @@
           "subtype": "select",
           "fulltype": "lookup/select",
           "description": "One selected option of multiple available options (or `null`).\n\nThe available options are defined in the `lookup_data` attribute of this control's LivingApp.\n\nThe field value will be the key in this `lookup_data` attribute or `null`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "lookup_data": {
             "fruehstueck": "Fr\u00fchst\u00fcck",
             "snack": "Snack",
@@ -297,7 +458,14 @@
           "type": "string",
           "subtype": "textarea",
           "fulltype": "string/textarea",
-          "description": "A string value that can contain multiple lines of text (or `null`)."
+          "description": "A string value that can contain multiple lines of text (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true
         },
         "kalorien": {
           "identifier": "kalorien",
@@ -306,6 +474,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "protein": {
@@ -315,6 +490,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "carbs": {
@@ -324,6 +506,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "fett": {
@@ -333,6 +522,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         }
       }
@@ -347,7 +543,14 @@
           "type": "date",
           "subtype": "date",
           "fulltype": "date/date",
-          "description": "A calendar date consisting of year, month and day. (Or `null`/`None`)\n\nThe field value will be a string in the format `<YYYY>-<MM>-<DD>` or `null`.\n\nFor example: `1642-12-25`."
+          "description": "A calendar date consisting of year, month and day. (Or `null`/`None`)\n\nThe field value will be a string in the format `<YYYY>-<MM>-<DD>` or `null`.\n\nFor example: `1642-12-25`.",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true
         },
         "gewicht_kg": {
           "identifier": "gewicht_kg",
@@ -356,6 +559,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": true,
+          "in_text": true,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "kfa_geschaetzt": {
@@ -365,6 +575,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "brustumfang": {
@@ -374,6 +591,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "taillenumfang": {
@@ -383,6 +607,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": true,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "hueftumfang": {
@@ -392,6 +623,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "armumfang": {
@@ -401,6 +639,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "beinumfang": {
@@ -410,6 +655,13 @@
           "subtype": null,
           "fulltype": "number",
           "description": "A decimal number value (or `null`).",
+          "required": null,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
           "precision": null
         },
         "notizen": {
@@ -418,7 +670,14 @@
           "type": "string",
           "subtype": "textarea",
           "fulltype": "string/textarea",
-          "description": "A string value that can contain multiple lines of text (or `null`)."
+          "description": "A string value that can contain multiple lines of text (or `null`).",
+          "required": null,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": false,
+          "in_fulltext_search": null,
+          "in_expert_search": true
         }
       }
     }
