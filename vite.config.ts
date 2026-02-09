@@ -13,6 +13,8 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,
+    allowedHosts: [".e2b.app"],
     proxy: {
       '/api/rest': {
         target: 'https://my.living-apps.de',

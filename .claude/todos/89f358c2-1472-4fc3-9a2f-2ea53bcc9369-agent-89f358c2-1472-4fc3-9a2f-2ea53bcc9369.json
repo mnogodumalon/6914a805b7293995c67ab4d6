@@ -1,0 +1,47 @@
+[
+  {
+    "content": "Create design_brief.md with full design specification",
+    "status": "completed",
+    "activeForm": "Creating design_brief.md"
+  },
+  {
+    "content": "Read existing types and services code",
+    "status": "completed",
+    "activeForm": "Reading existing code"
+  },
+  {
+    "content": "Update CSS variables in index.css and font in index.html",
+    "status": "completed",
+    "activeForm": "Updating theme and font"
+  },
+  {
+    "content": "Set up React Router in main.tsx and App.tsx",
+    "status": "completed",
+    "activeForm": "Setting up React Router"
+  },
+  {
+    "content": "Create Layout.tsx with sidebar and bottom tabs",
+    "status": "completed",
+    "activeForm": "Creating Layout component"
+  },
+  {
+    "content": "Create DashboardOverview page",
+    "status": "completed",
+    "activeForm": "Creating Dashboard Overview page"
+  },
+  {
+    "content": "Create all app pages with full CRUD",
+    "status": "completed",
+    "activeForm": "Creating app pages with CRUD"
+  },
+  {
+    "content": "Build and fix errors",
+    "status": "completed",
+    "activeForm": "Building and fixing errors"
+  },
+  {
+    "content": "Deploy to GitHub",
+    "status": "in_progress",
+    "activeForm": "Deploying to GitHub"
+  }
+]

@@ -73,9 +73,10 @@ Read the ENTIRE brief carefully. Pay attention to:
 - **Section 3: Theme & Colors** → Font name, URL, and all color values
 - **Section 4: Mobile Layout** → Exact structure for phone screens
 - **Section 5: Desktop Layout** → Exact structure for computer screens
-- **Section 6: Components** → Hero KPI, secondary KPIs, charts, lists
-- **Section 7: Visual Details** → Border radius, shadows, animations
-- **Section 8: CSS Variables** → Copy these EXACTLY into src/index.css
+- **Section 6: Components** → Hero KPI, secondary KPIs, charts, lists, CRUD per app
+- **Section 7: Navigation** → React Router routes, sidebar, bottom tabs
+- **Section 8: Visual Details** → Border radius, shadows, animations
+- **Section 9: CSS Variables** → Copy these EXACTLY into src/index.css
 
 The brief explains WHY decisions were made. This helps you understand intent, but your job is to implement what is written, not to interpret.
 
@@ -126,9 +127,21 @@ Copy the font URL from **Section 3** of design_brief.md into `index.html`:
 <link href="[URL from Section 3]" rel="stylesheet">
 ```
 
-### Step 5: Implement Dashboard.tsx
+### Step 5: Set Up React Router
 
-Now implement the React component following the brief:
+**Before implementing any pages**, set up React Router:
+
+1. Install `react-router-dom` if not already installed
+2. Set up `BrowserRouter` with `basename` in `main.tsx`
+3. Create `Layout.tsx` with sidebar (desktop) + bottom tabs (mobile)
+4. Define routes in `App.tsx` — one route per app from design_brief.md Section 7
+5. Create page files in `src/pages/`
+
+See the **React Router Navigation** section below for complete code patterns.
+
+### Step 6: Implement Pages
+
+Create one page per app + the Dashboard Overview:
 
 ```typescript
 // 1. Imports (always use 'import type' for types!)
@@ -137,11 +150,12 @@ import type { AppType1, AppType2 } from '@/types/app';
 import { LivingAppsService } from '@/services/livingAppsService';
 
 // 2. Follow Section 4 (Mobile) and Section 5 (Desktop) for layout
-// 3. Follow Section 6 for components (Hero, KPIs, Charts, Lists)
-// 4. Follow Section 7 for visual details (radius, shadows, animations)
+// 3. Follow Section 6 for components (Hero, KPIs, Charts, Lists, CRUD)
+// 4. Follow Section 7 for navigation routes
+// 5. Follow Section 8 for visual details (radius, shadows, animations)
 ```
 
-### Step 6: Build and Deploy
+### Step 7: Build and Deploy
 
 ```bash
 npm run build
@@ -333,6 +347,15 @@ Before completing, verify EACH item against design_brief.md:
 - [ ] ALL CSS variables in `src/index.css` copied EXACTLY from design_brief.md Section 8
 - [ ] Colors are complete hsl() functions (not raw values)
 
+### Navigation Verification
+- [ ] React Router set up with `BrowserRouter` and `basename`
+- [ ] Routes defined for every app (one page per app)
+- [ ] Dashboard Overview page at `/` with summary KPIs
+- [ ] Desktop sidebar navigation with active state styling
+- [ ] Mobile bottom tab navigation with active state styling
+- [ ] Navigation matches EXACTLY design_brief.md Section 7
+- [ ] Mobile bottom tabs don't overlap page content
+
 ### Layout Verification
 - [ ] Mobile layout matches EXACTLY design_brief.md Section 4
 - [ ] Desktop layout matches EXACTLY design_brief.md Section 5
@@ -359,7 +382,10 @@ Before completing, verify EACH item against design_brief.md:
 **You MUST verify the dashboard is 100% complete before finishing:**
 
 - [ ] **Every app in app_metadata.json is used** - no data sources ignored
+- [ ] **Every app has FULL CRUD** - Create, Read, Update, Delete for EACH app
 - [ ] **Primary action works** (create new record via dialog/form)
+- [ ] **Edit works** for every app (pre-filled form, PATCH request)
+- [ ] **Delete works** for every app (confirmation dialog, DELETE request)
 - [ ] **Data displays correctly** (all KPIs calculated, lists populated)
 - [ ] **All states handled:**
   - [ ] Loading states for every data fetch
@@ -369,6 +395,8 @@ Before completing, verify EACH item against design_brief.md:
   - [ ] No "TODO" comments in code
   - [ ] No "Coming soon" messages
   - [ ] No hardcoded demo data
+- [ ] **CRUD feedback** - Toast messages for success/error on every operation
+- [ ] **Data refresh** - Lists update after create/update/delete
 
 **If ANY item above is unchecked, the dashboard is NOT complete. Fix it before deploying.**
 
@@ -379,17 +407,572 @@ Before completing, verify EACH item against design_brief.md:
 The dashboard is complete when:
 
 1. ✅ **User experience excellent**: Intuitive, clear, professional
-2. ✅ **Primary action button works** (with Dialog/Modal)
-3. ✅ All KPIs/Stats calculated correctly
-4. ✅ Loading state works (Skeleton, not empty page)
-5. ✅ Error handling implemented (friendly messages)
-6. ✅ Empty state implemented (helpful placeholders)
-7. ✅ Responsive design (Mobile + Desktop)
-8. ✅ No TypeScript errors (`npm run build`)
-9. ✅ No console errors in browser
-10. ✅ Business logic correct
-11. ✅ Living Apps API rules followed (dates, applookup, response)
-12. ✅ **All features complete** - nothing skipped or left as TODO
+2. ✅ **React Router navigation** works (sidebar on desktop, bottom tabs on mobile)
+3. ✅ **Every app has its own page/route** with full CRUD
+4. ✅ **Dashboard Overview page** shows summary KPIs across all apps
+5. ✅ **Full CRUD for EVERY app** - Create, Read, Update, Delete all work
+6. ✅ **Primary action button works** (with Dialog/Modal)
+7. ✅ **Edit records works** for every app (pre-filled form, saves changes)
+8. ✅ **Delete records works** for every app (with confirmation dialog)
+9. ✅ All KPIs/Stats calculated correctly
+10. ✅ Loading state works (Skeleton, not empty page)
+11. ✅ Error handling implemented (friendly messages)
+12. ✅ Empty state implemented (helpful placeholders)
+13. ✅ Responsive design (Mobile + Desktop)
+14. ✅ No TypeScript errors (`npm run build`)
+15. ✅ No console errors in browser
+16. ✅ Business logic correct
+17. ✅ Living Apps API rules followed (dates, applookup, response)
+18. ✅ **All features complete** - nothing skipped or left as TODO
+19. ✅ **CRUD feedback** - Toast messages on success/error for every operation
+
+---
+
+## Full CRUD Implementation (REQUIRED for Every App!)
+
+**⚠️ CRITICAL: Every app in the dashboard MUST have full CRUD operations.**
+
+The design_brief.md specifies CRUD operations for each app. You MUST implement ALL of them - Create, Read, Update, Delete - for EVERY app. No exceptions.
+
+### CRUD Architecture Pattern
+
+For each app, implement these components:
+
+1. **List/Table View** - Shows all records (Read)
+2. **Create/Edit Dialog** - Shared dialog for creating and editing (Create + Update)
+3. **Delete Confirmation Dialog** - Confirmation before deleting (Delete)
+4. **Data refresh** - After any mutation, refresh the data
+
+### Reusable CRUD Dialog Pattern
+
+Use a SINGLE dialog component for both Create and Edit per app:
+
+```typescript
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { LivingAppsService } from '@/services/livingAppsService';
+import { toast } from '@/components/ui/use-toast';
+
+interface RecordDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  record?: MyAppRecord | null;  // null = Create mode, record = Edit mode
+  onSuccess: () => void;
+}
+
+function MyAppRecordDialog({ open, onOpenChange, record, onSuccess }: RecordDialogProps) {
+  const isEditing = !!record;
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: record?.fields.name ?? '',
+    value: record?.fields.value ?? 0,
+    // ... all fields with defaults
+  });
+
+  // Reset form when dialog opens with different record
+  useEffect(() => {
+    if (open) {
+      setFormData({
+        name: record?.fields.name ?? '',
+        value: record?.fields.value ?? 0,
+      });
+    }
+  }, [open, record]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      if (isEditing) {
+        await LivingAppsService.updateMyAppRecord(record!.record_id, formData);
+        toast({ title: 'Gespeichert', description: 'Eintrag wurde aktualisiert.' });
+      } else {
+        await LivingAppsService.createMyAppRecord(formData);
+        toast({ title: 'Erstellt', description: 'Neuer Eintrag wurde erstellt.' });
+      }
+      onOpenChange(false);
+      onSuccess();  // ← Triggers data refresh
+    } catch (err) {
+      toast({
+        title: 'Fehler',
+        description: `Fehler beim ${isEditing ? 'Speichern' : 'Erstellen'}: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`,
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{isEditing ? 'Eintrag bearbeiten' : 'Neuer Eintrag'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              required
+            />
+          </div>
+          {/* ... more fields ... */}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Abbrechen
+            </Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Speichert...' : (isEditing ? 'Speichern' : 'Erstellen')}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+### Delete Confirmation Pattern
+
+**ALWAYS require confirmation before deleting!**
+
+```typescript
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+interface DeleteDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  recordName: string;  // What is being deleted (for display)
+  onConfirm: () => Promise<void>;
+}
+
+function DeleteConfirmDialog({ open, onOpenChange, recordName, onConfirm }: DeleteDialogProps) {
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await onConfirm();
+      toast({ title: 'Gelöscht', description: `"${recordName}" wurde gelöscht.` });
+      onOpenChange(false);
+    } catch (err) {
+      toast({
+        title: 'Fehler',
+        description: 'Eintrag konnte nicht gelöscht werden.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Eintrag löschen?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Möchtest du "{recordName}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={deleting}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {deleting ? 'Löscht...' : 'Löschen'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+```
+
+### CRUD List with Edit/Delete Actions
+
+```typescript
+import { Pencil, Trash2, Plus } from 'lucide-react';
+
+function MyAppList() {
+  const [records, setRecords] = useState<MyAppRecord[]>([]);
+  const [editRecord, setEditRecord] = useState<MyAppRecord | null>(null);
+  const [deleteRecord, setDeleteRecord] = useState<MyAppRecord | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  async function refreshData() {
+    const data = await LivingAppsService.getMyAppRecords();
+    setRecords(data);
+  }
+
+  async function handleDelete() {
+    if (!deleteRecord) return;
+    await LivingAppsService.deleteMyAppRecord(deleteRecord.record_id);
+    setDeleteRecord(null);
+    refreshData();
+  }
+
+  return (
+    <>
+      {/* Header with Create button */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Meine Einträge</h2>
+        <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+          <Plus className="h-4 w-4 mr-1" /> Neu
+        </Button>
+      </div>
+
+      {/* Record list with inline edit/delete actions */}
+      {records.map((record) => (
+        <div key={record.record_id} className="flex items-center justify-between p-3 rounded-lg border">
+          <div>
+            <div className="font-medium">{record.fields.name}</div>
+            <div className="text-sm text-muted-foreground">{record.fields.description}</div>
+          </div>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditRecord(record)}
+              aria-label="Bearbeiten"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeleteRecord(record)}
+              aria-label="Löschen"
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      ))}
+
+      {/* Create Dialog (record=null → create mode) */}
+      <MyAppRecordDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        record={null}
+        onSuccess={refreshData}
+      />
+
+      {/* Edit Dialog (record=editRecord → edit mode) */}
+      <MyAppRecordDialog
+        open={!!editRecord}
+        onOpenChange={(open) => !open && setEditRecord(null)}
+        record={editRecord}
+        onSuccess={refreshData}
+      />
+
+      {/* Delete Confirmation */}
+      <DeleteConfirmDialog
+        open={!!deleteRecord}
+        onOpenChange={(open) => !open && setDeleteRecord(null)}
+        recordName={deleteRecord?.fields.name ?? ''}
+        onConfirm={handleDelete}
+      />
+    </>
+  );
+}
+```
+
+### CRUD Service Methods Pattern
+
+The generated `livingAppsService.ts` already includes GET and CREATE. You MUST also use UPDATE and DELETE:
+
+```typescript
+// These methods should already exist in livingAppsService.ts:
+
+// GET all records
+static async getMyAppRecords(): Promise<MyAppRecord[]> { ... }
+
+// CREATE a record
+static async createMyAppRecord(data: Partial<MyAppFields>): Promise<any> {
+  return this.request(`/apps/${APP_IDS.MY_APP}/records`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// UPDATE a record (PATCH - only changed fields)
+static async updateMyAppRecord(recordId: string, data: Partial<MyAppFields>): Promise<any> {
+  return this.request(`/apps/${APP_IDS.MY_APP}/records/${recordId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+// DELETE a record
+static async deleteMyAppRecord(recordId: string): Promise<any> {
+  return this.request(`/apps/${APP_IDS.MY_APP}/records/${recordId}`, {
+    method: 'DELETE',
+  });
+}
+```
+
+**⚠️ If `livingAppsService.ts` is missing update/delete methods, you MUST add them!**
+
+### CRUD Implementation Checklist
+
+For EVERY app in `app_metadata.json`, verify:
+- [ ] **Create** - Users can create new records via dialog/form
+- [ ] **Read** - Records are displayed in a list/table with all relevant fields
+- [ ] **Update** - Users can edit existing records (same form as create, pre-filled)
+- [ ] **Delete** - Users can delete records with confirmation dialog
+- [ ] **Feedback** - Toast messages for success and error on every operation
+- [ ] **Refresh** - Data refreshes after every mutation
+- [ ] **Loading states** - Submit buttons show loading state during operations
+- [ ] **Error handling** - Failed operations show error message, don't lose user input
+
+---
+
+## React Router Navigation (REQUIRED!)
+
+**⚠️ CRITICAL: The dashboard MUST use React Router for navigation between apps.**
+
+Each app gets its own route/page. Do NOT build a single scrollable page with all apps crammed together.
+
+### Step 1: Install React Router (if not already)
+
+```bash
+npm install react-router-dom
+```
+
+### Step 2: Set Up Router in main.tsx
+
+```typescript
+import { BrowserRouter } from 'react-router-dom';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>
+);
+```
+
+**⚠️ CRITICAL: Always use `basename={import.meta.env.BASE_URL}`!** The dashboard is deployed to GitHub Pages under a subpath (e.g. `/repo-name/`). Without basename, all routes will break in production.
+
+### Step 3: Define Routes in App.tsx
+
+```typescript
+import { Routes, Route } from 'react-router-dom';
+import { Layout } from '@/components/Layout';
+import { DashboardOverview } from '@/pages/DashboardOverview';
+import { WorkoutsPage } from '@/pages/WorkoutsPage';
+import { ExercisesPage } from '@/pages/ExercisesPage';
+// ... import a page for each app
+
+function App() {
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/" element={<DashboardOverview />} />
+        <Route path="/workouts" element={<WorkoutsPage />} />
+        <Route path="/exercises" element={<ExercisesPage />} />
+        {/* One route per app */}
+      </Routes>
+    </Layout>
+  );
+}
+```
+
+### Step 4: Create Layout with Navigation
+
+The Layout component wraps all pages and provides navigation.
+
+```typescript
+import { NavLink, useLocation } from 'react-router-dom';
+import { Home, Dumbbell, ListChecks } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const NAV_ITEMS = [
+  { path: '/', label: 'Übersicht', icon: Home },
+  { path: '/workouts', label: 'Workouts', icon: Dumbbell },
+  { path: '/exercises', label: 'Übungen', icon: ListChecks },
+  // ... one per app
+];
+
+function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Desktop: Sidebar navigation */}
+      <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r bg-card">
+        <div className="p-6">
+          <h1 className="text-xl font-bold">Dashboard</h1>
+        </div>
+        <nav className="flex-1 px-3 space-y-1">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )
+              }
+            >
+              <item.icon className="h-5 w-5" />
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+      </aside>
+
+      {/* Main content area */}
+      <main className="md:pl-64">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto">
+          {children}
+        </div>
+      </main>
+
+      {/* Mobile: Bottom tab navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-card z-50">
+        <div className="flex justify-around">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                cn(
+                  'flex flex-col items-center gap-1 py-2 px-3 text-xs font-medium transition-colors',
+                  isActive ? 'text-primary' : 'text-muted-foreground'
+                )
+              }
+            >
+              <item.icon className="h-5 w-5" />
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
+    </div>
+  );
+}
+```
+
+### Step 5: Create a Page Per App
+
+Each app page contains the full CRUD view for that app:
+
+```typescript
+// src/pages/WorkoutsPage.tsx
+import { useState, useEffect } from 'react';
+import type { Workout } from '@/types/app';
+import { LivingAppsService } from '@/services/livingAppsService';
+
+export function WorkoutsPage() {
+  const [records, setRecords] = useState<Workout[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function refreshData() {
+    setLoading(true);
+    const data = await LivingAppsService.getWorkouts();
+    setRecords(data);
+    setLoading(false);
+  }
+
+  useEffect(() => { refreshData(); }, []);
+
+  // Full CRUD UI: list, create dialog, edit dialog, delete confirmation
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Workouts</h1>
+        <Button onClick={() => setShowCreate(true)}>
+          <Plus className="h-4 w-4 mr-2" /> Neues Workout
+        </Button>
+      </div>
+      {/* Record list with edit/delete actions */}
+      {/* Create/Edit Dialog */}
+      {/* Delete Confirmation */}
+    </div>
+  );
+}
+```
+
+### Step 6: Dashboard Overview Page
+
+The root route (`/`) shows a summary across all apps:
+
+```typescript
+// src/pages/DashboardOverview.tsx
+export function DashboardOverview() {
+  // Fetch data from ALL apps for KPIs
+  // Show hero KPI, secondary KPIs, charts
+  // Quick action buttons that navigate to app pages
+  // Recent activity across all apps
+}
+```
+
+### File Structure
+
+Organize pages and components cleanly:
+
+```
+src/
+├── main.tsx                    # BrowserRouter setup
+├── App.tsx                     # Routes definition
+├── components/
+│   ├── Layout.tsx              # Navigation layout (sidebar + bottom tabs)
+│   ├── ui/                     # shadcn components
+│   └── shared/                 # Shared components (DeleteDialog, etc.)
+├── pages/
+│   ├── DashboardOverview.tsx   # / route - summary across all apps
+│   ├── WorkoutsPage.tsx        # /workouts - full CRUD for Workouts app
+│   ├── ExercisesPage.tsx       # /exercises - full CRUD for Exercises app
+│   └── ...                     # One page per app
+├── services/
+│   └── livingAppsService.ts    # API service (generated)
+└── types/
+    └── app.ts                  # TypeScript types (generated)
+```
+
+### Navigation Rules
+
+1. **Use `NavLink`, not `Link`** - NavLink provides `isActive` for styling
+2. **Always use `basename`** - Required for GitHub Pages deployment
+3. **Mobile: max 5 bottom tabs** - If more apps, use a "More" tab or hamburger menu
+4. **Desktop: sidebar always visible** - Shows all apps with icons and labels
+5. **Active route highlighted** - Follow design_brief.md for exact styling
+6. **Page title** - Each page should have a clear `<h1>` title
+
+### React Router Checklist
+
+- [ ] `react-router-dom` installed
+- [ ] `BrowserRouter` with `basename` in main.tsx
+- [ ] Routes defined for every app in App.tsx
+- [ ] Layout component with sidebar (desktop) + bottom tabs (mobile)
+- [ ] `NavLink` used with active state styling
+- [ ] Dashboard Overview page at `/` with summary KPIs
+- [ ] One page per app with full CRUD
+- [ ] Mobile bottom tabs don't overlap content (add `pb-16` to main content)
+- [ ] Navigation matches design_brief.md Section 7
 
 ---
 
@@ -814,6 +1397,15 @@ mcp_shadcn_search_items_in_registries(registries: ['@shadcn'], query: 'chart')
 mcp_shadcn_view_items_in_registries(items: ['@shadcn/card'])
 mcp_shadcn_get_item_examples_from_registries(registries: ['@shadcn'], query: 'card-demo')
 ```
+
+### react-router-dom (Routing)
+
+Pre-installed! Use for navigation between app pages:
+```typescript
+import { BrowserRouter, Routes, Route, NavLink, useNavigate, useParams } from 'react-router-dom';
+```
+
+See: https://reactrouter.com/
 
 ### recharts (Charts)
 
