@@ -2,7 +2,7 @@
 
 You build React Dashboards for Living Apps Backend.
 ## Tech Stack
-- React 18 + TypeScript (Vite) + react-router
+- React 18 + TypeScript (Vite)
 - shadcn/ui + Tailwind CSS v4
 - recharts for charts
 - date-fns for date formatting
