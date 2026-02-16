@@ -4,6 +4,10 @@ from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, AssistantMessa
 import subprocess
 import os
 
+# Environment-specific configuration
+LA_API_URL = os.getenv("LA_API_URL", "https://my.living-apps.de/rest")
+LA_FRONTEND_URL = os.getenv("LA_FRONTEND_URL", "https://my.living-apps.de")
+
 async def main():
     # Skills and CLAUDE.md are loaded automatically by Claude SDK from cwd
     # No manual instruction loading needed - the SDK reads:
@@ -90,7 +94,7 @@ async def main():
                     # 1. Hole alle App-IDs der Appgroup
                     print(f"[DEPLOY] Lade Appgroup: {appgroup_id}")
                     resp = httpx.get(
-                        f"https://my.living-apps.de/rest/appgroups/{appgroup_id}",
+                        f"{LA_API_URL}/appgroups/{appgroup_id}",
                         headers=headers,
                         timeout=30
                     )
@@ -104,7 +108,7 @@ async def main():
                         print("[DEPLOY] ⚠️ Keine Apps gefunden")
                         return {"content": [{"type": "text", "text": "✅ Deployment erfolgreich!"}]}
                     
-                    dashboard_url = f"https://my.living-apps.de/github/{appgroup_id}/"
+                    dashboard_url = f"{LA_FRONTEND_URL}/github/{appgroup_id}/"
                     
                     # 2. Warte bis Dashboard verfügbar ist
                     print(f"[DEPLOY] ⏳ Warte auf Dashboard: {dashboard_url}")
@@ -130,14 +134,14 @@ async def main():
                         try:
                             # URL aktivieren
                             httpx.put(
-                                f"https://my.living-apps.de/rest/apps/{app_id}/params/la_page_header_additional_url",
+                                f"{LA_API_URL}/apps/{app_id}/params/la_page_header_additional_url",
                                 headers=headers,
                                 json={"description": "dashboard_url", "type": "string", "value": dashboard_url},
                                 timeout=10
                             )
                             # Title aktualisieren
                             httpx.put(
-                                f"https://my.living-apps.de/rest/apps/{app_id}/params/la_page_header_additional_title",
+                                f"{LA_API_URL}/apps/{app_id}/params/la_page_header_additional_title",
                                 headers=headers,
                                 json={"description": "dashboard_title", "type": "string", "value": "Dashboard"},
                                 timeout=10
