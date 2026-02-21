@@ -25,6 +25,8 @@ Call `mcp__deploy_tools__deploy_to_github`
 
 **WRITE ONCE RULE:** Write/edit each file ONCE. Do NOT write a file, read it back, then rewrite it.
 
+**ONE COMPONENT PER FILE:** Every React component gets its own file in `src/components/`. No spaghetti code — DashboardOverview.tsx imports components, it does NOT contain 500+ lines of inline logic. Extract interactive views, charts, dialogs, and reusable UI into separate files.
+
 ---
 
 ## Pre-Generated CRUD Scaffolds

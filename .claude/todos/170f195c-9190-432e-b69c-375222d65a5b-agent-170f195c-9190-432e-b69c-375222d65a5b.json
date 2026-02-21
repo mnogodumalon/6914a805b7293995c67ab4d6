@@ -1,0 +1,47 @@
+[
+  {
+    "content": "Edit index.css with fitness theme (Outfit font, energetic orange accent)",
+    "status": "completed",
+    "activeForm": "Editing index.css with fitness theme"
+  },
+  {
+    "content": "Edit Layout.tsx with app title",
+    "status": "completed",
+    "activeForm": "Editing Layout.tsx"
+  },
+  {
+    "content": "Create TodayWorkoutPanel component",
+    "status": "completed",
+    "activeForm": "Creating TodayWorkoutPanel"
+  },
+  {
+    "content": "Create NutritionRings component",
+    "status": "completed",
+    "activeForm": "Creating NutritionRings"
+  },
+  {
+    "content": "Create BodyWeightChart component",
+    "status": "completed",
+    "activeForm": "Creating BodyWeightChart"
+  },
+  {
+    "content": "Create WeeklyActivity component",
+    "status": "completed",
+    "activeForm": "Creating WeeklyActivity"
+  },
+  {
+    "content": "Write DashboardOverview.tsx",
+    "status": "completed",
+    "activeForm": "Writing DashboardOverview.tsx"
+  },
+  {
+    "content": "Run npm build and fix errors",
+    "status": "completed",
+    "activeForm": "Running npm build"
+  },
+  {
+    "content": "Deploy to GitHub",
+    "status": "in_progress",
+    "activeForm": "Deploying to GitHub"
+  }
+]

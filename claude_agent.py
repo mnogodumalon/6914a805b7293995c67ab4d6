@@ -113,7 +113,7 @@ async def main():
                 "- Layout.tsx: NEVER Write, only Edit (only change APP_TITLE/APP_SUBTITLE)\n"
                 "- CRUD pages/dialogs: NEVER touch — complete with all logic\n"
                 "- App.tsx, PageShell.tsx, StatCard.tsx, ConfirmDialog.tsx: NEVER touch\n"
-                "- You MAY create new files in src/components/ for custom interactive components\n"
+                "- One component per file — extract views, charts, dialogs into src/components/. No spaghetti.\n"
                 "- No Read-back after Write/Edit\n"
                 "- No Read of files whose contents are in .scaffold_context\n"
                 "- Read .scaffold_context FIRST to understand all generated files\n"

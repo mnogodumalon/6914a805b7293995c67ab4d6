@@ -73,7 +73,9 @@ Use Edit to change `APP_TITLE` and `APP_SUBTITLE`. Nothing else.
 
 ## Step 4: Write DashboardOverview.tsx
 
-Plan the ENTIRE component, then Write it ONCE. You MAY create additional files in `src/components/` for complex interactive components.
+Plan the ENTIRE component, then Write it ONCE.
+
+**ONE COMPONENT PER FILE (mandatory).** Every React component gets its own file in `src/components/`. DashboardOverview.tsx is the orchestrator — it imports and composes components, it does NOT contain hundreds of lines of inline logic. Extract interactive views (calendar, kanban, etc.), charts, dialogs, and reusable UI into separate files.
 
 ## Step 5: Deploy
 

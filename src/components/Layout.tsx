@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Dumbbell, LayoutDashboard, Menu, X, Utensils, Target, Weight, ClipboardList, Activity } from 'lucide-react';
+import { FileText, LayoutDashboard, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 // ⚡ Customize these for your app
@@ -8,12 +8,12 @@ const APP_SUBTITLE = 'Fitness & Ernährung';
 
 const navigation = [
   { name: 'Übersicht', href: '/', icon: LayoutDashboard },
-  { name: 'Übungen', href: '/uebungen', icon: Dumbbell },
-  { name: 'Workouts', href: '/workouts', icon: Activity },
-  { name: 'Workout-Logs', href: '/workout-logs', icon: ClipboardList },
-  { name: 'Ziele', href: '/ziele', icon: Target },
-  { name: 'Ernährung', href: '/ernaehrung', icon: Utensils },
-  { name: 'Körperdaten', href: '/koerperdaten', icon: Weight },
+  { name: 'Übungen', href: '/uebungen', icon: FileText },
+  { name: 'Workouts', href: '/workouts', icon: FileText },
+  { name: 'Workout-Logs', href: '/workout-logs', icon: FileText },
+  { name: 'Ziele', href: '/ziele', icon: FileText },
+  { name: 'Ernährung', href: '/ernaehrung', icon: FileText },
+  { name: 'Körperdaten', href: '/koerperdaten', icon: FileText },
 ];
 
 export function Layout() {
@@ -39,7 +39,7 @@ export function Layout() {
         <div className="flex items-center justify-between px-5 py-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-sidebar-primary flex items-center justify-center shadow-sm">
-              <Dumbbell size={16} className="text-sidebar-primary-foreground" />
+              <FileText size={16} className="text-sidebar-primary-foreground" />
             </div>
             <div>
               <h1 className="text-sm font-bold tracking-tight text-sidebar-foreground">{APP_TITLE}</h1>
