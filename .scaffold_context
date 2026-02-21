@@ -1,0 +1,437 @@
+# Scaffold Context — Generated File Contents
+
+These files are pre-generated. Do NOT Read them — their contents are below.
+Your job: Analyze data (1-2 sentences), Edit index.css (design tokens), Edit Layout.tsx (title), Write DashboardOverview.tsx (once), Deploy.
+
+Generated 18 scaffold files:
+  - src/App.tsx
+  - src/components/Layout.tsx
+  - src/components/PageShell.tsx
+  - src/pages/DashboardOverview.tsx
+  - src/components/ConfirmDialog.tsx
+  - src/components/StatCard.tsx
+  - src/pages/UebungenPage.tsx
+  - src/components/dialogs/UebungenDialog.tsx
+  - src/pages/WorkoutsPage.tsx
+  - src/components/dialogs/WorkoutsDialog.tsx
+  - src/pages/WorkoutLogsPage.tsx
+  - src/components/dialogs/WorkoutLogsDialog.tsx
+  - src/pages/ZielePage.tsx
+  - src/components/dialogs/ZieleDialog.tsx
+  - src/pages/ErnaehrungPage.tsx
+  - src/components/dialogs/ErnaehrungDialog.tsx
+  - src/pages/KoerperdatenPage.tsx
+  - src/components/dialogs/KoerperdatenDialog.tsx
+
+## src/types/app.ts
+```
+// AUTOMATICALLY GENERATED TYPES - DO NOT EDIT
+
+export interface Uebungen {
+  record_id: string;
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    name?: string;
+    muskelgruppe?: 'brust' | 'ruecken' | 'beine' | 'schultern' | 'bizeps' | 'trizeps' | 'bauch' | 'ganzkoerper';
+    equipment?: 'langhantel' | 'kurzhantel' | 'maschine' | 'kabelzug' | 'bodyweight' | 'kettlebell' | 'resistance_band' | 'sonstiges';
+    schwierigkeitsgrad?: 'anfaenger' | 'fortgeschritten' | 'experte';
+  };
+}
+
+export interface Workouts {
+  record_id: string;
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    datum?: string; // Format: YYYY-MM-DD oder ISO String
+    typ?: 'push' | 'pull' | 'beine' | 'ganzkoerper' | 'oberkoerper' | 'unterkoerper' | 'cardio' | 'sonstiges';
+    dauer_minuten?: number;
+    stimmung?: 'schlecht' | 'okay' | 'gut' | 'brutal';
+    rest_day?: boolean;
+  };
+}
+
+export interface WorkoutLogs {
+  record_id: string;
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    workout?: string; // applookup -> URL zu 'Workouts' Record
+    uebung?: string; // applookup -> URL zu 'Uebungen' Record
+    satz_nummer?: number;
+    gewicht?: number;
+    wiederholungen?: number;
+    rpe?: 'rpe_1' | 'rpe_2' | 'rpe_3' | 'rpe_4' | 'rpe_5' | 'rpe_6' | 'rpe_7' | 'rpe_8' | 'rpe_9' | 'rpe_10';
+  };
+}
+
+export interface Ziele {
+  record_id: string;
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    taeglich_kalorien?: number;
+    taeglich_protein?: number;
+    trainingstage_pro_woche?: number;
+    schlaf_ziel_stunden?: number;
+    status?: 'aktiv' | 'erreicht' | 'verworfen';
+    notizen?: string;
+  };
+}
+
+export interface Ernaehrung {
+  record_id: string;
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    datum?: string; // Format: YYYY-MM-DD oder ISO String
+    mahlzeit_typ?: 'fruehstueck' | 'snack' | 'mittagessen' | 'abendessen' | 'pre_workout' | 'post_workout' | 'sonstiges';
+    beschreibung?: string;
+    kalorien?: number;
+    protein?: number;
+    carbs?: number;
+    fett?: number;
+  };
+}
+
+export interface Koerperdaten {
+  record_id: string;
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    datum?: string; // Format: YYYY-MM-DD oder ISO String
+    gewicht_kg?: number;
+    kfa_geschaetzt?: number;
+    brustumfang?: number;
+    taillenumfang?: number;
+    hueftumfang?: number;
+    armumfang?: number;
+    beinumfang?: number;
+    notizen?: string;
+  };
+}
+
+export const APP_IDS = {
+  UEBUNGEN: '6914a7e259d98c952771c809',
+  WORKOUTS: '6914a7e7b773d677cf3838c1',
+  WORKOUT_LOGS: '6914a7e8154ee0268140a731',
+  ZIELE: '6914a7ead630b6a1488ff831',
+  ERNAEHRUNG: '6914a7e8078cdd936a7fe8bf',
+  KOERPERDATEN: '6914a7e9764e7bbbd63bbd93',
+} as const;
+
+// Helper Types for creating new records
+export type CreateUebungen = Uebungen['fields'];
+export type CreateWorkouts = Workouts['fields'];
+export type CreateWorkoutLogs = WorkoutLogs['fields'];
+export type CreateZiele = Ziele['fields'];
+export type CreateErnaehrung = Ernaehrung['fields'];
+export type CreateKoerperdaten = Koerperdaten['fields'];
+```
+
+## src/services/livingAppsService.ts
+```
+// AUTOMATICALLY GENERATED SERVICE
+import { APP_IDS } from '@/types/app';
+import type { Uebungen, Workouts, WorkoutLogs, Ziele, Ernaehrung, Koerperdaten } from '@/types/app';
+
+// Base Configuration
+const API_BASE_URL = 'https://my.living-apps.de/rest';
+
+// --- HELPER FUNCTIONS ---
+export function extractRecordId(url: string | null | undefined): string | null {
+  if (!url) return null;
+  // Extrahiere die letzten 24 Hex-Zeichen mit Regex
+  const match = url.match(/([a-f0-9]{24})$/i);
+  return match ? match[1] : null;
+}
+
+export function createRecordUrl(appId: string, recordId: string): string {
+  return `https://my.living-apps.de/rest/apps/${appId}/records/${recordId}`;
+}
+
+async function callApi(method: string, endpoint: string, data?: any) {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',  // Nutze Session Cookies für Auth
+    body: data ? JSON.stringify(data) : undefined
+  });
+  if (!response.ok) throw new Error(await response.text());
+  // DELETE returns often empty body or simple status
+  if (method === 'DELETE') return true;
+  return response.json();
+}
+
+export class LivingAppsService {
+  // --- UEBUNGEN ---
+  static async getUebungen(): Promise<Uebungen[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.UEBUNGEN}/records`);
+    return Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec
+    }));
+  }
+  static async getUebungenEntry(id: string): Promise<Uebungen | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.UEBUNGEN}/records/${id}`);
+    return { record_id: data.id, ...data };
+  }
+  static async createUebungenEntry(fields: Uebungen['fields']) {
+    return callApi('POST', `/apps/${APP_IDS.UEBUNGEN}/records`, { fields });
+  }
+  static async updateUebungenEntry(id: string, fields: Partial<Uebungen['fields']>) {
+    return callApi('PATCH', `/apps/${APP_IDS.UEBUNGEN}/records/${id}`, { fields });
+  }
+  static async deleteUebungenEntry(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.UEBUNGEN}/records/${id}`);
+  }
+
+  // --- WORKOUTS ---
+  static async getWorkouts(): Promise<Workouts[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.WORKOUTS}/records`);
+    return Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec
+    }));
+  }
+  static async getWorkout(id: string): Promise<Workouts | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.WORKOUTS}/records/${id}`);
+    return { record_id: data.id, ...data };
+  }
+  static async createWorkout(fields: Workouts['fields']) {
+    return callApi('POST', `/apps/${APP_IDS.WORKOUTS}/records`, { fields });
+  }
+  static async updateWorkout(id: string, fields: Partial<Workouts['fields']>) {
+    return callApi('PATCH', `/apps/${APP_IDS.WORKOUTS}/records/${id}`, { fields });
+  }
+  static async deleteWorkout(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.WORKOUTS}/records/${id}`);
+  }
+
+  // --- WORKOUT_LOGS ---
+  static async getWorkoutLogs(): Promise<WorkoutLogs[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.WORKOUT_LOGS}/records`);
+    return Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec
+    }));
+  }
+  static async getWorkoutLog(id: string): Promise<WorkoutLogs | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.WORKOUT_LOGS}/records/${id}`);
+    return { record_id: data.id, ...data };
+  }
+  static async createWorkoutLog(fields: WorkoutLogs['fields']) {
+    return callApi('POST', `/apps/${APP_IDS.WORKOUT_LOGS}/records`, { fields });
+  }
+  static async updateWorkoutLog(id: string, fields: Partial<WorkoutLogs['fields']>) {
+    return callApi('PATCH', `/apps/${APP_IDS.WORKOUT_LOGS}/records/${id}`, { fields });
+  }
+  static async deleteWorkoutLog(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.WORKOUT_LOGS}/records/${id}`);
+  }
+
+  // --- ZIELE ---
+  static async getZiele(): Promise<Ziele[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ZIELE}/records`);
+    return Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec
+    }));
+  }
+  static async getZieleEntry(id: string): Promise<Ziele | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ZIELE}/records/${id}`);
+    return { record_id: data.id, ...data };
+  }
+  static async createZieleEntry(fields: Ziele['fields']) {
+    return callApi('POST', `/apps/${APP_IDS.ZIELE}/records`, { fields });
+  }
+  static async updateZieleEntry(id: string, fields: Partial<Ziele['fields']>) {
+    return callApi('PATCH', `/apps/${APP_IDS.ZIELE}/records/${id}`, { fields });
+  }
+  static async deleteZieleEntry(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.ZIELE}/records/${id}`);
+  }
+
+  // --- ERNAEHRUNG ---
+  static async getErnaehrung(): Promise<Ernaehrung[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ERNAEHRUNG}/records`);
+    return Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec
+    }));
+  }
+  static async getErnaehrungEntry(id: string): Promise<Ernaehrung | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ERNAEHRUNG}/records/${id}`);
+    return { record_id: data.id, ...data };
+  }
+  static async createErnaehrungEntry(fields: Ernaehrung['fields']) {
+    return callApi('POST', `/apps/${APP_IDS.ERNAEHRUNG}/records`, { fields });
+  }
+  static async updateErnaehrungEntry(id: string, fields: Partial<Ernaehrung['fields']>) {
+    return callApi('PATCH', `/apps/${APP_IDS.ERNAEHRUNG}/records/${id}`, { fields });
+  }
+  static async deleteErnaehrungEntry(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.ERNAEHRUNG}/records/${id}`);
+  }
+
+  // --- KOERPERDATEN ---
+  static async getKoerperdaten(): Promise<Koerperdaten[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.KOERPERDATEN}/records`);
+    return Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec
+    }));
+  }
+  static async getKoerperdatenEntry(id: string): Promise<Koerperdaten | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.KOERPERDATEN}/records/${id}`);
+    return { record_id: data.id, ...data };
+  }
+  static async createKoerperdatenEntry(fields: Koerperdaten['fields']) {
+    return callApi('POST', `/apps/${APP_IDS.KOERPERDATEN}/records`, { fields });
+  }
+  static async updateKoerperdatenEntry(id: string, fields: Partial<Koerperdaten['fields']>) {
+    return callApi('PATCH', `/apps/${APP_IDS.KOERPERDATEN}/records/${id}`, { fields });
+  }
+  static async deleteKoerperdatenEntry(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.KOERPERDATEN}/records/${id}`);
+  }
+
+}
+```
+
+## src/App.tsx
+```
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Layout } from '@/components/Layout';
+import DashboardOverview from '@/pages/DashboardOverview';
+import UebungenPage from '@/pages/UebungenPage';
+import WorkoutsPage from '@/pages/WorkoutsPage';
+import WorkoutLogsPage from '@/pages/WorkoutLogsPage';
+import ZielePage from '@/pages/ZielePage';
+import ErnaehrungPage from '@/pages/ErnaehrungPage';
+import KoerperdatenPage from '@/pages/KoerperdatenPage';
+
+export default function App() {
+  return (
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<DashboardOverview />} />
+          <Route path="uebungen" element={<UebungenPage />} />
+          <Route path="workouts" element={<WorkoutsPage />} />
+          <Route path="workout-logs" element={<WorkoutLogsPage />} />
+          <Route path="ziele" element={<ZielePage />} />
+          <Route path="ernaehrung" element={<ErnaehrungPage />} />
+          <Route path="koerperdaten" element={<KoerperdatenPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+## src/components/Layout.tsx
+```
+import { NavLink, Outlet } from 'react-router-dom';
+import { FileText, LayoutDashboard, Menu, X } from 'lucide-react';
+import { useState } from 'react';
+
+// ⚡ Customize these for your app
+const APP_TITLE = 'Dashboard';
+const APP_SUBTITLE = 'Verwaltung';
+
+const navigation = [
+  { name: 'Übersicht', href: '/', icon: LayoutDashboard },
+  { name: 'Übungen', href: '/uebungen', icon: FileText },
+  { name: 'Workouts', href: '/workouts', icon: FileText },
+  { name: 'Workout-Logs', href: '/workout-logs', icon: FileText },
+  { name: 'Ziele', href: '/ziele', icon: FileText },
+  { name: 'Ernährung', href: '/ernaehrung', icon: FileText },
+  { name: 'Körperdaten', href: '/koerperdaten', icon: FileText },
+];
+
+export function Layout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-background">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`
+          fixed top-0 left-0 z-50 h-full w-64 bg-sidebar border-r border-sidebar-border
+          transform transition-transform duration-200 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
+        `}
+      >
+        <div className="flex items-center justify-between px-5 py-6 border-b border-sidebar-border">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-sidebar-primary flex items-center justify-center shadow-sm">
+              <FileText size={16} className="text-sidebar-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold tracking-tight text-sidebar-foreground">{APP_TITLE}</h1>
+              <p className="text-xs text-sidebar-foreground/60">{APP_SUBTITLE}</p>
+            </div>
+          </div>
+          <button
+            className="lg:hidden p-1.5 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <nav className="px-3 pt-4 space-y-0.5">
+          <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/40">
+            Navigation
+          </p>
+          {navigation.map(item => (
+            <NavLink
+              key={item.href}
+              to={item.href}
+              end={item.href === '/'}
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }: { isActive: boolean }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                }`
+              }
+            >
+              <item.icon size={16} className="shrink-0" />
+              {item.name}
+            </NavLink>
+          ))}
+        </nav>
+      </aside>
+
+      <div className="lg:pl-64">
+        <header className="lg:hidden flex items-center gap-4 px-4 py-3 border-b bg-card sticky top-0 z-30">
+          <button
+            className="p-2 rounded-lg hover:bg-accent transition-colors"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu size={18} />
+          </button>
+          <span className="font-semibold text-sm">{APP_TITLE}</span>
+        </header>
+        <main className="p-6 lg:p-8 max-w-screen-2xl">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}
+```
+
+## src/pages/DashboardOverview.tsx
+```
+export default function DashboardOverview() {
+  return (
+    <div className="space-y-8">
+    </div>
+  );
+}
+```
